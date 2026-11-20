@@ -1,0 +1,122 @@
+id: mil-pyro-asthma
+group: Millerntor (FC St. Pauli)
+letter: B
+title: Pyro-Rauch im Block, Atemnot
+teaser: Asthma + dichter Rauch
+dispatch: "Funkmeldung Millerntor: Im Stehplatzblock wurde Pyrotechnik gezündet, eine Frau hat starke Atemnot und hustet."
+debrief_notes: >
+  Sophie (29), Asthma, Spray vergessen, Rauch im Block. Erwartet: Eigenschutz (Rauch, Funken, Gedränge), Patientin aus dem Rauch bringen,
+  aufrecht lagern, Atemanweisung, O2, Pulsoxi (bei Rauch mit Vorsicht deuten), Auskultation, Heiserkeit/Rußspuren als Warnzeichen
+  (Inhalationstrauma?), SAMPLE inkl. Spray, Rettungsdienst nachfordern, Reevaluation.
+
+conscious: true
+trauma: false
+request: {required: [RTW], optional: [NEF]}
+skip: [hws]
+
+responses:
+  lage_pruefen:
+    - Befund: "Stehplatzblock, dichte Rauchwolke, schlechte Sicht, laute Stimmung. Einige bengalische Feuer brennen noch, Funkenflug, Gedränge. Eine Betroffene sitzt am Rand auf einer Stufe, ihr Freund Ole sucht ihr Spray."
+  aus_gefahr_bringen:
+    - Kollege: (hilft, Sophie aus dem Rauch in den Umlauf zu bringen)
+    - Befund: An der frischen Luft wird der Hustenreiz etwas weniger.
+  platz_schaffen:
+    - Umstehende: (machen widerwillig Platz)
+  blutung_pruefen:
+    - Befund: Keine Blutung.
+  vorstellen:
+    - Patient: (hustet) Hilfe … Luft …
+  was_passiert:
+    - Umstehende: Da wurde Pyro gezündet und der ganze Rauch kam zu uns. Sie hat Asthma, und ihr Spray liegt im Auto!
+  beschwerden_fragen:
+    - Patient: Brust … eng …
+  beruhigen:
+    - Patient: (nickt, panisch)
+  atemanweisung:
+    - Patient: (versucht langsamer auszuatmen)
+  oberkoerper_hoch:
+    - Befund: (sitzt aufrecht, stützt die Arme ab)
+  atemwege_freimachen:
+    - Befund: Atemwege frei, leichte Heiserkeit, Rußspuren am Mundwinkel.
+  atmung_fragen:
+    - Patient: Nein … schlecht …
+  schmerz_atmen:
+    - Patient: Nicht … Schmerz … eng.
+  zyanose:
+    - Befund: Lippen leicht bläulich.
+  af_zaehlen:
+    - Befund: Atemfrequenz 30, Einsatz der Atemhilfsmuskulatur.
+  spo2:
+    - when: {sauerstoff: false}
+      say:
+        - Befund: SpO2 91 %.
+    - say:
+        - Befund: SpO2 94 % unter Sauerstoff.
+  auskultation:
+    - Befund: Beidseits exspiratorisches Giemen.
+  sauerstoff:
+    - Kollege: (legt die Sauerstoffmaske an)
+  hautfarbe:
+    - Befund: Haut warm, feucht.
+  puls:
+    - Befund: Puls 122.
+  rekap:
+    - Befund: Rekap-Zeit 2 Sekunden.
+  rr:
+    - Befund: RR 135/85.
+  gcs:
+    - Befund: Wach, GCS 15, ängstlich.
+  orientierung:
+    - Patient: Sophie … Stadion.
+  pupillen:
+    - Befund: Pupillen isokor.
+  bz:
+    - Befund: BZ 104 mg/dl.
+  frieren_fragen:
+    - Patient: Nein.
+  decke:
+    - Patient: (nickt)
+  temperatur:
+    - Befund: Temperatur 36,8 °C.
+  bodycheck:
+    - Befund: Augen tränen und sind gerötet, keine Verbrennungen.
+  auge:
+    - Befund: Augen gerötet und tränend, Sehen normal.
+  sample_allergie:
+    - Patient: Keine.
+  sample_medikamente:
+    - Umstehende: Salbutamol, aber das liegt im Auto!
+  sample_vorerkrankung:
+    - Patient: Asthma … seit Kind.
+  sample_mahlzeit:
+    - Patient: Vor drei Stunden … zwei Bier.
+  reevaluation:
+    - when: {aus_gefahr_bringen: true, sauerstoff: true}
+      say:
+        - Befund: Atemfrequenz 26, SpO2 94 %, etwas längere Sätze möglich.
+    - say:
+        - Befund: Atemnot unverändert, SpO2 89 %.
+
+events:
+  - at: 60
+    when: {aus_gefahr_bringen: false}
+    say:
+      - Befund: Der Rauch zieht weiter über euch, Sophie hustet stärker und wird erschöpft.
+  - at: 150
+    when: {aus_gefahr_bringen: false}
+    say:
+      - Befund: SpO2 sinkt, sie kann kaum noch sprechen.
+
+key_actions:
+  - label: Eigenschutz und Patientin aus dem Rauch gebracht
+    any: [aus_gefahr_bringen]
+    critical: true
+    within: 60
+  - label: Aufrechte Lagerung und Atemanweisung
+    any: [oberkoerper_hoch, atemanweisung]
+  - label: Sauerstoff nach SpO2
+    all: [spo2, sauerstoff]
+  - label: Heiserkeit/Ruß als Warnzeichen geprüft
+    any: [atemwege_freimachen]
+  - label: Reevaluation
+    any: [reevaluation]

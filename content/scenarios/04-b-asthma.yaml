@@ -1,0 +1,119 @@
+id: b-asthma
+letter: B
+title: Asthmaanfall
+teaser: Atemnot beim jungen Patienten
+dispatch: "Einsatzmeldung: Wohnung, 19-jährige Frau mit akuter Atemnot, bekannte Asthmatikerin."
+debrief_notes: >
+  Lena (19), Asthma, Kontakt mit Katze, Spray 4x ohne Effekt. B-Problem: sitzende Position, beruhigen, Atemanweisung,
+  O2 nach Sättigung, Auskultation, Anaphylaxie ausschließen (E: Haut, Schwellung), Notarzt nachfordern, Reevaluation.
+
+conscious: true
+trauma: false
+request: {required: [RTW, NEF]}
+skip: [hws]
+
+responses:
+  lage_pruefen:
+    - Befund: Wohnung im 2. OG, hell, aufgeräumt, keine Gefahr. Eine Betroffene, ihre Mitbewohnerin ist da.
+  blutung_pruefen:
+    - Befund: Keine Blutung.
+  vorstellen:
+    - Patient: (keucht) Hallo … ich krieg … keine Luft.
+  was_passiert:
+    - Umstehende: Sie war bei Freunden mit Katze und ist dann die Treppe hoch. Seit einer halben Stunde wird's immer schlimmer.
+  beschwerden_fragen:
+    - Patient: Die Brust … so eng.
+  beruhigen:
+    - when: {atemanweisung: false}
+      say:
+        - Patient: (nickt, atmet weiter hektisch)
+    - say:
+        - Patient: (nickt, etwas ruhiger)
+  atemanweisung:
+    - Patient: (versucht die Lippenbremse, die Atmung wird etwas ruhiger)
+  atemwege_freimachen:
+    - Befund: Atemwege frei, sie spricht nur in Halbsätzen.
+  atmung_fragen:
+    - Patient: Nein … gar nicht … gut.
+  schmerz_atmen:
+    - Patient: Nicht … weh … nur eng.
+  zyanose:
+    - Befund: Lippen leicht bläulich.
+  af_zaehlen:
+    - Befund: Atemfrequenz 30, Einsatz der Atemhilfsmuskulatur.
+  spo2:
+    - when: {sauerstoff: false}
+      say:
+        - Befund: SpO2 90 %.
+    - say:
+        - Befund: SpO2 94 % unter Sauerstoff.
+  auskultation:
+    - Befund: Beidseits exspiratorisches Pfeifen und Giemen, verlängertes Ausatmen.
+  halsvenen:
+    - Befund: Halsvenen nicht gestaut.
+  oberkoerper_hoch:
+    - Befund: (sitzt vornübergebeugt, stützt sich auf die Knie ab)
+  sauerstoff:
+    - Kollege: (legt die Sauerstoffmaske an)
+    - Befund: Die Sättigung steigt langsam.
+  hautfarbe:
+    - Befund: Haut warm, leicht gerötet, kein Ausschlag.
+  puls:
+    - Befund: Puls 125, regelmäßig.
+  rekap:
+    - Befund: Rekap-Zeit 2 Sekunden.
+  rr:
+    - Befund: RR 130/80.
+  gcs:
+    - Befund: Wach, GCS 15, ängstlich.
+  orientierung:
+    - Patient: Lena … in meiner … Wohnung.
+  pupillen:
+    - Befund: Pupillen seitengleich, reagieren prompt.
+  bz:
+    - Befund: BZ 98 mg/dl.
+  frieren_fragen:
+    - Patient: Nein.
+  decke:
+    - Patient: (nickt kurz)
+  temperatur:
+    - Befund: Temperatur 36,9 °C.
+  bodycheck:
+    - Befund: Keine Hautveränderungen, kein Ausschlag, keine Schwellung von Lippen oder Zunge.
+  sample_allergie:
+    - Patient: Katzen … Katzenhaare.
+  sample_medikamente:
+    - Patient: Salbutamol … vier Mal … hilft nicht. Und Kortison-Spray.
+  sample_vorerkrankung:
+    - Patient: Asthma … seit klein.
+  sample_mahlzeit:
+    - Patient: Vor … zwei Stunden.
+  reevaluation:
+    - when: {sauerstoff: true, oberkoerper_hoch: true}
+      say:
+        - Befund: Atemfrequenz 26, SpO2 94 %, sie spricht etwas längere Sätze.
+    - say:
+        - Befund: Unverändert angestrengt, SpO2 89 %.
+
+events:
+  - at: 120
+    when: {sauerstoff: false}
+    say:
+      - Befund: Lena wird erschöpft, die Atmung flacher.
+  - at: 200
+    when: {sauerstoff: false}
+    say:
+      - Befund: Die Lippen werden deutlicher blau.
+
+key_actions:
+  - label: Sitzende Position / Oberkörper hoch
+    any: [oberkoerper_hoch]
+  - label: Beruhigen und Atemanweisung
+    any: [beruhigen, atemanweisung]
+  - label: Sauerstoffgabe nach Sättigung
+    all: [spo2, sauerstoff]
+    critical: true
+  - label: Anaphylaxie ausgeschlossen (Haut, Schwellung)
+    any: [bodycheck, hautfarbe]
+  - label: Notarzt nachgefordert
+    any: [nachforderung]

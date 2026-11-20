@@ -1,0 +1,126 @@
+id: dom-nase
+group: Hamburger DOM
+letter: A
+title: Faustschlag auf die Nase
+teaser: Blut im Rachen, Alkohol, Gedränge
+dispatch: "Funkmeldung DOM: Schlägerei vor einem Imbiss, ein Mann blutet stark im Gesicht. Polizei ist informiert."
+debrief_notes: >
+  Kevin (28), alkoholisiert, Faustschlag ins Gesicht: starkes Nasenbluten, Blut läuft in den Rachen, leichte Verwirrung (GCS 14),
+  kurze Erinnerungslücke. Erwartet: Eigenschutz/Deeskalation, Polizei; sitzend mit vorgeneigtem Oberkörper, Absaugbereitschaft,
+  Nasenbluten stillen (Nasenflügel, Kühlen), Aspirationsrisiko; GCS, an SHT/HWS denken; Alkohol als Fehlerquelle;
+  Rettungsdienst; Ablehnung/Einwilligung sauber klären.
+
+conscious: true
+trauma: true
+request: {required: [RTW], optional: [NEF, Polizei]}
+
+responses:
+  lage_pruefen:
+    - Befund: "DOM, spät abends, laut, viele Alkoholisierte. Die Beteiligten sind nicht mehr handgreiflich, aber die Stimmung ist aufgeheizt, Freunde drängeln. Der Schläger ist weg. Die Polizei kommt in ca. 5 Minuten."
+  polizei:
+    - Kollege: (fragt über Funk nach, die Streife ist unterwegs)
+  platz_schaffen:
+    - Umstehende: "Ey, chill, wir gehen ja schon."
+  blutung_pruefen:
+    - Befund: Starkes Nasenbluten, das Blut läuft auch in den Rachen. Er spuckt Blut.
+  blutung_stillen:
+    - Befund: Er drückt die Nasenflügel zusammen, das Bluten wird weniger.
+  kuehlen:
+    - Kollege: (reicht ein Kühlpack für den Nacken)
+  vorstellen:
+    - Patient: Was willst du? Mir geht's gut, ich will weiterfeiern.
+  was_passiert:
+    - Umstehende: Der Typ hat ihm einfach eine reingehauen, voll auf die Nase! Vor zehn Minuten.
+    - Patient: Weiß nich … war auf einmal so.
+  beschwerden_fragen:
+    - Patient: Die Nase … und mir ist schlecht vom Blut.
+  beruhigen:
+    - Patient: Ja ja … okay.
+  oberkoerper_hoch:
+    - Befund: (sitzt mit vorgebeugtem Oberkörper, das Blut läuft nach vorne ab)
+  schocklage:
+    - Befund: Beim Hinlegen gurgelt er, das Blut läuft in den Rachen.
+  absaugen:
+    - Kollege: (stellt die Absaugpumpe bereit und saugt Blut aus dem Mund ab)
+  hws_manuell:
+    - Kollege: (stabilisiert den Kopf manuell)
+    - Patient: Lass mich los, Alter!
+  atemwege_freimachen:
+    - Befund: Blut im Mund und Rachen, ein Zahn oben ist locker.
+  atmung_fragen:
+    - Patient: Durch die Nase nicht.
+  schmerz_atmen:
+    - Patient: Nee.
+  zyanose:
+    - Befund: Keine Zyanose.
+  af_zaehlen:
+    - Befund: Atemfrequenz 20.
+  spo2:
+    - Befund: SpO2 95 %.
+  auskultation:
+    - Befund: Lunge frei.
+  hautfarbe:
+    - Befund: Haut warm.
+  puls:
+    - Befund: Puls 100.
+  rekap:
+    - Befund: Rekap-Zeit 2 Sekunden.
+  rr:
+    - Befund: RR 135/80.
+  trauma_check:
+    - Befund: Bauch, Becken und Oberschenkel unauffällig.
+  gcs:
+    - Befund: GCS 14 (verbal 4), leicht verwirrt, wiederholt Fragen.
+  orientierung:
+    - Patient: Kevin. DOM … welcher Tag? Freitag? Was is passiert?
+  pupillen:
+    - Befund: Pupillen isokor, reagieren prompt.
+  bz:
+    - Befund: BZ 130 mg/dl.
+  frieren_fragen:
+    - Patient: Nee.
+  decke:
+    - Patient: Brauch ich nich.
+  temperatur:
+    - Befund: Temperatur 36,6 °C.
+  bodycheck:
+    - Befund: Nase deformiert und geschwollen, Schürfung am Handrücken, sonst keine Verletzungen. Deutlicher Alkoholgeruch.
+  sample_allergie:
+    - Patient: Nee.
+  sample_medikamente:
+    - Patient: Nix.
+  sample_vorerkrankung:
+    - Patient: Nix.
+  sample_mahlzeit:
+    - Patient: Vor vier Stunden. Und Bier. Viel Bier.
+  aufklaeren:
+    - when: {gcs: true}
+      say:
+        - Patient: Krankenhaus? … Na gut, wenn du meinst, dass das mit dem Kopf was sein kann.
+    - say:
+        - Patient: Ich fahr nirgendwohin!
+  reevaluation:
+    - Befund: Blutung lässt nach, GCS 14, er wiederholt weiter Fragen.
+
+events:
+  - at: 60
+    when: {oberkoerper_hoch: false}
+    say:
+      - Befund: Er hustet, schluckt Blut und würgt.
+  - at: 120
+    when: {aufklaeren: false}
+    say:
+      - Patient: Ich geh jetzt weiter feiern. (steht auf)
+
+key_actions:
+  - label: Eigenschutz / Polizei / Deeskalation
+    any: [polizei, platz_schaffen]
+  - label: Sitzend mit vorgeneigtem Oberkörper (Aspirationsschutz)
+    any: [oberkoerper_hoch]
+    critical: true
+  - label: Absaugbereitschaft
+    any: [absaugen]
+  - label: Bewusstsein/Orientierung geprüft (SHT?)
+    any: [gcs, orientierung]
+  - label: Aufklärung / Ablehnung sauber geklärt
+    any: [aufklaeren]

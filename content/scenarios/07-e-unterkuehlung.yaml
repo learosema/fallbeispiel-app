@@ -1,0 +1,117 @@
+id: e-unterkuehlung
+letter: E
+title: Unterkühlter Wanderer
+teaser: Exposure / Wärmeerhalt
+dispatch: "Einsatzmeldung: Waldweg, November, Wanderer (68) liegt im nassen Laub, ist ansprechbar aber verlangsamt, zittert kaum noch."
+debrief_notes: >
+  Herr Hartmann (68), 2–3 Stunden im nassen Laub bei 3 °C, Körpertemperatur 31,8 °C. Erwartet: schonender Umgang (Kammerflimmern-Gefahr),
+  horizontal lagern, nicht aufstehen lassen, nasse Kleidung entfernen, Isolation von unten, Wärmeerhalt, Temperatur messen,
+  Vitalzeichen länger prüfen, Notarzt, Transport. Keine heißen Getränke, kein Alkohol, keine aktive Bewegung.
+
+conscious: true
+trauma: true
+request: {required: [RTW, NEF]}
+
+responses:
+  lage_pruefen:
+    - Befund: Waldweg, Dämmerung, 3 °C, nasses Laub, rutschig, es wird bald dunkel. Ein Betroffener am Wegrand, ein Wanderer hat ihn gefunden.
+  blutung_pruefen:
+    - Befund: Keine Blutung.
+  vorstellen:
+    - Patient: (langsam, lallend) Hm … hallo.
+  was_passiert:
+    - Umstehende: Ich hab ihn hier so gefunden. Er sagt, er ist gestolpert und kam nicht mehr hoch.
+    - Patient: Hingefallen … Stunden …
+  beschwerden_fragen:
+    - Patient: Das Handgelenk … und die Hüfte. Bin so müde.
+  hws_manuell:
+    - Kollege: (stabilisiert den Kopf manuell)
+  beruhigen:
+    - Patient: (nickt langsam)
+  atemwege_freimachen:
+    - Befund: Atemwege frei.
+  atmung_fragen:
+    - Patient: Geht … schon.
+  schmerz_atmen:
+    - Patient: Nein.
+  zyanose:
+    - Befund: Lippen bläulich-livide.
+  af_zaehlen:
+    - Befund: Atemfrequenz 10, flach.
+  spo2:
+    - Befund: SpO2 nicht messbar, die Finger sind zu kalt.
+  auskultation:
+    - Befund: Leises, aber seitengleiches Atemgeräusch.
+  hautfarbe:
+    - Befund: Haut kalt, Hände und Füße blass-livide.
+  puls:
+    - Befund: Puls langsam und schwach, ca. 52. Man muss lange tasten.
+  rekap:
+    - Befund: Rekap-Zeit 4 Sekunden.
+  rr:
+    - Befund: RR 105/70.
+  trauma_check:
+    - Befund: Bauch weich, Becken links druckschmerzhaft (Prellung), Oberschenkel unauffällig.
+  gcs:
+    - Befund: GCS 14, verlangsamt, verwaschene Sprache.
+  orientierung:
+    - Patient: Hartmann … im Wald … welcher Tag? … weiß nicht.
+  pupillen:
+    - Befund: Pupillen seitengleich, reagieren etwas träge.
+  bz:
+    - Befund: BZ 95 mg/dl.
+  frieren_fragen:
+    - Patient: Kalt … nicht mehr so … schlimm.
+  decke:
+    - when: {nasse_kleidung: false}
+      say:
+        - Kollege: (deckt ihn mit der Rettungsdecke zu und schiebt eine Decke unter)
+        - Befund: Die nasse Kleidung kühlt unter der Decke weiter.
+    - say:
+        - Kollege: (wickelt ihn in Decken und Rettungsdecke, isoliert vom Boden)
+  nasse_kleidung:
+    - Kollege: (schneidet vorsichtig die nasse Jacke und den Pullover auf)
+    - Befund: Die nasse Kleidung ist entfernt.
+  temperatur:
+    - Befund: Körpertemperatur 31,8 °C.
+  bodycheck:
+    - Befund: Prellung am linken Handgelenk und an der linken Hüfte, keine offenen Wunden. Kleidung komplett durchnässt.
+  dms:
+    - Patient: Finger … spür ich kaum.
+  immobilisieren:
+    - Kollege: (holt die Vakuummatratze)
+  nicht_aufstehen:
+    - Patient: Hm … okay.
+  glukose_geben:
+    - Kollege: Heißes Getränk? Lieber nicht, oder?
+  sample_allergie:
+    - Patient: Nein.
+  sample_medikamente:
+    - Patient: Betablocker … und Wassertabletten.
+  sample_vorerkrankung:
+    - Patient: Herz … schwach.
+  sample_mahlzeit:
+    - Patient: Heute früh.
+  reevaluation:
+    - when: {decke: true, nasse_kleidung: true}
+      say:
+        - Befund: Puls 54, AF 11, er wirkt minimal wacher.
+    - say:
+        - Befund: Puls 48, AF 9, er wird schläfriger.
+
+events:
+  - at: 120
+    when: {decke: false}
+    say:
+      - Befund: Herr Hartmann wird zunehmend schläfrig und antwortet kaum noch.
+
+key_actions:
+  - label: Wärmeerhalt mit Isolation vom Boden
+    any: [decke]
+    critical: true
+  - label: Nasse Kleidung entfernt
+    any: [nasse_kleidung]
+  - label: Körpertemperatur gemessen
+    any: [temperatur]
+  - label: Nicht aufstehen lassen / schonend lagern
+    any: [nicht_aufstehen, immobilisieren]

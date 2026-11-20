@@ -1,0 +1,120 @@
+id: bw-seitenlage
+group: Bewusstlosigkeit
+letter: SL
+title: Bewusstlos, atmet normal
+teaser: Stabile Seitenlage
+dispatch: "Meldung: Sonntagmorgen am Hamburger Fischmarkt, Passant meldet einen Mann, der reglos auf einer Bank liegt und nicht reagiert."
+debrief_notes: >
+  Mann (ca. 58), bewusstlos (GCS 8), Alkoholgeruch, atmet normal. Erwartet: Eigenschutz/Lage, Ansprechen/Schmerzreiz, Atemwege frei machen,
+  Atemkontrolle max. 10 s, stabile Seitenlage (Schritte benennen), Nachforderung, Atemkontrolle wiederholen, Absaugbereitschaft,
+  Wärmeerhalt (6 °C, nass), BZ/SpO2/Puls, nicht allein lassen. Bleibt er auf dem Rücken, erbricht er und aspiriert.
+
+conscious: false
+breathing: normal
+request: {required: [RTW], optional: [NEF]}
+
+responses:
+  lage_pruefen:
+    - Befund: "Fischmarkt Altona, 6 °C, Nieselregen, nasse Bank und nasses Pflaster, viele Passanten, Verkehr in der Nähe. Ein Betroffener, der Passant Uwe ist bei ihm."
+  blutung_pruefen:
+    - Befund: Keine Blutung erkennbar.
+  vorstellen:
+    - Befund: (keine Reaktion)
+    - Umstehende: Der reagiert gar nicht. Ich hab ihn so gefunden.
+  laut_ansprechen:
+    - Befund: Keine Reaktion auf lautes Ansprechen und Rütteln an den Schultern.
+  schmerzreiz:
+    - Befund: Auf den Schmerzreiz nur eine ungezielte Abwehrbewegung, er stöhnt kurz.
+  was_passiert:
+    - Umstehende: Keine Ahnung, ich bin hier langgekommen und er lag so da. Da steht 'ne Flasche.
+  atemwege_freimachen:
+    - when: {seitenlage: false}
+      say:
+        - Befund: Nach dem Überstrecken des Kopfes und Anheben des Kinns verschwindet das Schnarchen, die Atemwege sind frei.
+    - say:
+        - Befund: Atemwege frei, etwas Speichel läuft ab.
+  atemkontrolle:
+    - when: {atemwege_freimachen: false}
+      say:
+        - Befund: Schnarchende Atmung.
+    - say:
+        - Befund: Normale Atmung, ca. 14 pro Minute, regelmäßig und kräftig.
+  seitenlage:
+    - when: {atemkontrolle: false}
+      say:
+        - Kollege: Hast du die Atmung schon geprüft?
+    - say:
+        - Befund: Er liegt in stabiler Seitenlage, Kopf überstreckt, Mund tiefster Punkt. Speichel läuft ab.
+  hlw:
+    - Kollege: Er atmet doch normal.
+  puls:
+    - Befund: Puls kräftig tastbar, ca. 76.
+  spo2:
+    - Befund: SpO2 95 %.
+  af_zaehlen:
+    - Befund: Atemfrequenz 14.
+  rr:
+    - Befund: RR 145/90.
+  rekap:
+    - Befund: Rekap-Zeit 2 Sekunden.
+  hautfarbe:
+    - Befund: Haut kühl und nass.
+  zyanose:
+    - Befund: Keine Zyanose.
+  bz:
+    - Befund: BZ 96 mg/dl.
+  gcs:
+    - Befund: GCS 8.
+  pupillen:
+    - Befund: Pupillen isokor, reagieren träge.
+  temperatur:
+    - Befund: Temperatur 35,4 °C.
+  frieren_fragen:
+    - Befund: Er ist kühl und nass.
+  decke:
+    - Kollege: (deckt ihn mit der Rettungsdecke zu und legt eine Decke unter)
+  absaugen:
+    - Kollege: (stellt die Absaugpumpe bereit)
+  bodycheck:
+    - Befund: Keine Verletzungen, keine Anzeichen für ein Trauma am Kopf. Alkoholgeruch, eine leere Flasche liegt daneben.
+  sample_allergie:
+    - Umstehende: Keine Ahnung, ich kenn den nicht.
+  sample_medikamente:
+    - Umstehende: Weiß ich nicht.
+  sample_vorerkrankung:
+    - Umstehende: Keine Ahnung.
+  sample_mahlzeit:
+    - Umstehende: Keine Ahnung. Aber er riecht stark nach Alkohol.
+  orientierung:
+    - Befund: (keine Reaktion)
+  beruhigen:
+    - Umstehende: Okay … wird er wieder?
+  reevaluation:
+    - when: {seitenlage: true}
+      say:
+        - Befund: Atmung weiter normal, 14 pro Minute, Atemwege frei.
+    - say:
+        - Befund: Er schnarcht wieder.
+
+events:
+  - at: 120
+    when: {seitenlage: false}
+    say:
+      - Befund: Er schnarcht wieder, dann würgt er und erbricht – auf dem Rücken liegend läuft das Erbrochene in den Rachen.
+    set: {aspiration: true}
+
+key_actions:
+  - label: Atemwege frei gemacht vor der Atemkontrolle
+    any: [atemwege_freimachen]
+    before: [atemkontrolle]
+    critical: true
+  - label: Stabile Seitenlage
+    any: [seitenlage]
+    critical: true
+    within: 120
+  - label: Wärmeerhalt
+    any: [decke]
+  - label: Atemkontrolle wiederholt / Reevaluation
+    any: [reevaluation]
+  - label: Absaugbereitschaft
+    any: [absaugen]

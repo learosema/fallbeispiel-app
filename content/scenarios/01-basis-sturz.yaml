@@ -1,0 +1,143 @@
+# Fallbeispiel – frei erfunden, nur für die Ausbildung.
+# Aufbau: siehe content/README.md
+id: basis-sturz
+group: Grundlagen
+letter: "1."
+title: Sturz auf nasser Treppe
+teaser: "Basisfall für die 1. Minute: ansprechbar, Trauma"
+dispatch: "Funkmeldung: Landungsbrücken, Person auf einer Treppe gestürzt, sitzt am Boden und ist ansprechbar."
+debrief_notes: >
+  Herr Petersen (68) ist auf nassen Stufen gestürzt, Stirn am Geländer angeschlagen, nimmt Apixaban.
+  Kopfanprall unter Blutverdünner und Nackenschmerz → manuelle HWS-Stabilisierung und Rettungsdienst (RTW, NEF vertretbar).
+  Er friert (5 °C, nass) – Wärmeerhalt ist entscheidend. Er will zuerst nach Hause und braucht eine gute Aufklärung.
+
+conscious: true
+trauma: true
+bleeding: false
+request: {required: [RTW], optional: [NEF]}
+
+responses:
+  lage_pruefen:
+    - Befund: "Nasse, rutschige Stufen, leichter Regen, 5 °C, Tageslicht. Sonst keine Gefahr. Ein Betroffener, eine Passantin ist bei ihm."
+  blutung_pruefen:
+    - Befund: Keine bedrohliche Blutung. Die rechte Handfläche ist aufgeschürft, an der Stirn eine Beule.
+  vorstellen:
+    - Patient: Hallo … ach, ist mir das peinlich.
+  was_passiert:
+    - Patient: Ich bin auf den nassen Stufen ausgerutscht und die letzten paar runtergefallen.
+    - Umstehende: Er ist mit der Stirn ans Geländer geknallt und dann auf den Po gefallen. Ohnmächtig war er nicht.
+  laut_ansprechen:
+    - Patient: Ja, ja, ich höre Sie gut.
+  beschwerden_fragen:
+    - Patient: Der Nacken tut weh, wenn ich den Kopf drehe. Und der Po. Und die Stirn.
+  hws_manuell:
+    - Kollege: (kniet sich hinter Herrn Petersen und übernimmt die manuelle HWS-Stabilisierung)
+    - Patient: Oh – muss das sein?
+  beruhigen:
+    - Patient: Danke. Ich bin nur so durcheinander.
+  atemwege_freimachen:
+    - Befund: Atemwege frei, er spricht in ganzen Sätzen.
+  atmung_fragen:
+    - Patient: Luft bekomme ich gut.
+  schmerz_atmen:
+    - Patient: Nein, beim Atmen tut nichts weh.
+  zyanose:
+    - Befund: Lippen rosig, keine Zyanose.
+  af_zaehlen:
+    - Befund: Atemfrequenz 16, regelmäßig.
+  spo2:
+    - Befund: SpO2 97 %.
+  auskultation:
+    - Befund: Atemgeräusch beidseits gleich, keine Nebengeräusche.
+  halsvenen:
+    - Befund: Halsvenen nicht gestaut.
+  hautfarbe:
+    - when: {decke: false}
+      say:
+        - Befund: Haut leicht blass und kühl.
+    - say:
+        - Befund: Haut leicht blass, wird langsam wärmer.
+  puls:
+    - Befund: Puls gut tastbar, regelmäßig, ca. 78.
+  rekap:
+    - Befund: Rekap-Zeit unter 2 Sekunden.
+  rr:
+    - Befund: RR 145/85.
+  trauma_check:
+    - Befund: Bauch weich und schmerzfrei, Becken stabil und schmerzfrei, Oberschenkel unauffällig.
+  gcs:
+    - Befund: Wach, GCS 15, reagiert angemessen, etwas aufgeregt.
+  orientierung:
+    - Patient: Petersen, Klaus Petersen. Wir sind an den Landungsbrücken, heute ist Dienstag. Ich bin hingefallen.
+  pupillen:
+    - Befund: Pupillen mittelweit, seitengleich, reagieren prompt auf Licht.
+  bz:
+    - Befund: BZ 112 mg/dl.
+  fast:
+    - Befund: Gesicht symmetrisch, beide Arme werden gleich gehalten, Sprache klar.
+  dms:
+    - Patient: Nein, kein Kribbeln. Ich spüre alles und kann alles bewegen.
+  frieren_fragen:
+    - when: {decke: false}
+      say:
+        - Patient: Ja, mir ist kalt. Ich sitze ja hier im Nassen.
+    - say:
+        - Patient: Jetzt mit der Decke geht's.
+  decke:
+    - Kollege: (holt die Rettungsdecke und hilft beim Zudecken)
+    - Patient: Danke, das tut gut.
+  temperatur:
+    - when: {decke: false}
+      say:
+        - Befund: Temperatur 35,9 °C.
+    - say:
+        - Befund: Temperatur 36,2 °C.
+  bodycheck:
+    - Befund: Beule an der Stirn, rechte Handfläche aufgeschürft, Prellung am Gesäß. Sonst keine Verletzungen.
+  wunde_versorgen:
+    - Kollege: (reicht eine Kompresse für die Handfläche)
+  sample_allergie:
+    - Patient: Allergien? Nein.
+  sample_medikamente:
+    - Patient: Ich nehme einen Blutverdünner, Apixaban, wegen Vorhofflimmern. Und was für den Blutdruck.
+  sample_vorerkrankung:
+    - Patient: Vorhofflimmern und Bluthochdruck.
+  sample_mahlzeit:
+    - Patient: Gegessen hab ich vor drei Stunden.
+  aufklaeren:
+    - when: {sample_medikamente: true}
+      say:
+        - Patient: Na gut, wenn das mit dem Blutverdünner wirklich gefährlich ist … dann lass ich mich mitnehmen.
+    - say:
+        - Patient: Ach, ins Krankenhaus? Ich will eigentlich nur nach Hause.
+  immobilisieren:
+    - Kollege: (holt den Stifneck aus dem Rucksack)
+  nicht_aufstehen:
+    - Patient: Gut, ich bleib sitzen.
+  schocklage:
+    - Patient: Hinlegen? Hier auf die nassen Stufen?
+
+events:
+  - at: 75
+    when: {decke: false}
+    say:
+      - Patient: (zittert) Mir wird richtig kalt …
+  - at: 150
+    when: {decke: false}
+    say:
+      - Befund: Er zittert deutlich, die Haut ist kalt.
+  - at: 60
+    when: {aufklaeren: false}
+    say:
+      - Patient: Ich glaube, es geht schon wieder. Ich will eigentlich nur nach Hause.
+
+key_actions:
+  - label: Manuelle HWS-Stabilisierung nach Sturz mit Kopfanprall
+    any: [hws_manuell]
+    critical: true
+  - label: Wärmeerhalt (er friert)
+    any: [decke]
+  - label: Blutverdünner erfragt
+    any: [sample_medikamente]
+  - label: Aufklärung, warum er nicht nach Hause gehen sollte
+    any: [aufklaeren]

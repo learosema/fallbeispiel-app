@@ -1,0 +1,170 @@
+id: bw-reanimation
+group: Bewusstlosigkeit
+letter: HLW
+title: Bewusstlos, keine Atmung
+teaser: Reanimation mit AED
+dispatch: "Funkmeldung: Laufveranstaltung an der Außenalster, Läufer zusammengebrochen und reagiert nicht, Umstehende haben nichts unternommen."
+debrief_notes: >
+  Läufer (ca. 52), Kreislaufstillstand, nur Schnappatmung (= nicht normal). Erwartet: Ansprechen, Atemwege frei, Atemkontrolle max. 10 s,
+  Schnappatmung als nicht normal erkennen, Notruf/AED delegieren, sofort HLW 30:2 (Mitte Brustkorb, 5–6 cm, 100–120/min),
+  AED früh (der Kollege baut AED, Sauerstoff und Absaugung auf, während sie drückt), Sicherheit beim Schock („alle weg“), Pausen minimieren, Helferwechsel. Nach 2 Schocks ROSC: Atemkontrolle, Seitenlage,
+  Wärmeerhalt, Elektroden dranlassen, strukturierte Übergabe.
+
+conscious: false
+breathing: abnormal
+request: {required: [RTW, NEF]}
+state: {analyse: 0, schocks: 0, rosc: false}
+
+responses:
+  lage_pruefen:
+    - Befund: "Weg direkt am Wasser, trocken, 12 °C, etwa 20 Zuschauer, die Strecke ist hier gesperrt. Keine akute Gefahr, aber Gaffer drängen nach. Ein Betroffener liegt auf dem Weg."
+  blutung_pruefen:
+    - Befund: Keine Blutung.
+  vorstellen:
+    - Befund: (keine Reaktion)
+    - Umstehende: (aufgelöst) Er ist einfach umgefallen, mitten im Laufen!
+  laut_ansprechen:
+    - Befund: Keine Reaktion auf Ansprechen und Rütteln.
+  schmerzreiz:
+    - Befund: Keine Reaktion auf Schmerzreiz.
+  was_passiert:
+    - Umstehende: Er ist mitten im Lauf umgekippt, nicht gestolpert, nicht auf den Kopf gefallen. Seitdem bewegt er sich nicht.
+  atemwege_freimachen:
+    - Befund: Kopf überstreckt, Kinn angehoben, die Atemwege sind frei.
+  atemkontrolle:
+    - when: {rosc: true}
+      say:
+        - Befund: Er atmet wieder selbstständig, ca. 16 pro Minute.
+    - say:
+        - Befund: Keine normale Atmung, nur vereinzelte schnappende Atemzüge. Haut blass-livide.
+  puls:
+    - when: {rosc: true}
+      say:
+        - Befund: Puls tastbar, ca. 110.
+    - say:
+        - Befund: Kein Puls tastbar.
+  nachforderung:
+    - Kollege: (setzt über Funk den Notruf ab und fordert RTW und NEF an)
+  hlw:
+    - when: {rosc: true}
+      say:
+        - Kollege: Stopp – er atmet wieder!
+    - when: {analyse: 0}
+      say:
+        - Befund: (Herzdruckmassage läuft)
+        - Kollege: (schaltet den AED ein, klebt die Elektroden rechts unter dem Schlüsselbein und links seitlich unter der Achsel, legt Sauerstoff und Beutel bereit und stellt die Absaugung bereit)
+        - AED: "Herzrhythmus wird analysiert. Patient nicht berühren. Schock empfohlen."
+      set: {aed_dran: true, analyse: 1, absaugbereit: true}
+    - when: {analyse: 1, schocks: 1}
+      say:
+        - Befund: Zwei Minuten Herzdruckmassage sind um.
+        - AED: "Herzrhythmus wird analysiert. Patient nicht berühren. Schock empfohlen."
+      set: {analyse: 2}
+    - when: {analyse: 2, schocks: 2}
+      say:
+        - Befund: Zwei Minuten sind um.
+        - AED: "Herzrhythmus wird analysiert. Patient nicht berühren. Kein Schock empfohlen."
+        - Befund: Er hustet, bewegt sich, atmet wieder. Puls tastbar.
+      set: {rosc: true, analyse: 3}
+    - say:
+        - Befund: (Herzdruckmassage läuft)
+  beatmen:
+    - Befund: (der Brustkorb hebt sich bei der Beatmung)
+  aed:
+    - when: {aed_dran: true}
+      say:
+        - AED: "Elektroden sind angeschlossen."
+    - say:
+        - Kollege: (holt den AED und baut ihn auf)
+  schock_warnung:
+    - Umstehende: (treten zurück)
+  schock_ausloesen:
+    - when: {analyse: 1, schocks: 0}
+      say:
+        - AED: "Schock wird abgegeben. Beginnen Sie sofort mit der Herz-Lungen-Wiederbelebung."
+      set: {schocks: 1}
+    - when: {analyse: 2, schocks: 1}
+      say:
+        - AED: "Schock wird abgegeben. Beginnen Sie sofort mit der Herz-Lungen-Wiederbelebung."
+      set: {schocks: 2}
+    - say:
+        - AED: "Kein Schock empfohlen."
+  helferwechsel:
+    - Kollege: (übernimmt die Herzdruckmassage)
+  platz_schaffen:
+    - Umstehende: (die Zuschauer weichen zurück)
+  seitenlage:
+    - when: {rosc: true}
+      say:
+        - Befund: Er liegt in stabiler Seitenlage, die Elektroden bleiben aufgeklebt.
+    - say:
+        - Kollege: Seitenlage? Er atmet doch nicht normal!
+  spo2:
+    - when: {rosc: true}
+      say:
+        - Befund: SpO2 90 %.
+    - say:
+        - Befund: Kein Messwert.
+  sauerstoff:
+    - Kollege: (bereitet den Sauerstoff vor)
+  rr:
+    - when: {rosc: true}
+      say:
+        - Befund: RR 100/60.
+    - say:
+        - Befund: Nicht messbar.
+  gcs:
+    - when: {rosc: true}
+      say:
+        - Befund: GCS 5.
+    - say:
+        - Befund: GCS 3.
+  pupillen:
+    - Befund: Pupillen weit.
+  bz:
+    - Befund: BZ 140 mg/dl.
+  hautfarbe:
+    - when: {rosc: true}
+      say:
+        - Befund: Haut blass, wird langsam rosiger, kühl.
+    - say:
+        - Befund: Haut blass-livide.
+  decke:
+    - Kollege: (deckt ihn zu)
+  sample_vorerkrankung:
+    - Umstehende: Ein Freund von ihm meinte, er hatte heute Morgen Brustschmerzen. Und er nimmt was gegen Bluthochdruck.
+  sample_medikamente:
+    - Umstehende: Irgendwas gegen Bluthochdruck.
+  sample_allergie:
+    - Umstehende: Weiß ich nicht.
+  sample_mahlzeit:
+    - Umstehende: Keine Ahnung.
+  reevaluation:
+    - when: {rosc: true}
+      say:
+        - Befund: Atmung 16/min, Puls 110, SpO2 90 %.
+    - say:
+        - Befund: Weiterhin keine Atmung, kein Puls.
+
+events:
+  - at: 40
+    when: {hlw: false}
+    say:
+      - Befund: Die Schnappatmung wird seltener, die Haut immer blauer.
+  - at: 480
+    say:
+      - Rettungsdienst: Rettungsdienst, wir übernehmen! Was habt ihr bisher gemacht?
+    set: {rd_da: true}
+
+key_actions:
+  - label: Schnappatmung als nicht normal erkannt, sofort HLW
+    any: [hlw]
+    critical: true
+    within: 60
+  - label: Sicherheit beim Schock („alle weg“)
+    any: [schock_warnung]
+    before: [schock_ausloesen]
+  - label: Notruf / Nachforderung veranlasst
+    any: [nachforderung]
+  - label: Nach ROSC Atemkontrolle und Wärmeerhalt
+    all: [atemkontrolle, decke]

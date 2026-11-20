@@ -1,0 +1,954 @@
+# Intent-Katalog für die Simulation.
+#
+# Je Intent:
+#   label     Name in der Auswertung („Fehlt: …“)
+#   patterns  Regex auf kleingeschriebenen Text (ß wird zu ss). Ein Treffer reicht.
+#   examples  Beispielsätze für die Embedding-Erkennung (Umschreibungen ohne Stichwort)
+#   default   Antwort, wenn der Fall selbst keine festlegt (Varianten mit when/set möglich)
+#   implies   gilt automatisch mit als erledigt (ohne eigene Antwort)
+#   overrides wird dieser Intent erkannt, entfallen die genannten
+#   exclusive wird dieser Intent erkannt, entfallen alle anderen der Äußerung
+#
+# Die Funk-Intents (funk_anruf, funk_meldung, funk_ende) erkennt die Engine selbst anhand der Rufnamen.
+
+# ---------------------------------------------------------------- Sicherheit / Lage
+lage_pruefen:
+  label: Sicherheit und Lage
+  patterns:
+    - \blage\b
+    - \bsicher(heit)?\b
+    - gefahr
+    - eigenschutz
+    - umgebung
+    - (schaue?|guck\w*|seh\w*) (mich |uns )?um
+    - umschauen|umsehen
+    - wie viele (betroffene|verletzte|patienten|personen)
+    - (weitere|noch mehr|andere) (betroffene|verletzte|patienten)
+  examples:
+    - Ist die Einsatzstelle sicher?
+    - Ich schaue mir die Umgebung an
+    - Gibt es Gefahren für uns?
+    - Wie viele Verletzte gibt es?
+    - Ich verschaffe mir einen Überblick
+
+handschuhe:
+  label: Eigenschutz (Handschuhe)
+  patterns:
+    - handschuh
+  examples:
+    - Ich ziehe mir Einmalhandschuhe an
+  default:
+    - Kollege: (zieht ebenfalls Handschuhe an)
+
+platz_schaffen:
+  label: Platz schaffen / Umstehende lenken
+  patterns:
+    - platz (machen|schaffen|da|bitte)
+    - \babstand\b
+    - (bitte )?(treten sie|gehen sie|geht) (bitte )?(zurück|weg|weiter|zur seite)
+    - zurücktreten
+    - gaffer|schaulustig
+    - absperr
+  examples:
+    - Bitte gehen Sie ein Stück zurück
+    - Können Sie hier bitte Platz machen?
+    - Alle bitte etwas Abstand
+  default:
+    - Umstehende: (treten ein Stück zurück)
+
+polizei:
+  label: Polizei hinzuziehen
+  patterns:
+    - polizei
+  examples:
+    - Wir brauchen die Polizei hier
+  default:
+    - Kollege: (gibt über Funk an die Einsatzleitung weiter, dass die Polizei benötigt wird)
+
+aus_gefahr_bringen:
+  label: Aus dem Gefahrenbereich bringen
+  patterns:
+    - aus dem (rauch|qualm|gefahrenbereich|block|wasser|wald)
+    - an die frische luft
+    - frische luft
+    - in sicherheit bringen
+    - (raus|weg) aus dem
+    - (weg|raus)bringen
+    - (weg|raus)tragen
+    - rettung aus
+  examples:
+    - Wir bringen sie hier raus aus dem Rauch
+    - Lass uns ihn in Sicherheit bringen
+  default:
+    - Kollege: (hilft, die Person vorsichtig aus dem Gefahrenbereich zu bringen)
+
+rucksack:
+  label: Material holen
+  patterns:
+    - rucksack
+    - (hol|bring)\w* (\w+ ){0,3}(rucksack|material|ausrüstung|koffer|tasche)
+    - (rucksack|material|ausrüstung) (holen|bringen)
+  examples:
+    - Kannst du das Material holen?
+  default:
+    - Kollege: (stellt den Sanitätsrucksack bereit)
+
+# ---------------------------------------------------------------- x – bedrohliche Blutung
+blutung_pruefen:
+  label: Bedrohliche Blutung geprüft
+  patterns:
+    - \bblut(ung|ungen|et|en)?\b
+    - blutungs?check
+    - bedrohlich\w* blut
+    - spritz
+    - blutlache
+  examples:
+    - Ich schaue nach starken Blutungen
+    - Blutet er irgendwo?
+    - Keine lebensbedrohliche Blutung zu sehen
+
+blutung_stillen:
+  label: Blutstillung (Tourniquet / Druckverband / Abdrücken)
+  implies: [blutung_pruefen]
+  overrides: [wunde_versorgen]
+  patterns:
+    - tourniquet|tourniket|turnicket|torniquet
+    - abbind
+    - druckverband
+    - abdrück
+    - (fest |kräftig )?drauf ?drücken
+    - druck auf die wunde
+    - (blutung|wunde) (stillen|komprimieren|abdrücken)
+    - (stille|stoppe) (die )?blutung
+    - komprimier
+    - wunde (aus)?tamponier|tamponade
+  examples:
+    - Ich lege sofort ein Tourniquet oberhalb der Wunde an
+    - Ich drücke die Wunde fest ab
+    - Druckverband anlegen
+  default:
+    - Befund: (die Blutung wird gestoppt)
+
+# ---------------------------------------------------------------- Ansprache
+vorstellen:
+  label: Vorstellung (Name / Organisation)
+  patterns:
+    - \bdrk\b|deutsch\w* rot\w* kreuz|vom roten kreuz|rotes kreuz
+    - wir sind (vom|die|der|hier)
+    - mein name ist|ich heisse|ich bin (die|der) \w+
+    - sanitätsdienst|sanitäter
+    - \bhallo\b|guten (tag|abend|morgen)|\bmoin\b|servus
+  examples:
+    - Hallo, wir sind vom Sanitätsdienst
+    - Guten Tag, ich bin Lea vom DRK
+    - Wir sind hier, um Ihnen zu helfen
+  default:
+    - Patient: Hallo …
+
+was_passiert:
+  label: Nach dem Hergang gefragt
+  patterns:
+    - was ist (denn )?(passiert|los|geschehen)
+    - was (war|ist) (denn )?los
+    - wie ist das passiert
+    - was (haben sie|hast du|hat er|hat sie) gemacht
+    - hergang
+    - unfallhergang
+    - (erzählen|erzähl) sie (mir )?(was|mal)
+    - was genau ist
+    - wie (kam|kommt) es (dazu)?
+  examples:
+    - Was ist denn passiert?
+    - Können Sie mir erzählen, wie das passiert ist?
+    - Was ist hier los?
+
+laut_ansprechen:
+  label: Laut ansprechen / an den Schultern rütteln
+  patterns:
+    - hören sie mich|hörst du mich|können sie mich hören|kannst du mich hören
+    - (augen|auge) auf
+    - aufwachen
+    - rüttel
+    - an den schultern
+    - laut ansprech
+    - sprech\w* (ihn|sie) (laut )?an
+    - reagiert (er|sie)
+    - (hallo|he),? (hallo|he)
+  examples:
+    - Hallo, können Sie mich hören?
+    - Ich spreche ihn laut an und rüttle an den Schultern
+  default:
+    - Patient: Ja … ich höre Sie.
+
+schmerzreiz:
+  label: Schmerzreiz gesetzt
+  patterns:
+    - schmerzreiz
+    - kneif
+    - trapezius
+    - (reiz|schmerz) setzen
+  examples:
+    - Ich setze einen Schmerzreiz am Trapezmuskel
+  default:
+    - Patient: Au! Was soll das?
+
+beschwerden_fragen:
+  label: Nach Beschwerden gefragt
+  patterns:
+    - (wo |was )(tut|tuts|schmerzt)
+    - tut (ihnen|dir|es|irgendwas|was|etwas) (irgendwo |sonst )?weh
+    - haben sie schmerzen|hast du schmerzen|schmerzen\?
+    - beschwerden
+    - wie geht es (ihnen|dir)|wie gehts
+    - was fehlt (ihnen|dir)
+    - wie fühlen sie sich|wie fühlst du dich
+  examples:
+    - Wo haben Sie Schmerzen?
+    - Wie geht es Ihnen gerade?
+    - Tut Ihnen etwas weh?
+
+beruhigen:
+  label: Beruhigt / Maßnahmen erklärt
+  patterns:
+    - beruhig
+    - ganz ruhig|bleiben sie ruhig|bleib ruhig|keine (angst|sorge)
+    - wir (sind|bleiben) (bei ihnen|da|hier)|ich bin (bei ihnen|da|hier)
+    - wir (helfen|kümmern)
+    - (ich|wir) (werde|werden) (jetzt )?(ihnen|dir)
+    - ich erkläre
+    - (sie|du) (sind|bist) in guten händen
+    - alles wird gut
+  examples:
+    - Keine Sorge, wir kümmern uns um Sie
+    - Ich erkläre Ihnen kurz, was ich jetzt mache
+    - Sie sind nicht allein, wir bleiben bei Ihnen
+  default:
+    - Patient: (nickt) Okay.
+
+# ---------------------------------------------------------------- A
+atemwege_freimachen:
+  label: Atemwege freimachen / prüfen
+  patterns:
+    - überstreck
+    - kinn (an)?heben|kinn hoch
+    - kopf (nach hinten|in den nacken)
+    - esmarch
+    - atemwege? (frei|prüfen|checken|kontrollieren|sichern|freimachen|offen)
+    - (in den |den )?mund(raum)? (schauen|gucken|kontrollieren|inspizieren|öffnen|ausräumen|anschauen)
+    - mundraum
+    - (schaue|gucke) (in den|ihm in den|ihr in den) mund
+    - fremdkörper im mund
+    - guedel|wendl
+  examples:
+    - Ich mache die Atemwege frei, Kopf überstrecken
+    - Ich schaue in den Mund, ob da was drin ist
+    - Sind die Atemwege frei?
+
+absaugen:
+  label: Absaugen / Absaugbereitschaft
+  patterns:
+    - absaug
+    - sauger
+  examples:
+    - Mach mal die Absaugpumpe bereit
+  default:
+    - Kollege: (macht die Absaugpumpe bereit)
+
+husten_auffordern:
+  label: Zum Husten aufgefordert
+  patterns:
+    - husten sie|hust(e|en)? (weiter|kräftig|fest)
+    - kräftig husten|weiter husten
+    - versuch\w* (\w+ ){0,2}zu husten
+  examples:
+    - Versuchen Sie kräftig zu husten!
+
+rueckenschlaege:
+  label: Rückenschläge
+  patterns:
+    - rückenschl
+    - schl\w+ (kräftig )?(zwischen|auf) (die|den) schulterbl
+    - zwischen die schulterbl
+    - auf den rücken (schlag|klopf)
+    - (5|fünf) schläge
+  examples:
+    - Ich beuge ihn nach vorne und gebe fünf Schläge zwischen die Schulterblätter
+
+heimlich:
+  label: Oberbauchkompression (Heimlich)
+  patterns:
+    - heimlich
+    - oberbauch(kompression|stö|stoss|stöss)
+    - bauch(stoss|stöss|stöße|kompression)
+  examples:
+    - Ich mache jetzt den Heimlich-Handgriff
+
+# ---------------------------------------------------------------- B
+atmung_fragen:
+  label: „Bekommen Sie gut Luft?“
+  patterns:
+    - (gut |genug |ausreichend )?luft\b
+    - atemnot|luftnot|kurzatmig
+    - wie (ist|geht) (die|ihre|deine|es mit der) atmung
+    - (können|kannst) (sie|du) (gut |normal |frei )?atmen
+    - atmung (gut|normal|frei|unauffällig|ok|in ordnung)
+    - atmet (normal|gut|ruhig|frei)
+  examples:
+    - Bekommen Sie gut Luft?
+    - Haben Sie Probleme beim Atmen?
+    - Atmung ist unauffällig
+
+schmerz_atmen:
+  label: Schmerzen beim Atmen
+  patterns:
+    - schmerz\w* beim (ein|aus)?atmen
+    - beim (ein|aus)?atmen (weh|schmerz)
+    - tut (das )?(ein|aus)?atmen weh
+    - atemabhängig\w* schmerz
+  examples:
+    - Tut das Atmen weh?
+    - Haben Sie Schmerzen beim Einatmen?
+
+zyanose:
+  label: Zyanose (Lippenfarbe)
+  patterns:
+    - zyano
+    - lippe
+    - bläulich|blau (angelaufen|verfärbt)
+  examples:
+    - Ich schaue auf die Lippenfarbe
+    - Ist er blau im Gesicht?
+
+af_zaehlen:
+  label: Atemfrequenz
+  patterns:
+    - atemfrequenz
+    - \baf\b
+    - atemzüge
+    - (zähl\w*|zähle) (die )?atmung
+    - atmung (zählen|zähle)
+  examples:
+    - Ich zähle die Atemzüge pro Minute
+
+spo2:
+  label: Sauerstoffsättigung (SpO2)
+  patterns:
+    - spo ?2|\bsp ?o ?zwei\b
+    - sättigung
+    - puls ?ox
+    - oxymet|oximet
+    - fingerclip|clip an
+  examples:
+    - Ich messe die Sättigung
+    - Leg mal das Pulsoxymeter an
+
+auskultation:
+  label: Lunge abgehört (Auskultation)
+  patterns:
+    - abhör|abhören|\blunge\b
+    - auskult
+    - stethoskop
+    - atemgeräusch
+    - seitengleich
+  examples:
+    - Ich höre die Lunge mit dem Stethoskop ab
+
+sauerstoff:
+  label: Sauerstoffgabe
+  patterns:
+    - \bsauerstoff\b(?! weg)
+    - \bo ?2\b(?! weg)
+    - sauerstoff(maske|gabe|brille)
+    - (maske|nasenbrille) (auf|an)
+    - \d+ liter
+  examples:
+    - Ich gebe ihr Sauerstoff über die Maske
+  default:
+    - Kollege: (bereitet den Sauerstoff vor und legt die Maske an)
+
+oberkoerper_hoch:
+  label: Oberkörper hoch / sitzende Lagerung
+  patterns:
+    - oberkörper\w* (hoch|erhöht|aufrecht|anheben|hochlagern)
+    - aufrecht
+    - (hin|auf)setzen|sitzend\w*|sitzen (lassen|bleiben)
+    - kutschersitz
+    - (nach )?vorne (beugen|lehnen)|vornüber
+    - halbsitzend|hochlagern
+  examples:
+    - Wir lassen sie aufrecht sitzen
+    - Lagern Sie den Oberkörper hoch
+  default:
+    - Befund: (sitzt jetzt mit erhöhtem Oberkörper)
+
+atemanweisung:
+  label: Atemanweisung (Lippenbremse, ruhig atmen)
+  patterns:
+    - lippenbremse
+    - (ruhig|langsam|tief) (ein- und aus|ein|aus)?atmen
+    - atmen sie (\w+ ){0,2}(ruhig|langsam|mit mir|tief)
+    - atme (ruhig|langsam|mit mir)
+  examples:
+    - Atmen Sie ganz langsam mit mir, durch die Nase ein und durch den Mund aus
+  default:
+    - Patient: (versucht, langsamer zu atmen)
+
+halsvenen:
+  label: Halsvenen beurteilt
+  patterns:
+    - halsvene
+    - gestaut
+    - jugular
+  examples:
+    - Sind die Halsvenen gestaut?
+
+# ---------------------------------------------------------------- C
+hautfarbe:
+  label: Hautfarbe / Hautzustand
+  patterns:
+    - hautfarbe|\bhaut\b|hautkolorit
+    - \bblass|blässe
+    - kaltschweiss|schweissig|schwitzt
+    - gesichtsfarbe
+    - rosig
+  examples:
+    - Wie sieht die Haut aus?
+    - Er ist ziemlich blass
+
+puls:
+  label: Puls
+  patterns:
+    - \bpuls(e|es)?\b(?!ox)
+    - herzfrequenz|\bhf\b
+    - radialis|karotis|carotis|halsschlagader
+    - (fühl|tast|mess)\w* (den |ihren |seinen )?puls
+  examples:
+    - Ich fühle den Puls am Handgelenk
+    - Wie ist die Herzfrequenz?
+
+rekap:
+  label: Rekapillarisierungszeit
+  patterns:
+    - rekap|recap|re-kap
+    - kapillar
+    - nagelbett|nagelprobe|fingernagel
+  examples:
+    - Ich drücke auf das Nagelbett und schaue, wie schnell es wieder rosig wird
+
+rr:
+  label: Blutdruck
+  patterns:
+    - blutdruck
+    - \brr\b
+    - manschette
+  examples:
+    - Ich messe den Blutdruck
+
+trauma_check:
+  label: Trauma-Check (Bauch, Becken, Oberschenkel)
+  patterns:
+    - trauma ?check
+    - \bbauch\b|abdomen
+    - becken
+    - oberschenkel
+    - innere blutung
+  examples:
+    - Ich taste den Bauch, das Becken und die Oberschenkel ab
+
+schocklage:
+  label: Schocklage / flach lagern
+  patterns:
+    - schocklage
+    - beine (hoch|anheben|hochlagern|erhöht|hochlegen)
+    - flach (hin)?(legen|lagern|hinlegen)|flachlage|flache lagerung
+    - (hin)?legen (sie sich|wir (sie|ihn))
+  examples:
+    - Wir legen sie flach hin und machen die Beine hoch
+  default:
+    - Befund: (liegt jetzt flach, Beine erhöht)
+
+nicht_aufstehen:
+  label: Nicht aufstehen lassen
+  patterns:
+    - nicht (auf)?stehen|nicht aufsetzen
+    - (bleiben sie|bleib) (bitte )?(liegen|sitzen|ruhig liegen)
+    - liegen bleiben|sitzen bleiben
+  examples:
+    - Bitte bleiben Sie liegen und stehen Sie nicht auf
+  default:
+    - Patient: Okay …
+
+# ---------------------------------------------------------------- D
+orientierung:
+  label: Orientierung (Person, Ort, Zeit, Situation)
+  patterns:
+    - wie heissen (sie|du)|wie heisst du|ihr name|dein name|wie ist ihr name
+    - wo (sind|bist) (sie|du|wir)|wissen sie,? wo
+    - welche?r? (tag|datum|jahr|monat|wochentag)|welches jahr
+    - wissen sie,? (was|welcher|wie spät)
+    - orientier
+    - wie alt sind sie|wie alt bist du|geburtsdatum|geburtstag
+  examples:
+    - Wie heißen Sie und wissen Sie, wo wir gerade sind?
+    - Welcher Tag ist heute?
+
+gcs:
+  label: Bewusstseinslage (GCS / AVPU)
+  patterns:
+    - \bgcs\b|glasgow
+    - avpu
+    - bewusstsein|bewusstseinslage
+    - (ist|wirkt) (er|sie) (wach|ansprechbar)
+    - ansprechbar
+  examples:
+    - Wie ist die Bewusstseinslage?
+    - Er ist wach und ansprechbar
+
+pupillen:
+  label: Pupillen
+  patterns:
+    - pupille
+    - lichtreaktion|leuchte
+  examples:
+    - Ich leuchte mit der Lampe in die Augen
+
+bz:
+  label: Blutzucker gemessen
+  patterns:
+    - blutzucker
+    - \bbz\b
+    - zucker (messen|mess|kontrollieren|bestimmen|testen)|zucker ?wert
+    - (mess|bestimm)\w* (den |mal )?zucker
+  examples:
+    - Ich messe den Blutzucker
+
+fast:
+  label: FAST / neurologische Schnelltests
+  patterns:
+    - \bfast\b|be-?fast
+    - lächeln
+    - arme? (heben|vorhalten|ausstrecken|nach vorne)
+    - armvorhalte
+    - sprechen sie (mir )?nach|nachsprechen
+    - halbseit
+    - gesicht\w* (symmetr|hängt|schief)
+  examples:
+    - Können Sie einmal lächeln und beide Arme nach vorne strecken?
+
+glukose_geben:
+  label: Zucker / Trinken angeboten
+  patterns:
+    - traubenzucker
+    - (zucker|glukose|glucose|saft|cola|limo|wasser)\w* (geben|anbieten|trinken)
+    - (gebe|geben|biete|bieten) (ihnen |ihr |ihm |dir )?(etwas |was |einen? )?(zucker|traubenzucker|saft|cola|wasser|trinken)
+    - (etwas|was) (zu )?trinken
+    - zucker ?gel|was süsses
+  examples:
+    - Ich gebe ihr Traubenzucker und etwas Saft
+    - Möchten Sie etwas trinken?
+
+krampf_dauer:
+  label: Dauer des Anfalls erfasst
+  patterns:
+    - uhrzeit
+    - zeit (stoppen|merken|notieren|nehmen|festhalten)
+    - wie lange (krampft|dauert|geht|schon|läuft)
+    - (anfalls|krampf)dauer
+    - seit wann
+  examples:
+    - Seit wann krampft er? Ich merke mir die Uhrzeit
+
+kopf_schuetzen:
+  label: Während des Anfalls schützen (Kopf polstern, nichts in den Mund)
+  patterns:
+    - kopf (schützen|polstern|abpolstern|unterlegen)
+    - polster
+    - unter (den|seinen|ihren) kopf
+    - nichts in den mund
+    - gegenstände (weg|wegräumen|entfernen)
+    - umfeld sichern
+  examples:
+    - Ich lege ihm die Jacke unter den Kopf und räume die Sachen weg
+  default:
+    - Kollege: (räumt Gegenstände weg und polstert den Kopf ab)
+
+dms:
+  label: Durchblutung, Motorik, Sensibilität (DMS)
+  patterns:
+    - \bdms\b
+    - kribbel|taubheit|taub\b
+    - (spüren|fühlen) sie (das|meine|mich|hier)
+    - bewegen sie (mal |bitte )?(die|ihre) (finger|zehen|füsse|hände|beine)
+    - (finger|zehen|füsse|hände|beine) bewegen
+    - lähmung
+    - gefühl in
+  examples:
+    - Spüren Sie, wo ich Sie berühre? Bewegen Sie mal die Zehen
+
+# ---------------------------------------------------------------- E
+frieren_fragen:
+  label: Nach Frieren gefragt
+  patterns:
+    - \bkalt\b|frier|frös?t|zitter
+    - warm genug
+    - kühl\b
+  examples:
+    - Ist Ihnen kalt?
+    - Frieren Sie?
+
+decke:
+  label: Wärmeerhalt (Decke / vom Boden isolieren)
+  patterns:
+    - decke
+    - zudeck
+    - wärmeerhalt|warm (halten|einpacken|zudecken)|wärmen
+    - jacke (über|drüber|drauf)
+    - isolier
+    - (vom|gegen den) boden
+    - isomatte|unterlage
+    - einwickeln|einpacken
+  examples:
+    - Ich decke ihn mit der Rettungsdecke zu
+    - Wir legen was unter ihn, damit er nicht auf dem kalten Boden liegt
+  default:
+    - Kollege: (holt die Rettungsdecke und hilft beim Zudecken)
+
+nasse_kleidung:
+  label: Nasse Kleidung entfernen
+  patterns:
+    - nasse? (kleidung|sachen|hose|jacke)
+    - (kleidung|jacke|hose|sachen) (aus|ausziehen|entfernen|aufschneiden|öffnen)
+    - ausziehen|aufschneiden|entkleiden|auskleiden
+  examples:
+    - Wir schneiden die nasse Kleidung auf
+  default:
+    - Kollege: (hilft, die Kleidung zu öffnen)
+
+kleidung_belassen:
+  label: Angeschmolzene Kleidung belassen
+  overrides: [nasse_kleidung]
+  patterns:
+    - nicht (ab)?reissen
+    - (kleben|dran|drauf) lassen
+    - angeschmolzen
+    - (kleidung|jacke|ärmel) (belassen|lassen)
+  examples:
+    - Die angeschmolzene Jacke lassen wir dran
+  default:
+    - Kollege: (lässt das angeschmolzene Material auf der Haut)
+
+kuehlen:
+  label: Kühlen
+  patterns:
+    - kühlen|kühlung|kühle (ich|den|die|das|wir)
+    - kühlpack|kältepack|coolpack
+    - (lauwarm\w*|kalt\w*)? ?wasser (drüber|darüber|laufen|auf)
+    - ablöschen
+  examples:
+    - Ich kühle den Arm mit lauwarmem Wasser
+  default:
+    - Kollege: (reicht eine Wasserflasche zum Kühlen)
+
+auge:
+  label: Auge versorgt (nicht reiben, spülen/abdecken)
+  patterns:
+    - auge\w* (spülen|ausspülen|abdecken|anschauen|ansehen|untersuchen|verbinden)
+    - (nicht|bitte nicht) (am auge )?reiben
+    - augen ?(spülung|verband|klappe)
+    - visus|sehen sie (gut|etwas|was|mich)|können sie sehen
+  examples:
+    - Nicht am Auge reiben, ich spüle das vorsichtig aus
+
+bodycheck:
+  label: Ganzkörperuntersuchung
+  patterns:
+    - body ?check
+    - ganzkörper
+    - (von )?kopf bis fuss
+    - (weitere|andere|sonstige) verletzung
+    - sonst (noch )?(verletzt|verletzungen|etwas)
+    - untersuch\w* (sie|ihn|dich) (komplett|ganz|von oben)
+  examples:
+    - Ich untersuche Sie jetzt einmal von Kopf bis Fuß
+    - Haben Sie sich sonst noch verletzt?
+
+temperatur:
+  label: Körpertemperatur gemessen
+  patterns:
+    - temperatur
+    - thermometer
+    - fieber
+  examples:
+    - Ich messe die Temperatur im Ohr
+
+wunde_versorgen:
+  label: Wunde versorgt (steriler Verband)
+  patterns:
+    - verband|verbinden
+    - wundauflage|kompresse|pflaster
+    - steril
+    - wunde (abdecken|versorgen)
+  examples:
+    - Ich lege einen sterilen Verband auf die Wunde
+  default:
+    - Kollege: (reicht das Verbandmaterial)
+
+immobilisieren:
+  label: Immobilisation (Stifneck, Vakuummatratze, Schiene)
+  patterns:
+    - stifneck|stiffneck|halskrause|stützkragen|zervikal|cervical
+    - vakuum
+    - schaufeltrage|spineboard
+    - immobilis
+    - schien
+    - ruhigstell
+  examples:
+    - Wir legen den Halskragen an und nehmen die Vakuummatratze
+  default:
+    - Kollege: (bereitet das Material zur Immobilisation vor)
+
+hws_manuell:
+  label: Manuelle HWS-Stabilisierung
+  patterns:
+    - \bhws\b
+    - halswirbel
+    - kopf (fest|ruhig)? ?(halten|fixieren|stabilisieren)
+    - (halt|halte|fixier|stabilisier)\w* (bitte |mal )?(den )?kopf
+    - manuell\w* (fixier|stabilis|immobil)
+    - nicht den kopf bewegen|kopf nicht bewegen
+  examples:
+    - Kannst du bitte den Kopf festhalten?
+    - Kollege, übernimm die Halswirbelsäule
+  default:
+    - Kollege: (kniet sich hinter den Kopf und übernimmt die manuelle HWS-Stabilisierung)
+
+# ---------------------------------------------------------------- SAMPLE
+sample:
+  label: SAMPLE-Anamnese
+  patterns:
+    - \bsampler?\b
+  examples:
+    - Ich mache jetzt die SAMPLE-Anamnese
+  default:
+    - Kollege: Was fragst du genau?
+
+sample_allergie:
+  label: Allergien
+  patterns:
+    - allergi
+    - unverträglich
+  examples:
+    - Sind Allergien bekannt?
+
+sample_medikamente:
+  label: Medikamente
+  patterns:
+    - medikament|medis\b|tablette|pillen?\b
+    - (nehmen|nimmst) (sie|du) (regelmässig )?(etwas|was)
+    - blutverdünn|gerinnungshemm|marcumar
+  examples:
+    - Nehmen Sie regelmäßig Medikamente?
+
+sample_vorerkrankung:
+  label: Vorerkrankungen
+  patterns:
+    - vorerkrank
+    - (bekannte |andere )?(krankheiten|erkrankungen)
+    - krankengeschichte
+    - (sind sie|bist du) (irgendwie )?(krank|in behandlung)
+    - herz(probleme|krank|erkrank)
+  examples:
+    - Haben Sie Vorerkrankungen?
+    - Sind Sie sonst gesund?
+
+sample_mahlzeit:
+  label: Letzte Mahlzeit / Getränke
+  patterns:
+    - gegessen|getrunken
+    - letzte (mahlzeit|nahrung|essen)
+    - mahlzeit
+    - alkohol
+    - was (haben sie|hast du) (heute )?(gegessen|getrunken)
+  examples:
+    - Wann haben Sie zuletzt etwas gegessen?
+
+# ---------------------------------------------------------------- Bewusstlosigkeit / Reanimation
+atemkontrolle:
+  label: Atemkontrolle (sehen, hören, fühlen)
+  patterns:
+    - atemkontrolle
+    - atmet (er|sie|der|die|das kind)\b
+    - (sehen|schauen),? hören,? fühlen
+    - atmung (prüfen|kontrollieren|checken|überprüfen)|prüfe (die )?atmung
+    - (hebt|senkt) sich (der )?brustkorb|brustkorb (hebt|bewegt)
+    - schnappatmung
+    - keine (normale )?atmung|atmet nicht
+  examples:
+    - Ich kontrolliere die Atmung, sehen, hören, fühlen, zehn Sekunden
+    - Atmet er normal?
+
+seitenlage:
+  label: Stabile Seitenlage
+  patterns:
+    - seitenlage
+    - auf die seite\b
+  examples:
+    - Ich bringe ihn in die stabile Seitenlage
+
+hlw:
+  label: Herzdruckmassage (HLW)
+  patterns:
+    - \bhlw\b|\bcpr\b
+    - herzdruck|druckmassage
+    - reanim
+    - wiederbeleb
+    - 30 ?(zu|:) ?2|dreissig zu zwei
+    - thoraxkompression
+    - (beginne|beginnen|fange|starte) (\w+ )?(mit dem )?drücken
+    - weiter drücken|drücke weiter|weiter (mit der )?(hlw|herzdruckmassage)
+  examples:
+    - Ich beginne sofort mit der Herzdruckmassage
+    - Wir machen weiter mit Drücken
+  default:
+    - Befund: (die Herzdruckmassage läuft)
+
+hlw_details:
+  label: HLW korrekt (Druckpunkt, Tiefe, Frequenz)
+  patterns:
+    - druckpunkt
+    - mitte (des |vom )?brustkorb|brustbein|brustmitte
+    - (5|fünf) bis (6|sechs)|zentimeter|\bcm\b
+    - (100|hundert) bis (120|hundertzwanzig)|frequenz
+    - entlast
+  examples:
+    - Druckpunkt Mitte Brustkorb, fünf bis sechs Zentimeter tief, hundert bis hundertzwanzig pro Minute
+
+beatmen:
+  label: Beatmung
+  patterns:
+    - beatm
+    - beutel
+    - (zwei|2) (atemspenden|beatmungen)|atemspende
+  examples:
+    - Jetzt zwei Beatmungen mit dem Beutel
+  default:
+    - Befund: (der Brustkorb hebt sich bei der Beatmung)
+
+aed:
+  label: AED geholt / angelegt
+  patterns:
+    - \baed\b|\bdefi
+    - elektrode|pads? (kleben|aufkleben|anbringen|drauf)
+  examples:
+    - Hol bitte den Defibrillator und klebe die Elektroden auf
+  default:
+    - Kollege: (holt den AED und schaltet ihn ein)
+
+schock_ausloesen:
+  label: Schock ausgelöst
+  patterns:
+    - schock\w* (aus|ab)?lös|lös\w* (den )?schock|schock (aus|ab)geben|schockknopf|schocktaste
+    - (knopf|taste) drücken
+    - schock (abgeben|geben|auslösen)
+  examples:
+    - Ich löse den Schock aus
+
+schock_warnung:
+  label: Warnung vor dem Schock („Alle weg!“)
+  patterns:
+    - alle (weg|zurück|los ?lassen)
+    - (weg|hände weg) vom patienten
+    - (niemand|keiner) (berührt|fasst)|nicht (mehr )?berühren|nicht anfassen
+    - sauerstoff weg
+    - achtung,? schock
+  examples:
+    - Achtung, alle weg vom Patienten, niemand berührt ihn!
+  default:
+    - Umstehende: (treten zurück)
+
+helferwechsel:
+  label: Helferwechsel
+  patterns:
+    - wechsel
+    - (abwechseln|ablösen|löse dich ab|übernimm (das|die) drücken)
+  examples:
+    - Wechsel, du drückst jetzt
+  default:
+    - Kollege: (übernimmt die Herzdruckmassage)
+
+# ---------------------------------------------------------------- Team / Nachforderung / Verlauf
+teambesprechung:
+  label: Teambesprechung (Lage, Verdachtsdiagnose, Notarzt)
+  exclusive: true   # wer zusammenfasst, handelt nicht – erwähnte Befunde lösen keine Antworten aus
+  patterns:
+    - teambesprechung|team ?time|team ?talk
+    - kurze (besprechung|rückmeldung)
+    - zusammengefasst|zusammenfassung|fasse zusammen
+    - verdacht|verdachtsdiagnose
+    - ich (denke|vermute|glaube),? (es ist|er hat|sie hat|das ist|wir haben)
+    - \b[abcde]-?problem
+    - (brauchen|benötigen) wir (einen |den )?(notarzt|nef)
+    - notarzt (nötig|notwendig|ja|nein|brauchen)
+  examples:
+    - Kurz zusammengefasst, Sturz mit Kopfanprall, Verdacht auf Schädel-Hirn-Trauma, wir brauchen den Notarzt
+  default:
+    - Kollege: Verstanden.
+
+nachforderung:
+  label: Rettungsdienst nachgefordert
+  patterns:
+    - \b112\b
+    - notruf
+    - nachforder|forder\w* (\w+ ){0,4}nach\b
+    - (ruf|rufen|alarmier\w*) (sie |du )?(bitte )?(den |einen |die )?(rettungsdienst|rtw|notarzt|nef|leitstelle)
+    - (wir brauchen|brauchen wir) (einen |den )?(rtw|rettungsdienst|rettungswagen)
+  # bewusst ohne examples: nur eindeutige Stichworte (RTW, Notruf …) zählen
+  default:
+    - Kollege: (setzt über Funk die Nachforderung ab)
+
+reevaluation:
+  label: Reevaluation
+  patterns:
+    - reevalu|re-evalu
+    - (nochmal|noch mal|erneut|wieder) (\w+ ){0,3}(messen|prüfen|kontrollieren|schauen|checken|untersuchen)
+    - (kontrolliere|prüfe|messe|checke) (\w+ ){0,2}(nochmal|noch mal|erneut)
+    - wieder bei a|von vorne (anfangen|beginnen)|zurück zu a
+    - verlaufskontrolle
+  examples:
+    - Ich kontrolliere jetzt nochmal alle Werte
+
+aufklaeren:
+  label: Aufklärung / Transport besprochen
+  patterns:
+    - ins krankenhaus|in die klinik|in die notaufnahme
+    - abklären|abklärung
+    - (mitfahren|mitkommen|mitnehmen)
+    - ablehn|verweiger|unterschreib|einwillig
+    - (wir empfehlen|ich empfehle|ich rate)
+    - risiko
+  examples:
+    - Ich würde Ihnen dringend raten, das im Krankenhaus abklären zu lassen
+  default:
+    - Patient: Hm … wenn Sie meinen.
+
+uebergabe:
+  label: Übergabe an den Rettungsdienst
+  patterns:
+    - übergabe|übergebe|übergeben
+    - (an|für) (den |die )?(rettungsdienst|kollegen vom rettungsdienst|notarzt)
+  examples:
+    - Übergabe an den Rettungsdienst, wir haben hier einen Patienten, Mitte sechzig
+  default:
+    - when: {rd_da: true}
+      say:
+        - Rettungsdienst: Danke, wir übernehmen.
+      set: {uebergeben: true}
+    - say:
+        - Kollege: Der Rettungsdienst ist noch nicht da.
+
+funk_anruf:
+  label: Funk – Anruf der Leitstelle
+funk_meldung:
+  label: Funk – Meldung
+funk_ende:
+  label: Funk – Abschluss mit „Ende“

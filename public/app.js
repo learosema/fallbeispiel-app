@@ -4,7 +4,6 @@
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
   // ---------- Einstellungen ----------
-  const API_URL = "/api/chat"; // Python-Backend mit lokalem Modell
   const DEFAULTS = { accessCode: "", rate: 1, speak: true, handsfree: false, mode: "minute", callsign: "EVT1", dispatcher: "RotkreuzHamburg" };
   let settings = { ...DEFAULTS };
   try {
@@ -16,9 +15,9 @@
   const saveSettings = () => { try { localStorage.setItem("settings", JSON.stringify(settings)); } catch {} };
 
   // ---------- Zustand ----------
+  let SCENARIOS = [];
   let scenario = null;
   let mode = "minute";    // "minute" = nur 1. Minute, "full" = ganzer Fall
-  let messages = [];      // ohne System-Prompt
   let busy = false;
   let listening = false;
   let recognition = null;
@@ -28,7 +27,7 @@
   let startedAt = null;
   let busyMs = 0;
   let busySince = null;
-  let userLog = [];       // { t: Sekunden, text }
+  let userLog = [];       // { t: Sekunden, text } – geht bei jeder Äußerung komplett an den Server
   const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, "0")}`;
   function netSec() {
     if (!startedAt) return 0;
@@ -37,102 +36,6 @@
   }
   const startClock = () => { if (!startedAt) startedAt = Date.now(); };
   setInterval(() => { if (scenario && startedAt && !debriefDone) $("timer").textContent = "⏱ " + fmt(netSec()); }, 500);
-
-  // ---------- Prompts ----------
-  function systemPrompt(s) {
-    const team = s.team || "Du bist mit einem Kollegen im Team, Sanitätsrucksack dabei. Der Rettungsdienst muss nachgefordert werden und trifft ca. 8 Minuten nach Nachforderung ein.";
-    const modeText = mode === "minute"
-      ? "MODUS 1. MINUTE: Der Fokus ist die 1. Minute nach SANmemo (Sicherheit/Lage, bedrohliche Blutung, Ansprechen, Schnellcheck, Teambesprechung, Funkspruch an die Leitstelle). Nach der Teambesprechung mit dem Kollegen (Lage, Verdachtsdiagnose, Notarzt) bestätigt der Kollege kurz. Danach setzt sie den Funkspruch ab. Sobald sie den Funkspruch mit ihrem Rufnamen und \"Ende\" abgeschlossen hat, ergänze als Befund: \"Die 1. Minute ist beendet. Du kannst die Auswertung starten.\" Danach keine neuen Untersuchungen mehr, außer sie besteht darauf. Vorher beendest du den Modus nie. Erinnere sie nicht an Teambesprechung oder Funkspruch."
-      : "MODUS GANZER FALL: Nach der 1. Minute geht der Einsatz weiter (vollständiges ABCDE, Maßnahmen, Reevaluation, Übergabe).";
-    return `Du bist die Simulation für ein Fallbeispiel-Training im Rettungsdienst (Ausbildung zur Sanitäterin beim DRK). Die Nutzerin ist die Sanitäterin in Ausbildung und spricht per Sprache mit dir. Antworte immer auf Deutsch.
-
-SZENARIO: ${s.title}
-${s.dispatch}
-${s.role}
-
-EINSATZSITUATION: ${team} Sanitätsrucksack-Ausrüstung (Pulsoxymeter, RR-Gerät, BZ-Messgerät, Thermometer, Absaugpumpe, Sauerstoff, AED, Verbandmaterial, Schienen, Rettungsdecke, Stifneck) steht zur Verfügung, wenn sie es verlangt. Alles, was darüber hinausgeht (Medikamente, Infusionen, Entlastungspunktion), steht dem Team nicht zur Verfügung.
-
-${modeText}
-
-SZENE (Auskunft zu Sicherheit und Lage, nur auf Nachfrage bzw. wenn sie die Umgebung prüft): ${s.scene}
-
-VERBORGENE FAKTEN (nur preisgeben, wenn die Nutzerin danach fragt, untersucht, misst oder Maßnahmen durchführt; niemals von dir aus aufzählen):
-${s.hidden}
-
-ROLLEN UND FORMAT:
-Jede Antwortzeile beginnt mit genau einem dieser Labels: "Patient:", "Kollege:", "Umstehende:", "Befund:", "Leitstelle:". Pro Antwort meist 1–3 kurze Zeilen. Kein Markdown, keine Aufzählungen, keine Emojis.
-- Patient: Aussagen und Reaktionen der betroffenen Person, in kurzen, natürlichen Sätzen. Ist die Person bewusstlos, spricht sie nicht, beschreibe dann nur als Befund, was sichtbar ist.
-- Kollege: ihr Teampartner. Er führt nur auf Zuruf aus, was sie ausspricht (z. B. manuelle HWS-Stabilisierung, Rucksack holen, Notruf/Nachforderung absetzen) und kündigt es kurz an, z. B. "Kollege: (übernimmt die manuelle HWS-Stabilisierung)". Er handelt fachlich nicht von sich aus und gibt keine Empfehlungen. In der Teambesprechung hört er zu und bestätigt knapp ("Verstanden.") oder fragt kurz nach, wenn etwas unverständlich ist, ohne Lücken zu füllen.
-- Umstehende: Zeugen, Angehörige, Passanten.
-- Leitstelle: die Funkzentrale "${settings.dispatcher}". Die Nutzerin ist das Team mit dem Funkrufnamen "${settings.callsign}". Die Leitstelle antwortet nur, wenn sie angefunkt wird, in knapper Funksprache: auf den Anruf ("${settings.dispatcher} von ${settings.callsign}, kommen") antwortet sie nur "Leitstelle: Hier ${settings.dispatcher}." Auf die Meldung wiederholt sie wortgleich die Nachforderung ("Leitstelle: RTW NEF kommt, verstanden."), nur das, was angefordert wurde. Ist etwas unverständlich, sagt sie "Leitstelle: Wiederholen." Sie gibt keine Empfehlungen, stellt keine Rückfragen zur Medizin und weist nichts zu, was nicht angefordert wurde. Fehlt der Anruf oder die Nachforderung, korrigiert sie nicht, sondern reagiert nur auf das, was gesagt wurde. Nach "${settings.callsign} Ende" sagt die Leitstelle nichts mehr. Außerhalb des Funkverkehrs spricht die Leitstelle nie.
-- Befund: nüchterne Messwerte und Beobachtungen in einem Satz, z. B. "Befund: Puls 78, gut tastbar, Rekap unter 2 Sekunden." Nur, wenn sie wirklich gemessen oder untersucht wird.
-
-REGELN FÜR DEN EINSATZ:
-- Bleib in der Rolle. Gib keine Hinweise, was sie als Nächstes tun sollte, und lobe oder korrigiere nicht während des Einsatzes.
-- Sagt sie nur, was sie tut oder feststellt (z. B. "Lage ist sicher", "Puls gut tastbar"), antworte minimal ("Kollege: Verstanden."), lass den Patienten reagieren, wenn es passt, und füge keine neuen Befunde hinzu. Widerspricht ihre Aussage den verborgenen Fakten, nenne den tatsächlichen Befund als "Befund:".
-- Sagt sie die Lage sei sicher, obwohl die SZENE Gefahren enthält, lass die Gefahr später spürbar werden.
-- Sagt sie nur "ich schaue nach den Atemwegen" o. Ä., gib den Befund dazu. Fragt sie vage, frage kurz nach, was genau sie tut.
-- Der Zustand entwickelt sich realistisch: Fehlende oder falsche Maßnahmen verschlechtern ihn, richtige Maßnahmen verbessern ihn.
-- Wärmeerhalt ist unabhängig von der Außentemperatur immer richtig. Wird die Person nicht zugedeckt und vom Boden isoliert, kühlt sie mit der Zeit aus (Temperatur und Hautbefund verschlechtern sich bzw. der Patient klagt über Kälte). Das Tempo hängt von der Außentemperatur ab: bei Kälte und Nässe schnell, bei Wärme langsam. Wird sie mit Decke/Rettungsdecke zugedeckt, wird es spürbar besser. Hinweise gibst du dazu nicht.
-- Ist die Übergabe an den Rettungsdienst/Notarzt oder der Transport erfolgt, schließe den Einsatz knapp ab und sag, dass sie jetzt die Auswertung starten kann.
-
-SCHLÜSSELMASSNAHMEN (nur für die Auswertung): ${s.keyActions}`;
-  }
-
-  function debriefPrompt() {
-    const timeline = userLog.length
-      ? userLog.map((e) => `[${fmt(e.t)}] ${e.text}`).join("\n")
-      : "(keine Äußerungen)";
-    const total = userLog.length ? fmt(userLog[userLog.length - 1].t) : "0:00";
-    const abcde = mode === "full" ? `
-x – Extreme Blutung: <✅ / ⚠️ / ❌ / –> <ein Satz>
-A – Airway: <✅ / ⚠️ / ❌ / –> <ein Satz>
-B – Breathing: <✅ / ⚠️ / ❌ / –> <ein Satz>
-C – Circulation: <✅ / ⚠️ / ❌ / –> <ein Satz>
-D – Disability: <✅ / ⚠️ / ❌ / –> <ein Satz>
-E – Exposure/Environment (SAMPLE, Ganzkörperuntersuchung, Wärmeerhalt): <✅ / ⚠️ / ❌ / –> <ein Satz>
-` : "";
-    const fullTail = mode === "full" ? `
-REEVALUATION: <wurde nach Maßnahmen erneut beurteilt bzw. nach E wieder bei A begonnen?>
-KRITISCHE MASSNAHMEN: <was war in diesem Fall entscheidend und wurde es gemacht?>` : "";
-
-    return `[AUSWERTUNG] Der Einsatz ist beendet. Verlasse die Rolle und bewerte nüchtern und wohlwollend, ob die Nutzerin dem Algorithmus gefolgt ist. Grundlage ist nur, was sie im Gespräch tatsächlich gesagt oder getan hat. Maßstab ist dieser Referenz-Algorithmus (DRK-SANmemo):
-
-${window.ALGORITHM}
-
-WICHTIG: Entscheidend ist das korrekte Einhalten des Algorithmus (vollständig, in der richtigen Reihenfolge, mit den richtigen Inhalten). Zeit ist nachrangig und nur eine Randnotiz. Die Funk-Rufnamen sind "${settings.callsign}" (eigenes Team) und "${settings.dispatcher}" (Leitstelle).
-
-Zeitstempel ihrer Äußerungen (Nettozeit, ohne Wartezeiten der Simulation; nur zur Information):
-${timeline}
-Gesamtzeit bis zur letzten Äußerung: ${total}.
-
-Bei Fällen mit Bewusstlosigkeit gilt für die "1. Minute" der Bewusstlos-Pfad (Atemwege freimachen, Atemkontrolle max. 10 s, Atmung nicht normal: HLW und AED, Atmung normal: Seitenlage, dazu immer Wärmeerhalt, unabhängig von der Außentemperatur). Prüfe dort auch, ob Schritte genau genannt wurden (Druckpunkt, Tiefe, Frequenz, Schock-Sicherheit bzw. Ablauf der Seitenlage). Schritte, die im Fall nicht relevant waren (z. B. HWS ohne Trauma), kennzeichne mit "–" statt ❌.
-
-Nutze genau dieses Format, auf Deutsch, ohne Markdown-Sternchen. Zitiere kurz, was sie gesagt hat, wo es hilft:
-
-ALGORITHMUS: <Erfüllt / Teilweise erfüllt / Nicht erfüllt>
-
-1. MINUTE
-Sicherheit und Lage: <✅ / ⚠️ / ❌ / –> <ein Satz>
-Bedrohliche Blutung geprüft: <✅ / ⚠️ / ❌ / –> <ein Satz>
-Vorstellung und Ansprache (Hallo, wir sind vom DRK, Was ist passiert?): <✅ / ⚠️ / ❌ / –> <ein Satz>
-HWS bei Trauma (manuelle Stabilisierung): <✅ / ⚠️ / ❌ / –> <ein Satz>
-Atmung (Luft? Schmerzen beim Atmen? Zyanose?): <✅ / ⚠️ / ❌ / –> <ein Satz>
-Kreislauf (Hautfarbe, Puls, Rekap-Zeit, bei Trauma Bauch/Becken/Oberschenkel): <✅ / ⚠️ / ❌ / –> <ein Satz>
-Neurologie (Reaktion angemessen, Gemütslage): <✅ / ⚠️ / ❌ / –> <ein Satz>
-Umfeld (Verletzungsmechanismus, Umfeld, Frieren): <✅ / ⚠️ / ❌ / –> <ein Satz>
-Wärmeerhalt (Decke/Rettungsdecke, Isolation vom Boden; immer richtig, unabhängig von der Außentemperatur; bei Kälte friert die Person nur schneller): <✅ / ⚠️ / ❌ / –> <ein Satz; nur nachfragen oder darüber sprechen reicht nicht, sie muss es ansagen oder durchführen>
-Teambesprechung (Lage, Verdachtsdiagnose, Notarzt): <✅ / ⚠️ / ❌ / –> <ein Satz>
-Funkspruch (Anruf mit beiden Rufnamen, auf Antwort gewartet, Patient/Ereignis/Verdachtsdiagnose, Nachforderung passend zur Lage, "kommen", Abschluss mit Rufname und "Ende"): <✅ / ⚠️ / ❌ / –> <ein bis zwei Sätze; nenne, was genau fehlte oder nicht passte>
-${abcde}
-TATSÄCHLICHE REIHENFOLGE: <die Schritte so aufzählen, wie sie im Gespräch tatsächlich vorkamen, mit Kürzeln und Pfeilen, z. B. Lage → Ansprache → HWS → Atmung>
-ABWEICHUNGEN: <wo weicht das vom Algorithmus ab: vergessene Schritte, vertauschte Reihenfolge, falsche oder ungenaue Inhalte? Bei kritischen Problemen sofort behandelt? Wenn keine, schreibe "keine".>
-ZEIT (nachrangig): <ein kurzer Satz, ohne Wertung des Algorithmus>${fullTail}
-GUT GEMACHT: <1–2 Punkte>
-VERBESSERN: <1–3 konkrete Punkte>
-
-Bewerte einen Schritt mit ⚠️, wenn er nur teilweise oder zu spät kam, und mit ❌, wenn er gar nicht vorkam. Sei ehrlich, aber kurz.`;
-  }
 
   // ---------- UI ----------
   function setStatus(text, error = false) {
@@ -150,23 +53,8 @@ Bewerte einen Schritt mit ⚠️, wenn er nur teilweise oder zu spät kam, und m
   }
 
   // Antwort der Simulation in Sprecher-Zeilen zerlegen: "Patient: …", "Kollege: …", "Umstehende: …", "Befund: …"
-  const WHO_CLASS = { Patient: "them", Kollege: "them kollege", Umstehende: "them", Befund: "sys befund", Leitstelle: "them funk" };
-  const PITCH = { Patient: 1, Kollege: 0.8, Umstehende: 1.2, Befund: 0.9, Leitstelle: 0.65 };
-  function parseReply(text) {
-    const segs = [];
-    for (const raw of text.split(/\n+/)) {
-      const line = raw.trim();
-      if (!line) continue;
-      const m = line.match(/^(Patient(?:in)?|Kolleg(?:e|in)|Umstehende[r]?|Befund|Leitstelle)\s*:\s*(.*)$/i);
-      if (m) {
-        const k = m[1].toLowerCase();
-        const who = k.startsWith("patient") ? "Patient" : k.startsWith("kolleg") ? "Kollege" : k.startsWith("umsteh") ? "Umstehende" : k.startsWith("leit") ? "Leitstelle" : "Befund";
-        segs.push({ who, text: m[2] });
-      } else if (segs.length) segs[segs.length - 1].text += " " + line;
-      else segs.push({ who: "Patient", text: line });
-    }
-    return segs;
-  }
+  const WHO_CLASS = { Patient: "them", Kollege: "them kollege", Umstehende: "them", Befund: "sys befund", Leitstelle: "them funk", AED: "them funk", Rettungsdienst: "them kollege" };
+  const PITCH = { Patient: 1, Kollege: 0.8, Umstehende: 1.2, Befund: 0.9, Leitstelle: 0.65, AED: 0.6, Rettungsdienst: 0.85 };
   function addReply(segs) {
     for (const seg of segs) {
       const d = document.createElement("div");
@@ -188,8 +76,19 @@ Bewerte einen Schritt mit ⚠️, wenn er nur teilweise oder zu spät kam, und m
     $("backBtn").hidden = true;
     $("title").textContent = "Fallbeispiel xABCDE";
   }
+  async function loadScenarios() {
+    try {
+      const res = await fetch("/api/scenarios");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      SCENARIOS = await res.json();
+      renderScenarios();
+    } catch (err) {
+      $("scenarioList").textContent = "Die Fälle konnten nicht geladen werden (" + err.message + "). Läuft der Server?";
+    }
+  }
   function renderScenarios() {
     const list = $("scenarioList");
+    list.innerHTML = "";
     const items = [...SCENARIOS, { id: "random", group: "Zufall", letter: "?", title: "Zufälliger Fall", teaser: "Überrasch mich" }];
     let lastGroup = null;
     for (const s of items) {
@@ -219,7 +118,6 @@ Bewerte einen Schritt mit ⚠️, wenn er nur teilweise oder zu spät kam, und m
   function startSession(s, hideTitle) {
     scenario = s;
     mode = settings.mode === "full" ? "full" : "minute";
-    messages = [];
     debriefDone = false;
     startedAt = null; busyMs = 0; busySince = null; userLog = [];
     $("timer").textContent = "⏱ 0:00";
@@ -258,9 +156,11 @@ Bewerte einen Schritt mit ⚠️, wenn er nur teilweise oder zu spät kam, und m
     });
   }
   async function speakReply(segs) {
+    // Regieanweisungen in Klammern werden angezeigt, aber nicht vorgelesen
     for (const seg of segs) {
       if (!scenario) return;
-      await speak(seg.text, PITCH[seg.who] || 1);
+      const spoken = seg.text.replace(/\([^)]*\)/g, "").trim();
+      if (spoken) await speak(spoken, PITCH[seg.who] || 1);
     }
   }
 
@@ -306,53 +206,75 @@ Bewerte einen Schritt mit ⚠️, wenn er nur teilweise oder zu spät kam, und m
     setStatus("");
   }
 
-  // ---------- LLM ----------
-  async function chat(msgs, maxTokens) {
-    const res = await fetch(API_URL, {
+  // ---------- Backend ----------
+  const payload = () => ({ scenario: scenario.id, mode, callsign: settings.callsign, dispatcher: settings.dispatcher, log: [...userLog] });
+  async function api(path, body = payload()) {
+    const res = await fetch(path, {
       method: "POST",
       headers: { "Content-Type": "application/json", ...(settings.accessCode ? { "x-access-code": settings.accessCode } : {}) },
-      body: JSON.stringify({ messages: msgs, max_tokens: maxTokens }),
+      body: JSON.stringify(body),
     });
     let data = {};
     try { data = await res.json(); } catch { /* keine JSON-Antwort */ }
     if (res.status === 401) { openSettings(); throw new Error(data.error || "Zugangscode fehlt oder ist falsch."); }
     if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
-    return (data.content || "").trim();
+    return data;
   }
 
-  async function send(text, { debrief = false } = {}) {
+  function beginBusy(text) { busy = true; busySince = Date.now(); setStatus(text); }
+  function endBusy() { busyMs += Date.now() - busySince; busySince = null; busy = false; }
+
+  async function send(text) {
     if (!scenario || busy) return;
-    if (!debrief) { startClock(); userLog.push({ t: netSec(), text }); }
-    busy = true;
-    busySince = Date.now();
+    startClock();
+    userLog.push({ t: Math.round(netSec() * 10) / 10, text });
+    addMsg(text, "me");
+    beginBusy("…");
     let ok = false;
-    if (debrief) addMsg("Auswertung angefordert …", "sys"); else addMsg(text, "me");
-    messages.push({ role: "user", content: text });
-    setStatus("Denke nach …");
     try {
-      const reply = await chat([{ role: "system", content: systemPrompt(scenario) }, ...messages], debrief ? 1100 : 300);
-      messages.push({ role: "assistant", content: reply });
+      const data = await api("/api/turn");
       setStatus("");
-      if (debrief) {
-        debriefDone = true;
-        addMsg(reply, "debrief");
-        await speak(reply.split("\n").find((l) => l.startsWith("ALGORITHMUS")) || "Auswertung fertig.");
-      } else {
-        const segs = parseReply(reply);
-        addReply(segs);
-        await speakReply(segs);
-      }
+      addReply(data.lines);
+      await speakReply(data.lines);  // Vorlesen zählt nicht zur Nettozeit
       ok = true;
     } catch (err) {
-      messages.pop();
-      if (!debrief) userLog.pop();
+      userLog.pop();
       setStatus("Fehler: " + err.message, true);
     } finally {
-      busyMs += Date.now() - busySince;
-      busySince = null;
-      busy = false;
+      endBusy();
     }
-    if (ok && !debrief && settings.handsfree && scenario) startListening();
+    if (ok && settings.handsfree && scenario) startListening();
+  }
+
+  async function debrief() {
+    if (!scenario || busy || debriefDone) return;
+    stopAll();
+    if (userLog.length === 0) { setStatus("Starte erst den Einsatz, sonst gibt es nichts auszuwerten.", true); return; }
+    debriefDone = true;
+    const current = scenario;
+    const body = payload();  // Stand festhalten – das Feedback kommt evtl. erst nach einem Fallwechsel zurück
+    beginBusy("Werte aus …");
+    let result, text;
+    try {
+      ({ result, text } = await api("/api/debrief", body));
+    } catch (err) {
+      debriefDone = false;
+      setStatus("Fehler: " + err.message, true);
+      return;
+    } finally {
+      endBusy();  // das KI-Feedback kann dauern – die App bleibt währenddessen bedienbar
+    }
+    addMsg(text, "debrief");
+    setStatus("Die KI bewertet den Einsatz …");
+    speak("Algorithmus " + result.verdict + ".");
+    try {
+      const fb = await api("/api/feedback", body);
+      if (scenario !== current) return;
+      addMsg(fb.text, "debrief");
+      setStatus(fb.ai ? "" : "Keine KI-Bewertung konfiguriert, nur die regelbasierte Auswertung.");
+    } catch (err) {
+      if (scenario === current) setStatus(err.message, true);
+    }
   }
 
   // ---------- Einstellungen-Dialog ----------
@@ -397,14 +319,8 @@ Bewerte einen Schritt mit ⚠️, wenn er nur teilweise oder zu spät kam, und m
     stopAll();
     send(t);
   });
-  $("debriefBtn").addEventListener("click", () => {
-    if (!scenario || busy) return;
-    if (debriefDone) return;
-    stopAll();
-    if (messages.length === 0) { setStatus("Starte erst den Einsatz, sonst gibt es nichts auszuwerten.", true); return; }
-    send(debriefPrompt(), { debrief: true });
-  });
+  $("debriefBtn").addEventListener("click", debrief);
 
-  renderScenarios();
+  loadScenarios();
   if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 })();

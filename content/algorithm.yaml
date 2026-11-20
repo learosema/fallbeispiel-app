@@ -1,0 +1,81 @@
+# Checklisten für die Auswertung und Referenztext für die KI-Bewertung.
+#
+# Je Punkt:
+#   all: [a, b, [c, d]]   alle Elemente nötig (ein Element in [] = eines davon reicht); teilweise → ⚠️
+#   any: [a, b]           eines reicht
+#   min: n + of: [...]    mindestens n Elemente
+#   only: trauma | bleeding | conscious | unconscious | breathing_normal | breathing_abnormal
+#   extra: {trauma: [...]} zusätzliche Elemente, wenn die Bedingung für den Fall gilt
+#   special: funk | reevaluation
+# Fälle können einzelne Punkte per `skip: [id]` ausblenden („–“).
+
+minute_conscious:
+  - {id: lage, short: Lage, label: "Sicherheit und Lage", any: [lage_pruefen]}
+  - {id: blutung, short: Blutung, label: "Bedrohliche Blutung geprüft", any: [blutung_pruefen]}
+  - {id: ansprache, short: Ansprache, label: "Vorstellung und Ansprache (Hallo, wir sind vom DRK, was ist passiert?)", all: [vorstellen, was_passiert]}
+  - {id: hws, short: HWS, label: "HWS bei Trauma (manuelle Stabilisierung)", any: [hws_manuell], only: trauma}
+  - {id: atmung, short: Atmung, label: "Atmung (Luft? Schmerzen beim Atmen? Zyanose?)", all: [atmung_fragen, schmerz_atmen, zyanose]}
+  - id: kreislauf
+    short: Kreislauf
+    label: Kreislauf (Hautfarbe, Puls, Rekap-Zeit, bei Trauma Bauch/Becken/Oberschenkel)
+    all: [hautfarbe, puls, rekap]
+    extra: {trauma: [trauma_check]}
+  - {id: neuro, short: Neurologie, label: "Neurologie (Reaktion angemessen, Orientierung)", any: [orientierung, gcs]}
+  - {id: umfeld, short: Umfeld, label: "Umfeld (Verletzungsmechanismus, Frieren)", any: [frieren_fragen, decke]}
+  - {id: waerme, short: Wärme, label: "Wärmeerhalt (Decke, Isolation vom Boden)", any: [decke]}
+  - {id: team, short: Team, label: "Teambesprechung (Lage, Verdachtsdiagnose, Notarzt)", any: [teambesprechung]}
+  - {id: funk, short: Funk, label: "Funkspruch an die Leitstelle", special: funk}
+
+minute_unconscious:
+  - {id: lage, short: Lage, label: "Sicherheit und Lage", any: [lage_pruefen]}
+  - {id: blutung, short: Blutung, label: "Bedrohliche Blutung geprüft", any: [blutung_pruefen]}
+  - {id: ansprechen, short: Ansprechen, label: "Laut ansprechen, anfassen, ggf. Schmerzreiz", any: [laut_ansprechen, schmerzreiz]}
+  - {id: atemwege, short: Atemwege, label: "Atemwege freimachen (Kopf überstrecken, Kinn anheben)", any: [atemwege_freimachen]}
+  - {id: atemkontrolle, short: Atemkontrolle, label: "Atemkontrolle (sehen, hören, fühlen, max. 10 s)", any: [atemkontrolle]}
+  - {id: seitenlage, short: Seitenlage, label: "Atmung normal: stabile Seitenlage", any: [seitenlage], only: breathing_normal}
+  - {id: hlw, short: HLW, label: "Atmung nicht normal: sofort HLW 30:2", any: [hlw], only: breathing_abnormal}
+  - {id: waerme, short: Wärme, label: "Wärmeerhalt (Decke, Isolation vom Boden)", any: [decke]}
+  - {id: funk, short: Funk, label: "Funkspruch an die Leitstelle", special: funk}
+
+full:
+  - {id: x, short: x, label: "x – Extreme Blutung", any: [blutung_pruefen], extra: {bleeding: [blutung_stillen]}}
+  - {id: a, short: A, label: "A – Airway (Atemwege beurteilt)", any: [atemwege_freimachen, atemkontrolle, atmung_fragen]}
+  - {id: b, short: B, label: "B – Breathing (Atemfrequenz, SpO2, Auskultation)", all: [af_zaehlen, spo2, auskultation]}
+  - {id: c, short: C, label: "C – Circulation (Puls, Blutdruck, Rekap-Zeit)", all: [puls, rr, rekap]}
+  - {id: d, short: D, label: "D – Disability (Bewusstsein/Orientierung, Pupillen, Blutzucker)", all: [[gcs, orientierung], pupillen, bz]}
+  - id: e
+    short: E
+    label: E – Exposure/Environment (SAMPLE, Ganzkörperuntersuchung, Wärmeerhalt)
+    all: [[sample_allergie, sample_medikamente, sample_vorerkrankung, sample_mahlzeit, sample], bodycheck, decke]
+  - id: sample
+    short: SAMPLE
+    label: SAMPLE vollständig (Allergien, Medikamente, Vorerkrankungen, letzte Mahlzeit, Ereignis)
+    min: 4
+    of: [sample_allergie, sample_medikamente, sample_vorerkrankung, sample_mahlzeit, was_passiert]
+  - {id: reevaluation, short: Reevaluation, label: "Reevaluation (erneut beurteilt bzw. wieder bei A begonnen)", special: reevaluation}
+  - {id: uebergabe, short: Übergabe, label: "Strukturierte Übergabe an den Rettungsdienst", any: [uebergabe]}
+
+# Referenz für die KI-Bewertung, zusammengefasst nach dem DRK-SANmemo (2024).
+# Bewusst nur als knappe Checkliste, nicht als Abschrift des Memos.
+reference: |
+  1. MINUTE
+  - Sicherheit: akute Gefahr für Einsatzkräfte, Betroffene, andere Personen?
+  - Lage: Zahl der Betroffenen, Hergang erkennbar, Umfeld (Gelände, Wetter, Licht, Uhrzeit)?
+  - Bedrohliche Blutung? Dann sofort Blutstillung (x).
+  - Vorstellen und ansprechen (Name/Organisation, "Was ist passiert?").
+  - Patient:in bewusstlos: Atemwege frei machen, Atemkontrolle (sehen, hören, fühlen, max. 10 s). Atmung nicht normal: HLW und AED. Atmung eindeutig normal: Seitenlage. Wärmeerhalt (Decke/Rettungsdecke) immer, unabhängig von der Außentemperatur (bei Kälte friert die Person nur schneller). Ggf. Guedel/Wendl, Absaugbereitschaft.
+  - Patient:in wach: Schnellcheck. Trauma: ggf. manuelle HWS-Immobilisierung. A/B: "Bekommen Sie gut Luft?", Schmerzen beim Atmen, Zyanose. C: Hautfarbe, Puls (nicht zählen), Rekap-Zeit, bei Trauma innere Blutung (Bauch, Becken, Oberschenkel abtasten). D: angemessene Reaktion, Gemütslage. E: Verletzungsmechanismus, Umfeld, Frieren. Friert die Person, bekommt sie sofort eine Decke (Wärmeerhalt); Nachfragen allein reicht nicht.
+  - Teambesprechung/Rückmeldung: Lage, Verdachtsdiagnose (A/B/C/D/E-Problem), Notarzt/Notärztin nötig?
+  - Funkspruch/Statusmeldung an die Leitstelle (Abschluss der 1. Minute, Praxis DRK Hamburg):
+    1. Anruf mit beiden Rufnamen: "<Leitstelle> von <eigener Rufname>, kommen." Dann auf "Hier <Leitstelle>" warten.
+    2. Meldung kurz und strukturiert: Patient (Geschlecht, Alter ungefähr), Ereignis, Verdachtsdiagnose, Nachforderung (z. B. RTW und/oder NEF), Abschluss "kommen". Nachforderung muss zur Lage passen.
+    3. Die Leitstelle wiederholt die Nachforderung ("RTW NEF kommt, verstanden").
+    4. Abschluss: "<eigener Rufname> Ende."
+
+  ABCDE (jeweils "Immer richtig" plus Maßnahmen bei Problem)
+  A Airway: Trauma? Ggf. HWS-Stützkragen. Problem: Lagerung mit erhöhtem Oberkörper; Bolusaspiration: Rückenschläge, dann Oberbauchkompressionen; Schwellung Mund/Rachen: kühlen.
+  B Breathing: Atmung beurteilen, Pulsoximetrie (mind. 94 %), O2-Gabe erwägen. Problem: Oberkörper hoch, Atemanweisungen, gestaute Halsvenen/Schockzeichen (Spannungspneumothorax?), Brustkorb-/Lungenverletzung: ggf. Lagerung auf verletzte Seite.
+  C Circulation: Puls (80–100/min), Rekap-Zeit (max. 2 s), Blutdruck (ca. 120/80 mmHg). Problem: Ursache bekämpfen; Herzprobleme: Oberkörper hoch; akutes Abdomen: Beine angezogen; Volumenmangel: Schocklage.
+  D Disability: Bewusstsein (wach / Ansprache / Schmerzreiz / bewusstlos), Orientierung zu Person, Situation, Ort, Zeit. Problem: Lagerung i. d. R. Oberkörper hoch; Schlaganfall? FAST (Face, Arm, Speech, Time).
+  E Exposure/Environment: SAMPLE-Anamnese, Ganzkörperuntersuchung inkl. DMS, Wärmeerhaltung (immer richtig, unabhängig von der Außentemperatur; Isolation vom Boden). Problem: Schaufeltrage/Spineboard/Vakuummatratze; Extremitätenverletzung: Immobilisieren (Schiene); Wunde: steriler Verband.
+  Nach Abschluss von E wieder bei A beginnen: Diagnostik und Maßnahmen fortführen (Reevaluation).

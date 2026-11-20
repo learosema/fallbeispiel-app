@@ -1,0 +1,126 @@
+id: mil-pyro-brand
+group: Millerntor (FC St. Pauli)
+letter: E
+title: "Funkenflug: Verbrennungen"
+teaser: Brandwunden an Arm und Gesicht
+dispatch: "Funkmeldung Millerntor: Besucher hat sich bei Pyrotechnik verbrannt, hält sich Gesicht und Arm."
+debrief_notes: >
+  Leon (22), Verbrennung 2. Grades linker Unterarm (4–5 % KOF), angeschmolzene Jacke, Funkenpartikel im linken Auge, leichte Heiserkeit.
+  Erwartet: Eigenschutz (Rest-Pyro), angeschmolzene Kleidung nicht abreißen, kühlen (lauwarm, zeitlich begrenzt, Auskühlung bei 5 °C beachten),
+  steriler Verband, Auge nicht reiben, vorsichtig spülen/abdecken, Sehen erfragen, Heiserkeit beobachten, Wärmeerhalt, SAMPLE inkl. Tetanus,
+  Rettungsdienst/Augenabklärung.
+
+conscious: true
+trauma: true
+request: {required: [RTW]}
+skip: [hws]
+
+responses:
+  lage_pruefen:
+    - Befund: "Stehplatzbereich, ca. 5 °C, Rauchreste, Geruch nach verbranntem Kunststoff. Ein Rest der Fackel liegt noch qualmend am Boden. Gedränge, Ordner sichern ab. Ein Betroffener sitzt am Rand, sein Freund Finn ist dabei."
+  aus_gefahr_bringen:
+    - Kollege: (schiebt den heißen Fackelrest mit dem Fuß beiseite und bringt Leon ein Stück weg)
+  platz_schaffen:
+    - Umstehende: (die Ordner halten die Leute zurück)
+  blutung_pruefen:
+    - Befund: Keine Blutung.
+  vorstellen:
+    - Patient: Scheiße, mein Auge! Mein Arm!
+  was_passiert:
+    - Umstehende: Die Fackel ist ihm aus der Hand gerutscht, die Funken sind voll auf Arm und Gesicht.
+  beschwerden_fragen:
+    - Patient: Das Auge brennt total, ich seh links kaum was. Und der Arm tut so weh.
+  beruhigen:
+    - Patient: (atmet durch) Okay …
+  kleidung_belassen:
+    - Kollege: (schneidet den Ärmel um die angeschmolzene Stelle herum ab und lässt das Material auf der Haut)
+  nasse_kleidung:
+    - Patient: Aaah! Nicht die Jacke, das klebt fest!
+    - Befund: Die Jacke ist am Ärmel angeschmolzen und klebt an der Haut.
+  kuehlen:
+    - Befund: Der Arm wird mit lauwarmem Wasser gekühlt, die Schmerzen lassen etwas nach.
+    - Patient: Das tut gut.
+  wunde_versorgen:
+    - Kollege: (legt eine sterile Brandwundenauflage auf)
+  auge:
+    - Befund: Linkes Auge gerötet, tränend, Lid zugekniffen, Fremdkörpergefühl. Er sieht links verschwommen.
+  atemwege_freimachen:
+    - Befund: Atemwege frei, leichte Heiserkeit, kein Ruß in Mund und Nase.
+  atmung_fragen:
+    - Patient: Luft geht. Bin nur ein bisschen heiser.
+  schmerz_atmen:
+    - Patient: Nein.
+  zyanose:
+    - Befund: Keine Zyanose.
+  af_zaehlen:
+    - Befund: Atemfrequenz 20.
+  spo2:
+    - Befund: SpO2 98 %.
+  auskultation:
+    - Befund: Lunge frei.
+  hautfarbe:
+    - Befund: Haut warm.
+  puls:
+    - Befund: Puls 108.
+  rekap:
+    - Befund: Rekap-Zeit 2 Sekunden.
+  rr:
+    - Befund: RR 140/85.
+  trauma_check:
+    - Befund: Bauch, Becken, Oberschenkel unauffällig.
+  gcs:
+    - Befund: Wach, GCS 15, Schmerz 8 von 10.
+  orientierung:
+    - Patient: Leon. Millerntor. Samstag.
+  pupillen:
+    - Befund: Rechte Pupille reagiert prompt, links durch das zugekniffene Lid schwer zu beurteilen.
+  bz:
+    - Befund: BZ 110 mg/dl.
+  frieren_fragen:
+    - when: {kuehlen: true}
+      say:
+        - Patient: Ja, jetzt wird mir kalt.
+    - say:
+        - Patient: Geht.
+  decke:
+    - Kollege: (legt ihm die Rettungsdecke um)
+  temperatur:
+    - Befund: Temperatur 36,4 °C.
+  bodycheck:
+    - Befund: Linker Unterarm gerötet mit Blasen und nässend, Funkenlöcher in der Jacke, Kinn leicht verbrannt, Augenbrauen angesengt. Sonst keine Verletzungen.
+  dms:
+    - Patient: Finger gehen, spür ich alles.
+  sample_allergie:
+    - Patient: Nö.
+  sample_medikamente:
+    - Patient: Keine.
+  sample_vorerkrankung:
+    - Patient: Nichts. Tetanus? Keine Ahnung, wann.
+  sample_mahlzeit:
+    - Patient: Vor zwei Stunden. Drei Bier.
+  aufklaeren:
+    - Patient: Wegen dem Auge muss ich ins Krankenhaus? Okay.
+  reevaluation:
+    - Befund: Heiserkeit unverändert, Atmung unauffällig, Schmerzen etwas weniger.
+
+events:
+  - at: 120
+    when: {kuehlen: true, decke: false}
+    say:
+      - Befund: Leon zittert, das Kühlen bei 5 °C lässt ihn auskühlen.
+
+key_actions:
+  - label: Angeschmolzene Kleidung belassen (nicht abreißen)
+    any: [kleidung_belassen]
+  - label: Kühlen (lauwarm, zeitlich begrenzt)
+    any: [kuehlen]
+    critical: true
+  - label: Steriler Verband
+    any: [wunde_versorgen]
+  - label: Auge versorgt (nicht reiben, spülen/abdecken)
+    any: [auge]
+    critical: true
+  - label: Wärmeerhalt trotz Kühlung
+    any: [decke]
+  - label: Heiserkeit beobachtet / Reevaluation
+    any: [reevaluation, atemwege_freimachen]

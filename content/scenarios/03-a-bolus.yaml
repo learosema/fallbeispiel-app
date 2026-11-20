@@ -1,0 +1,199 @@
+id: a-bolus
+letter: A
+title: Bolusgeschehen im Restaurant
+teaser: Atemwegsverlegung
+dispatch: "Einsatzmeldung: Restaurant, Mann (62) hat sich beim Essen verschluckt, kann nicht mehr richtig atmen."
+debrief_notes: >
+  Herr Weber (62) hat ein Stück Steak verschluckt: inkomplette Verlegung, Husten ineffektiv. Erwartet: Husten beurteilen/dazu auffordern,
+  5 Rückenschläge, dann 5 Oberbauchkompressionen im Wechsel. Ohne Hilfe wird er zyanotisch, dann bewusstlos (dann HLW).
+  Auch bei Erfolg: Nachkontrolle und Transport (Verletzungen durch Heimlich möglich).
+
+conscious: true
+trauma: false
+request: {required: [RTW], optional: [NEF]}
+state: {geloest: false}
+skip: [hws]
+
+responses:
+  lage_pruefen:
+    - Befund: Restaurant, gut beleuchtet, viele Gäste, keine Gefahr. Ein Betroffener am Tisch, Umstehende drängen sich heran.
+  blutung_pruefen:
+    - Befund: Keine Blutung.
+  vorstellen:
+    - when: {geloest: false}
+      say:
+        - Befund: (Herr Weber greift sich an den Hals, würgt, kann nicht antworten)
+    - say:
+        - Patient: (heiser) Danke … danke.
+  was_passiert:
+    - Umstehende: Er hat Steak gegessen und plötzlich angefangen zu würgen. Seitdem kriegt er kaum Luft!
+  laut_ansprechen:
+    - when: {bewusstlos: true}
+      say:
+        - Befund: Keine Reaktion.
+    - say:
+        - Befund: (nickt panisch, zeigt auf seinen Hals)
+  beschwerden_fragen:
+    - when: {geloest: false}
+      say:
+        - Befund: (zeigt auf den Hals, pfeifendes Atemgeräusch)
+    - say:
+        - Patient: Der Hals tut weh … und der Bauch ein bisschen.
+  husten_auffordern:
+    - when: {geloest: false}
+      say:
+        - Befund: Er hustet schwach, ohne Effekt. Pfeifendes Atemgeräusch.
+    - say:
+        - Patient: (hustet kräftig) Geht schon besser.
+  rueckenschlaege:
+    - when: {heimlich: true, geloest: false}
+      say:
+        - Befund: Beim dritten Schlag fliegt ein Stück Fleisch heraus. Er hustet kräftig und atmet wieder.
+      set: {geloest: true}
+    - when: {geloest: false}
+      say:
+        - Befund: Nach fünf Schlägen zwischen die Schulterblätter löst sich nichts, er ringt weiter nach Luft.
+    - say:
+        - Befund: Nicht mehr nötig, er atmet frei.
+  heimlich:
+    - when: {rueckenschlaege: true, geloest: false}
+      say:
+        - Befund: Beim zweiten Oberbauchstoß fliegt ein Stück Fleisch heraus. Er hustet kräftig und atmet wieder.
+      set: {geloest: true}
+    - when: {geloest: false}
+      say:
+        - Befund: Nach fünf Oberbauchkompressionen löst sich nichts, er wird blasser.
+    - say:
+        - Befund: Nicht mehr nötig, er atmet frei.
+  atemwege_freimachen:
+    - when: {geloest: false}
+      say:
+        - Befund: Im Mund ist nichts zu sehen, der Fremdkörper sitzt tiefer.
+    - say:
+        - Befund: Atemwege frei, im Mund Speisereste.
+  atmung_fragen:
+    - when: {geloest: false}
+      say:
+        - Befund: (schüttelt den Kopf, pfeifende Atmung)
+    - say:
+        - Patient: Jetzt geht's wieder.
+  schmerz_atmen:
+    - when: {geloest: false}
+      say:
+        - Befund: (kann nicht antworten)
+    - say:
+        - Patient: Nur der Hals kratzt.
+  zyanose:
+    - when: {geloest: false}
+      say:
+        - Befund: Lippen bläulich.
+    - say:
+        - Befund: Lippen werden wieder rosig.
+  af_zaehlen:
+    - when: {geloest: false}
+      say:
+        - Befund: Angestrengte, pfeifende Atmung, ca. 30/min.
+    - say:
+        - Befund: Atemfrequenz 22.
+  spo2:
+    - when: {geloest: false}
+      say:
+        - Befund: SpO2 84 %.
+    - say:
+        - Befund: SpO2 92 %, steigt auf 97 %.
+  auskultation:
+    - when: {geloest: false}
+      say:
+        - Befund: Stridor, kaum Luftbewegung.
+    - say:
+        - Befund: Atemgeräusch beidseits frei.
+  hautfarbe:
+    - when: {geloest: false}
+      say:
+        - Befund: Gesicht rot-bläulich, schweißig.
+    - say:
+        - Befund: Haut leicht gerötet, warm.
+  puls:
+    - Befund: Puls 110, kräftig.
+  rekap:
+    - Befund: Rekap-Zeit 2 Sekunden.
+  rr:
+    - Befund: RR 150/90.
+  gcs:
+    - when: {bewusstlos: true}
+      say:
+        - Befund: Bewusstlos, keine Reaktion.
+    - say:
+        - Befund: Wach, GCS 15, panisch.
+  orientierung:
+    - when: {geloest: false}
+      say:
+        - Befund: (kann nicht sprechen, nickt)
+    - say:
+        - Patient: Weber, Rolf Weber. Im Restaurant.
+  pupillen:
+    - Befund: Pupillen seitengleich, reagieren prompt.
+  bz:
+    - Befund: BZ 120 mg/dl.
+  oberkoerper_hoch:
+    - Befund: (sitzt aufrecht, nach vorne gebeugt)
+  sauerstoff:
+    - Kollege: (legt die Sauerstoffmaske an)
+  frieren_fragen:
+    - Patient: (schüttelt den Kopf)
+  decke:
+    - Kollege: (legt ihm eine Decke über die Schultern)
+  temperatur:
+    - Befund: Temperatur 36,8 °C.
+  bodycheck:
+    - Befund: Sonst unauffällig. Druckschmerz im Oberbauch, wenn Oberbauchkompressionen erfolgt sind.
+  sample_allergie:
+    - Patient: Keine.
+  sample_medikamente:
+    - Patient: Einen Betablocker.
+  sample_vorerkrankung:
+    - Patient: Bluthochdruck.
+  sample_mahlzeit:
+    - Patient: Das Steak, gerade eben.
+  aufklaeren:
+    - Patient: Ins Krankenhaus? Es geht doch wieder … na gut, wenn Sie das sagen.
+  atemkontrolle:
+    - when: {bewusstlos: true}
+      say:
+        - Befund: Keine normale Atmung.
+    - when: {geloest: false}
+      say:
+        - Befund: Pfeifende, angestrengte Atmung.
+    - say:
+        - Befund: Atmung frei.
+  hlw:
+    - when: {bewusstlos: true}
+      say:
+        - Befund: (Herzdruckmassage läuft) Beim Kontrollblick in den Mund ist das Fleischstück sichtbar und lässt sich entfernen.
+      set: {geloest: true}
+    - say:
+        - Kollege: Er ist doch wach.
+
+events:
+  - at: 40
+    when: {geloest: false}
+    say:
+      - Befund: Herr Weber wird zunehmend blau, der Husten wird schwächer.
+  - at: 90
+    when: {geloest: false}
+    say:
+      - Befund: Er sackt zusammen und reagiert nicht mehr.
+    set: {bewusstlos: true}
+
+key_actions:
+  - label: Husten beurteilt bzw. zum Husten aufgefordert
+    any: [husten_auffordern]
+  - label: Rückenschläge
+    any: [rueckenschlaege]
+    critical: true
+    within: 60
+  - label: Oberbauchkompressionen im Wechsel
+    any: [heimlich]
+    critical: true
+  - label: Nachkontrolle und Transport trotz Erfolg
+    any: [aufklaeren, nachforderung]

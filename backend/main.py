@@ -1,51 +1,61 @@
-"""FastAPI-Backend: liefert das Frontend aus public/ und beantwortet /api/chat mit einem lokalen LLM.
+"""FastAPI-Backend: liefert das Frontend aus public/ und spielt die Fallbeispiele.
 
-Umgebungsvariablen:
-  LLM_MODEL        Hugging-Face-Modell-ID (Standard: Qwen/Qwen2.5-1.5B-Instruct)
-  LLM_DEVICE       cpu | cuda (Standard: automatisch)
-  LLM_TEMPERATURE  Standard: 0.7
-  ACCESS_CODE      optional; der Browser sendet ihn als Header x-access-code
-  PRELOAD_MODEL    "0" lädt das Modell erst bei der ersten Anfrage (Standard: beim Start)
+  GET  /api/scenarios   Liste der Fälle (ohne verborgene Fakten)
+  POST /api/turn        Protokoll → Antwort der Simulation auf die letzte Äußerung
+  POST /api/debrief     Protokoll → regelbasierte Checkliste
+  POST /api/feedback    Protokoll → KI-Bewertung (Algorithmus + Patientensicht)
+
+Umgebungsvariablen: siehe README.md (ACCESS_CODE, INTENT_*, JUDGE_*, LLM_*).
 """
+from __future__ import annotations
+
 import hmac
 import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Literal
 
-from fastapi import FastAPI, Header
-from fastapi.exceptions import RequestValidationError
+from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.concurrency import run_in_threadpool
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from . import llm
+from . import classifier, content, engine, evaluate, judge
 
-MAX_MESSAGES = 80
-MAX_TOTAL_CHARS = 80_000
-MAX_TOKENS_CAP = 1200
 PUBLIC_DIR = Path(__file__).resolve().parent.parent / "public"
+NO_STORE = {"Cache-Control": "no-store"}
 
 
-class Message(BaseModel):
-    role: Literal["system", "user", "assistant"]
-    content: str
+class Utterance(BaseModel):
+    t: float = Field(ge=0, le=24 * 3600)
+    text: str = Field(min_length=1, max_length=1000)
 
 
-class ChatRequest(BaseModel):
-    messages: list[Message] = Field(min_length=1, max_length=MAX_MESSAGES)
-    max_tokens: int | None = None
+class RunRequest(BaseModel):
+    scenario: str = Field(max_length=100)
+    mode: Literal["minute", "full"] = "minute"
+    callsign: str = Field(default="EVT1", min_length=1, max_length=40)
+    dispatcher: str = Field(default="RotkreuzHamburg", min_length=1, max_length=60)
+    log: list[Utterance] = Field(min_length=1, max_length=300)
 
 
 def error(msg: str, status: int) -> JSONResponse:
-    return JSONResponse({"error": msg}, status_code=status, headers={"Cache-Control": "no-store"})
+    return JSONResponse({"error": msg}, status_code=status, headers=NO_STORE)
+
+
+def check_access(x_access_code: str = Header(default="")) -> None:
+    code = os.environ.get("ACCESS_CODE", "")
+    if code and not hmac.compare_digest(x_access_code.encode(), code.encode()):
+        raise HTTPException(401, "Zugangscode fehlt oder ist falsch.")
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
+    content.scenarios()  # Inhalte beim Start prüfen – Fehler sollen sofort auffallen
     if os.environ.get("PRELOAD_MODEL", "1") != "0":
-        await run_in_threadpool(llm.load)
+        await run_in_threadpool(classifier.get)
     yield
 
 
@@ -57,21 +67,51 @@ async def _invalid(_req, _exc):
     return error("Ungültige Anfrage.", 400)
 
 
-@app.post("/api/chat")
-async def chat(req: ChatRequest, x_access_code: str = Header(default="")):
-    code = os.environ.get("ACCESS_CODE", "")
-    if code and not hmac.compare_digest(x_access_code.encode(), code.encode()):
-        return error("Zugangscode fehlt oder ist falsch.", 401)
+@app.exception_handler(HTTPException)
+async def _http(_req, exc: HTTPException):
+    return error(str(exc.detail), exc.status_code)
 
-    if sum(len(m.content) for m in req.messages) > MAX_TOTAL_CHARS:
-        return error("Anfrage zu groß.", 413)
 
-    max_tokens = min(max(req.max_tokens or 300, 1), MAX_TOKENS_CAP)
+def _run(req: RunRequest) -> engine.Run:
+    scenario = content.scenarios().get(req.scenario)
+    if scenario is None:
+        raise HTTPException(404, "Unbekannter Fall.")
+    settings = engine.Settings(callsign=req.callsign.strip(), dispatcher=req.dispatcher.strip())
+    return engine.replay(scenario, req.mode, settings, [u.model_dump() for u in req.log], classifier.get())
+
+
+@app.get("/api/scenarios")
+async def list_scenarios():
+    return JSONResponse([s.meta for s in content.scenarios().values()], headers={"Cache-Control": "no-cache"})
+
+
+@app.post("/api/turn", dependencies=[Depends(check_access)])
+async def turn(req: RunRequest):
+    run = await run_in_threadpool(_run, req)
+    last = run.turns[-1]
+    return JSONResponse({
+        "lines": [{"who": l.who, "text": l.text} for l in last.lines],
+        "ended": run.ended,
+        "intents": [h.intent for h in last.hits],
+    }, headers=NO_STORE)
+
+
+@app.post("/api/debrief", dependencies=[Depends(check_access)])
+async def debrief(req: RunRequest):
+    run = await run_in_threadpool(_run, req)
+    result = evaluate.evaluate(run)
+    return JSONResponse({"result": result, "text": evaluate.as_text(result)}, headers=NO_STORE)
+
+
+@app.post("/api/feedback", dependencies=[Depends(check_access)])
+async def feedback(req: RunRequest):
+    run = await run_in_threadpool(_run, req)
+    result = evaluate.evaluate(run)
     try:
-        content = await run_in_threadpool(llm.generate, [m.model_dump() for m in req.messages], max_tokens)
-    except Exception as exc:  # noqa: BLE001
-        return error(f"Lokales Modell fehlgeschlagen: {exc}", 500)
-    return JSONResponse({"content": content}, headers={"Cache-Control": "no-store"})
+        text = await run_in_threadpool(judge.judge, run, result)
+    except judge.JudgeError as exc:
+        return error(f"KI-Bewertung fehlgeschlagen: {exc}", 502)
+    return JSONResponse({"text": text or judge.fallback(result), "ai": text is not None, "provider": judge.provider()}, headers=NO_STORE)
 
 
 @app.get("/sw.js", include_in_schema=False)

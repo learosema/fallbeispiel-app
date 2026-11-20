@@ -1,0 +1,121 @@
+id: c-gib
+letter: C
+title: Schwäche und schwarzer Stuhl
+teaser: Hypovolämer Schock
+dispatch: "Einsatzmeldung: Wohnung, 71-jähriger Mann, Schwindel und Schwäche, kurzzeitig ohnmächtig gewesen."
+debrief_notes: >
+  Herr Krüger (71): Teerstuhl, Kaffeesatzerbrechen, ASS + Ibuprofen → obere GI-Blutung, hypovolämer Schock.
+  Erwartet: Schockerkennung, Flachlagerung/Schocklage, nicht aufstehen lassen, Wärmeerhalt, O2 nach Bedarf,
+  Medikamente erfragen, Notarzt/zügiger Transport, Reevaluation.
+
+conscious: true
+trauma: false
+request: {required: [RTW, NEF]}
+skip: [hws]
+
+responses:
+  lage_pruefen:
+    - Befund: Wohnung, hell, keine Gefahr. Herr Krüger liegt im Flur vor dem Bad, seine Ehefrau ist bei ihm.
+  blutung_pruefen:
+    - Befund: Keine äußere Blutung.
+  vorstellen:
+    - Patient: (leise) Hallo …
+  was_passiert:
+    - Umstehende: Er war im Bad und ist plötzlich umgekippt. Seit zwei Tagen ist sein Stuhl ganz schwarz, und heute hat er so was Braunes erbrochen, wie Kaffeesatz.
+  beschwerden_fragen:
+    - Patient: Mir ist so schwindlig … und schwach. Der Bauch drückt oben ein bisschen.
+  beruhigen:
+    - Patient: Danke … ich bin so müde.
+  atemwege_freimachen:
+    - Befund: Atemwege frei.
+  atmung_fragen:
+    - Patient: Luft geht.
+  schmerz_atmen:
+    - Patient: Nein.
+  zyanose:
+    - Befund: Keine Zyanose, Lippen blass.
+  af_zaehlen:
+    - Befund: Atemfrequenz 22.
+  spo2:
+    - Befund: SpO2 95 %.
+  auskultation:
+    - Befund: Lunge beidseits frei.
+  halsvenen:
+    - Befund: Halsvenen kollabiert.
+  hautfarbe:
+    - Befund: Haut kalt, blass, feucht.
+  puls:
+    - Befund: Puls flach und schnell, ca. 116.
+  rekap:
+    - Befund: Rekap-Zeit 4 Sekunden.
+  rr:
+    - when: {schocklage: false}
+      say:
+        - Befund: RR 90/55.
+    - say:
+        - Befund: RR 100/60.
+  trauma_check:
+    - Befund: Bauch weich, leichter Druckschmerz im Oberbauch. Becken und Oberschenkel unauffällig.
+  gcs:
+    - Befund: Wach, GCS 15, etwas matt und verlangsamt.
+  orientierung:
+    - Patient: Krüger … bei mir zu Hause.
+  pupillen:
+    - Befund: Pupillen seitengleich, reagieren prompt.
+  bz:
+    - Befund: BZ 118 mg/dl.
+  schocklage:
+    - Befund: (liegt flach, Beine erhöht) Er sagt, der Schwindel wird etwas besser.
+  nicht_aufstehen:
+    - Patient: Ich wollte eigentlich ins Bett …
+  oberkoerper_hoch:
+    - Patient: Oh … mir wird ganz schwarz vor Augen.
+    - Befund: Er wird beim Aufrichten noch blasser.
+  sauerstoff:
+    - Kollege: (legt die Sauerstoffmaske an)
+  frieren_fragen:
+    - Patient: Ja, mir ist kalt.
+  decke:
+    - Kollege: (deckt ihn zu)
+    - Patient: Danke.
+  temperatur:
+    - Befund: Temperatur 36,1 °C.
+  bodycheck:
+    - Befund: Keine Verletzungen vom Sturz sichtbar.
+  sample_allergie:
+    - Patient: Penicillin.
+  sample_medikamente:
+    - Umstehende: Aspirin 100, Blutdrucktabletten, und seit Wochen Ibuprofen wegen dem Rücken.
+  sample_vorerkrankung:
+    - Umstehende: Bluthochdruck. Und vor Jahren hatte er mal ein Magengeschwür.
+  sample_mahlzeit:
+    - Patient: Gestern Abend.
+  reevaluation:
+    - when: {schocklage: true}
+      say:
+        - Befund: Puls 110, RR 100/60, er wirkt etwas wacher.
+    - say:
+        - Befund: Puls 120, RR 85/50, er wird schläfriger.
+
+events:
+  - at: 90
+    when: {schocklage: false}
+    say:
+      - Patient: Ich will mich mal hinsetzen …
+  - at: 150
+    when: {schocklage: false}
+    say:
+      - Befund: Er wird zunehmend schläfrig, der Puls ist kaum noch tastbar.
+
+key_actions:
+  - label: Schock erkannt (Puls, Rekap, Haut)
+    all: [puls, rekap, hautfarbe]
+  - label: Flachlagerung / Schocklage
+    any: [schocklage]
+    critical: true
+  - label: Nicht aufstehen lassen
+    any: [nicht_aufstehen, schocklage]
+  - label: Wärmeerhalt
+    any: [decke]
+  - label: Medikamente (Blutverdünner, Schmerzmittel) erfragt
+    any: [sample_medikamente]

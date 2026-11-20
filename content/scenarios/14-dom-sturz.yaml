@@ -1,0 +1,144 @@
+id: dom-sturz-fahrgeschaeft
+group: Hamburger DOM
+letter: B
+title: Sturz aus dem Fahrgeschäft
+teaser: Polytrauma, du bist zuerst da
+dispatch: "Funkmeldung DOM: Person aus einem Fahrgeschäft gestürzt, liegt am Boden, nicht ansprechbar wie vorher. Fahrgeschäft wurde per Not-Aus gestoppt. Rettungsdienst ist alarmiert, ihr seid als Erste da."
+debrief_notes: >
+  Marco (31), Sturz aus 4 m: rechter Thorax (abgeschwächtes Atemgeräusch, ab Minute 6 gestaute Halsvenen – Spannungspneumothorax),
+  Becken, linker Oberschenkel, Kopfplatzwunde. Erwartet: Sicherheit/Not-Aus bestätigen, Nachforderung inkl. Notarzt bestätigen,
+  manuelle HWS-Stabilisierung, B-Problem erkennen, O2, Pulsoxi, Schockzeichen, Trauma-Check (Becken nur einmal vorsichtig),
+  Wärmeerhalt, schonende Rettung, Reevaluation, strukturierte Übergabe.
+
+conscious: true
+trauma: true
+request: {required: [RTW, NEF]}
+state: {gestaut: false}
+
+responses:
+  lage_pruefen:
+    - Befund: "DOM, Abend, dunkel, grelle Lichter, große Menschentraube. Das Fahrgeschäft ist per Not-Aus gestoppt, der Bereich um die Gondeln ist noch nicht freigegeben. Ein Betroffener liegt auf dem Pflaster neben der Absperrung, ca. 4 m tief gestürzt. Ein Mitarbeiter des Betreibers und sein Freund Tim sind da."
+    - Umstehende: "(Mitarbeiter) Not-Aus ist drin, die Anlage steht. Ihr könnt hin."
+  platz_schaffen:
+    - Umstehende: (die Menge weicht zurück)
+  blutung_pruefen:
+    - Befund: Platzwunde rechts am Kopf, blutet mäßig. Keine bedrohliche Blutung.
+  vorstellen:
+    - Patient: (stöhnt) Hilfe …
+  was_passiert:
+    - Umstehende: Er ist aus der Gondel gefallen, bestimmt vier Meter, auf die rechte Seite!
+  beschwerden_fragen:
+    - Patient: Die Brust rechts … das Becken … mein Bein!
+  hws_manuell:
+    - Kollege: (übernimmt die manuelle HWS-Stabilisierung)
+  beruhigen:
+    - Patient: (nickt, atmet schnell)
+  atemwege_freimachen:
+    - Befund: Atemwege frei, er spricht in kurzen Sätzen.
+  atmung_fragen:
+    - Patient: Schlecht … Luft …
+  schmerz_atmen:
+    - Patient: Ja! Rechts … beim Einatmen …
+  zyanose:
+    - Befund: Lippen leicht bläulich.
+  af_zaehlen:
+    - Befund: Atemfrequenz 30, flach.
+  spo2:
+    - when: {sauerstoff: false}
+      say:
+        - Befund: SpO2 88 %.
+    - say:
+        - Befund: SpO2 93 % unter Sauerstoff.
+  auskultation:
+    - Befund: Rechts deutlich abgeschwächtes Atemgeräusch. Prellmarke am rechten Brustkorb.
+  halsvenen:
+    - when: {gestaut: false}
+      say:
+        - Befund: Halsvenen nicht gestaut.
+    - say:
+        - Befund: Halsvenen deutlich gestaut.
+  sauerstoff:
+    - Kollege: (legt die Sauerstoffmaske an)
+  hautfarbe:
+    - Befund: Haut blass, kaltschweißig.
+  puls:
+    - Befund: Puls schnell und schwach, ca. 126.
+  rekap:
+    - Befund: Rekap-Zeit 4 Sekunden.
+  rr:
+    - when: {gestaut: false}
+      say:
+        - Befund: RR 95/60.
+    - say:
+        - Befund: RR 85/55, fallend.
+  trauma_check:
+    - Befund: Bauch weich, aber druckschmerzhaft. Becken druckschmerzhaft (nur einmal vorsichtig prüfen!). Linker Oberschenkel geschwollen, verformt und verkürzt.
+  gcs:
+    - Befund: GCS 14, orientiert, kurze Gedächtnislücke.
+  orientierung:
+    - Patient: Marco … DOM … ich weiß nicht mehr, wie ich runtergefallen bin.
+  pupillen:
+    - Befund: Pupillen isokor, reagieren prompt.
+  bz:
+    - Befund: BZ 118 mg/dl.
+  dms:
+    - Patient: Im linken Fuß spür ich was … bewegen tut höllisch weh.
+  frieren_fragen:
+    - Patient: Kalt …
+  decke:
+    - Kollege: (deckt ihn mit der Rettungsdecke zu)
+  temperatur:
+    - Befund: Temperatur 35,9 °C.
+  bodycheck:
+    - Befund: Platzwunde am Kopf rechts, Prellungen, linker Oberschenkel verformt. Durchnässt vom kalten Boden (8 °C).
+  immobilisieren:
+    - Kollege: (holt Vakuummatratze und Schaufeltrage, bereitet den Stifneck vor)
+  wunde_versorgen:
+    - Kollege: (reicht eine Kompresse für die Kopfwunde)
+  schocklage:
+    - Patient: Aaah! Nicht bewegen!
+    - Befund: Beim Umlagern fällt der Blutdruck weiter.
+  sample_allergie:
+    - Patient: Penicillin.
+  sample_medikamente:
+    - Patient: Keine.
+  sample_vorerkrankung:
+    - Patient: Nichts.
+  sample_mahlzeit:
+    - Patient: Vor zwei Stunden. Ein Glühwein.
+  nachforderung:
+    - Kollege: (bestätigt über Funk RTW und Notarzt)
+  reevaluation:
+    - when: {gestaut: true}
+      say:
+        - Befund: Atemfrequenz 34, SpO2 fällt, Halsvenen gestaut, RR 85/55.
+    - say:
+        - Befund: Atemfrequenz 30, SpO2 wie zuvor, RR 95/60.
+
+events:
+  - at: 360
+    say:
+      - Befund: Marco wird unruhiger, die Atemnot nimmt zu.
+    set: {gestaut: true}
+  - at: 480
+    say:
+      - Rettungsdienst: Rettungsdienst und Notarzt sind da. Was habt ihr?
+    set: {rd_da: true}
+
+key_actions:
+  - label: Sicherheit (Not-Aus bestätigt) vor dem Betreten
+    any: [lage_pruefen]
+    critical: true
+  - label: Manuelle HWS-Stabilisierung
+    any: [hws_manuell]
+    critical: true
+  - label: B-Problem erkannt (Auskultation, SpO2, Halsvenen)
+    all: [auskultation, spo2, halsvenen]
+  - label: Sauerstoffgabe
+    any: [sauerstoff]
+  - label: Trauma-Check Bauch/Becken/Oberschenkel
+    any: [trauma_check]
+  - label: Wärmeerhalt
+    any: [decke]
+  - label: Strukturierte Übergabe
+    any: [uebergabe]
