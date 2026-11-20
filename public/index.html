@@ -16,65 +16,68 @@
 </head>
 <body>
   <header class="topbar">
-    <button id="backBtn" class="icon-btn" hidden aria-label="Zurück">←</button>
-    <h1 id="title">Fallbeispiel xABCDE</h1>
-    <button id="settingsBtn" class="icon-btn" aria-label="Einstellungen">⚙︎</button>
+    <button type="button" id="backBtn" class="icon-btn" hidden aria-label="Zurück zur Fallauswahl"><span aria-hidden="true">←</span></button>
+    <h1 id="title" tabindex="-1">Fallbeispiel xABCDE</h1>
+    <button type="button" id="settingsBtn" class="icon-btn" aria-label="Einstellungen" aria-haspopup="dialog"><span aria-hidden="true">⚙︎</span></button>
   </header>
 
   <main>
     <!-- Startseite -->
-    <section id="home">
+    <section id="home" aria-labelledby="homeHeading">
+      <h2 id="homeHeading" class="visually-hidden">Fall wählen</h2>
       <p class="lead">Wähle einen Fall. Du sprichst, die App antwortet als Patient:in, Kollege, Umstehende und Leitstelle. <a href="info.html">So funktioniert's</a></p>
-      <div class="mode" role="radiogroup" aria-label="Modus">
+      <fieldset class="mode">
+        <legend class="visually-hidden">Modus</legend>
         <label><input type="radio" name="mode" value="minute"><span>1. Minute</span></label>
         <label><input type="radio" name="mode" value="full"><span>Ganzer Fall</span></label>
+      </fieldset>
+      <div id="scenarioList" class="scenario-list" aria-busy="true">
+        <p class="lead">Fälle werden geladen …</p>
       </div>
-      <div id="scenarioList" class="scenario-list"></div>
     </section>
 
     <!-- Einsatz -->
-    <section id="session" hidden>
-      <div id="log" class="log" aria-live="polite"></div>
-      <div id="status" class="status"></div>
+    <section id="session" aria-label="Einsatz" hidden>
+      <ol id="log" class="log" role="log" aria-label="Einsatzverlauf"></ol>
+      <p id="status" class="status" role="status"></p>
       <form id="inputBar" class="input-bar" autocomplete="off">
-        <button type="button" id="micBtn" class="mic" aria-label="Sprechen">🎤</button>
+        <button type="button" id="micBtn" class="mic" aria-label="Sprechen" aria-pressed="false"><span aria-hidden="true">🎤</span></button>
+        <label for="textInput" class="visually-hidden">Was du sagst oder tust</label>
         <input id="textInput" type="text" placeholder="Sprich oder tippe …" enterkeyhint="send">
-        <button type="submit" id="sendBtn" class="send" aria-label="Senden">➤</button>
+        <button type="submit" id="sendBtn" class="send" aria-label="Senden"><span aria-hidden="true">➤</span></button>
       </form>
       <div class="actions">
         <label class="toggle"><input type="checkbox" id="handsfree"> Freisprechen</label>
-        <span id="timer" class="timer" aria-label="Zeit">⏱ 0:00</span>
+        <p class="timer"><span class="visually-hidden">Nettozeit:</span> <span aria-hidden="true">⏱</span> <span id="timer">0:00</span></p>
         <button type="button" id="debriefBtn" class="secondary">Auswertung</button>
       </div>
     </section>
   </main>
 
-  <dialog id="settings">
+  <dialog id="settings" aria-labelledby="settingsHeading">
     <form method="dialog" id="settingsForm">
-      <h2>Einstellungen</h2>
-      <label>Zugangscode
-        <input id="accessCode" type="password" autocomplete="off" autocapitalize="off" spellcheck="false">
-      </label>
+      <h2 id="settingsHeading">Einstellungen</h2>
       <label>Funkrufname (dein Team)
         <input id="callsign" type="text" placeholder="EVT1" autocapitalize="off" spellcheck="false">
       </label>
       <label>Leitstelle
         <input id="dispatcher" type="text" placeholder="RotkreuzHamburg" autocapitalize="off" spellcheck="false">
       </label>
-      <label>Sprechtempo <output id="rateOut">1.0</output>
+      <!-- Label und output getrennt: ein <label> gilt immer für das erste beschriftbare Element darin, und das wäre <output> -->
+      <div class="field">
+        <label for="rate">Sprechtempo</label> <output id="rateOut" for="rate">1.0</output>
         <input id="rate" type="range" min="0.7" max="1.5" step="0.05" value="1">
-      </label>
+      </div>
       <label class="toggle"><input type="checkbox" id="speak"> Antworten vorlesen</label>
-      <p class="hint">Der Zugangscode wird nur auf diesem Gerät gespeichert. Den LLM-Key kennt allein der Server.</p>
-      <menu>
+      <p id="loginInfo" class="hint" hidden></p>
+      <p class="hint">Patient, Kollege und Leitstelle spielt ein regelbasiertes System; die KI bewertet nur am Ende.</p>
+      <div class="dialog-actions">
         <button value="cancel" class="secondary">Abbrechen</button>
-        <button value="save" id="saveSettings">Speichern</button>
-      </menu>
+        <button value="save" id="saveSettings" class="primary">Speichern</button>
+      </div>
     </form>
   </dialog>
 
-  <script src="algorithm.js"></script>
-  <script src="scenarios.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

@@ -1,0 +1,187 @@
+id: dom-krampf
+group: Hamburger DOM
+letter: D
+title: Krampfanfall am Winter-DOM
+teaser: Anfall in der Warteschlange
+dispatch: "Funkmeldung DOM: Person hat bei den Autoscootern gekrampft, liegt am Boden, Umstehende sind bei ihr. Ihr seid der nächste Fußtrupp."
+debrief_notes: >
+  Jonas (24), bekannte Epilepsie, Medikament vergessen, Alkohol, Schlafmangel. Bei Eintreffen krampft er noch, danach postiktal.
+  Platzwunde am Hinterkopf. Erwartet: Gedränge sichern, Anfallsdauer erfassen, nichts in den Mund, Kopf schützen; danach Atemkontrolle,
+  Seitenlage bzw. Atemweg frei halten, Absaugbereitschaft, HWS bedenken (Kopfanprall), BZ, GCS/Orientierung, Wärmeerhalt (2 °C, nass),
+  Wunde versorgen, SAMPLER, Rettungsdienst nachfordern.
+
+conscious: true
+trauma: true
+request: {required: [RTW], optional: [NEF]}
+state: {krampft: true}
+
+responses:
+  atmung_beurteilen:
+    - when: {krampft: true}
+      say:
+        - Befund: Während des Krampfs unregelmäßige Atmung, Schaum vor dem Mund.
+    - say:
+        - Befund: Atmung ca. 22/min, anfangs schnarchend, Blut und Schaum im Mund.
+  alter_fragen:
+    - when: {krampft: true}
+      say:
+        - Umstehende: Vierundzwanzig!
+    - say:
+        - Patient: Vier… undzwanzig.
+  lage_pruefen:
+    - Befund: "Winter-DOM, 2 °C, nasses Pflaster, laute Musik, dichtes Gedränge, viele Schaulustige. Ein Betroffener am Boden, seine Freundin Lea und Fremde stehen daneben. Der Betroffene ist ein junger Mann, etwa Mitte zwanzig."
+  platz_schaffen:
+    - Umstehende: (die Leute weichen etwas zurück)
+  blutung_pruefen:
+    - when: {krampft: true}
+      say:
+        - Befund: Am Hinterkopf blutet es mäßig, keine bedrohliche Blutung.
+    - say:
+        - Befund: Platzwunde am Hinterkopf, blutet mäßig, keine bedrohliche Blutung.
+  vorstellen:
+    - when: {krampft: true}
+      say:
+        - Befund: (Jonas krampft am ganzen Körper und reagiert nicht)
+    - say:
+        - Patient: (schläfrig) Hm … was …?
+  was_passiert:
+    - Umstehende: Er ist einfach umgefallen und hat am ganzen Körper gezuckt! Er hat Epilepsie. Er ist mit dem Kopf auf den Boden geknallt.
+  krampf_dauer:
+    - Umstehende: Seit … ich weiß nicht, eine Minute vielleicht?
+  kopf_schuetzen:
+    - when: {krampft: true}
+      say:
+        - Kollege: (räumt Gegenstände weg und polstert den Kopf mit einer Jacke ab)
+    - say:
+        - Kollege: Der Anfall ist vorbei.
+  laut_ansprechen:
+    - when: {krampft: true}
+      say:
+        - Befund: (keine Reaktion, er krampft weiter)
+    - say:
+        - Befund: Er öffnet kurz die Augen, murmelt etwas Unverständliches.
+  atemwege_freimachen:
+    - when: {krampft: true}
+      say:
+        - Kollege: Jetzt nicht in den Mund greifen, er krampft noch!
+    - say:
+        - Befund: Blut und Schaum im Mund (Zungenbiss), anfangs schnarchend, nach Überstrecken frei.
+  atemkontrolle:
+    - when: {krampft: true}
+      say:
+        - Befund: Während des Krampfs unregelmäßige Atmung.
+    - say:
+        - Befund: Er atmet, ca. 22 pro Minute, anfangs schnarchend.
+  seitenlage:
+    - when: {krampft: true}
+      say:
+        - Kollege: Erst wenn der Krampf vorbei ist.
+    - say:
+        - Befund: Er liegt in stabiler Seitenlage, Speichel und etwas Blut laufen ab, die Atmung wird ruhiger.
+  absaugen:
+    - Kollege: (stellt die Absaugpumpe bereit)
+  hws_manuell:
+    - when: {krampft: true}
+      say:
+        - Kollege: Während des Krampfes geht das nicht, ich polstere den Kopf.
+    - say:
+        - Kollege: (stabilisiert den Kopf manuell)
+  beschwerden_fragen:
+    - when: {krampft: true}
+      say:
+        - Befund: (keine Antwort)
+    - say:
+        - Patient: Kopf … tut weh. Was ist passiert?
+  atmung_fragen:
+    - when: {krampft: true}
+      say:
+        - Befund: (keine Antwort)
+    - say:
+        - Patient: Ja … geht.
+  schmerz_atmen:
+    - Patient: Nö.
+  zyanose:
+    - Befund: Lippen anfangs leicht bläulich, werden rosig.
+  af_zaehlen:
+    - Befund: Atemfrequenz 22.
+  spo2:
+    - when: {seitenlage: false}
+      say:
+        - Befund: SpO2 91 %.
+    - say:
+        - Befund: SpO2 96 %.
+  auskultation:
+    - Befund: Atemgeräusch beidseits vorhanden.
+  hautfarbe:
+    - Befund: Haut warm und schweißig.
+  puls:
+    - Befund: Puls schnell, regelmäßig, gut tastbar, ca. 112.
+  rekap:
+    - Befund: Rekap unter 2 Sekunden.
+  rr:
+    - Befund: RR 140/85.
+  trauma_check:
+    - Befund: Bauch weich und schmerzfrei, Becken stabil, Oberschenkel ohne Schwellung.
+  gcs:
+    - Befund: GCS 12 (Augen 3, verbal 4, motorisch 5).
+  orientierung:
+    - Patient: Jonas … wo … bin ich? Was für ein Tag?
+  pupillen:
+    - Befund: Pupillen isokor, reagieren prompt.
+  bz:
+    - Befund: BZ 102 mg/dl.
+  fast:
+    - Befund: Keine Halbseitensymptome.
+  frieren_fragen:
+    - Patient: (zittert) Kalt …
+  decke:
+    - Kollege: (deckt ihn mit der Rettungsdecke zu und legt eine Decke unter)
+  temperatur:
+    - Befund: Temperatur 35,8 °C.
+  bodycheck:
+    - Befund: Platzwunde am Hinterkopf, Zungenbiss, eingenässt, durchnässt vom Boden. Sonst keine Verletzungen. Alkoholgeruch.
+  wunde_versorgen:
+    - Kollege: (versorgt die Platzwunde am Hinterkopf mit Kompresse und Verband)
+  sample_allergie:
+    - Umstehende: Keine.
+  sample_medikamente:
+    - Umstehende: Levetiracetam. Er hat es heute vergessen, glaub ich.
+  sample_vorerkrankung:
+    - Umstehende: Epilepsie.
+  sample_mahlzeit:
+    - Umstehende: Bratwurst vor drei Stunden. Und drei Glühwein.
+  beruhigen:
+    - Umstehende: Okay … wird er wieder?
+  aufklaeren:
+    - Patient: Ich will nur nach Hause …
+  reevaluation:
+    - Befund: GCS 13, SpO2 96 %, Puls 104. Er ist noch desorientiert.
+
+events:
+  - at: 50
+    when: {krampft: true}
+    say:
+      - Befund: Das Zucken lässt nach und hört auf. Der Anfall hat insgesamt etwa zweieinhalb Minuten gedauert. Jonas ist schläfrig und schnarcht.
+    set: {krampft: false}
+  - at: 180
+    when: {decke: false}
+    say:
+      - Befund: Jonas zittert, die Kleidung ist nass vom Boden.
+
+key_actions:
+  - label: Während des Anfalls schützen (Kopf polstern, nichts in den Mund)
+    any: [kopf_schuetzen]
+    critical: true
+  - label: Anfallsdauer erfasst
+    any: [krampf_dauer]
+  - label: Nach dem Anfall Atemweg sichern (Seitenlage)
+    any: [seitenlage]
+    critical: true
+  - label: Blutzucker gemessen
+    phase: full
+    any: [bz]
+  - label: Wärmeerhalt (nass, kalt)
+    any: [decke]
+  - label: Platzwunde versorgt
+    phase: full
+    any: [wunde_versorgen]

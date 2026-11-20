@@ -1,9 +1,0 @@
-[build]
-  publish = "public"
-  functions = "netlify/functions"
-
-# Service Worker nie lange cachen, damit Updates ankommen
-[[headers]]
-  for = "/sw.js"
-  [headers.values]
-    Cache-Control = "no-cache"

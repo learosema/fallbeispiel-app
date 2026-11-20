@@ -1,0 +1,126 @@
+id: mil-alkohol
+group: Millerntor (FC St. Pauli)
+letter: D
+title: Besucher nach dem Spiel, stark alkoholisiert
+teaser: Ist es wirklich nur der Alkohol?
+dispatch: "Funkmeldung Millerntor: Ordner meldet einen Besucher auf der Treppe im Stehplatzbereich, reagiert kaum, hat erbrochen."
+debrief_notes: >
+  Torben (34), ca. 2,5 Promille, Treppensturz mit Hämatom am Hinterkopf, GCS 11, BZ 52 mg/dl, Erbrochenes im Mund.
+  Erwartet: Eigenschutz/Gedränge, Ansprache/Schmerzreiz, Atemwege frei, Seitenlage/Absaugbereitschaft, Messwerte, GCS/Pupillen,
+  BZ messen (Alkohol nicht als alleinige Erklärung), HWS bei Kopfanprall bedenken, Wärmeerhalt, SAMPLER, Rettungsdienst, nicht allein lassen.
+
+conscious: true
+trauma: true
+request: {required: [RTW], optional: [NEF]}
+
+responses:
+  atmung_beurteilen:
+    - when: {absaugen: false}
+      say:
+        - Befund: Atmung langsam und flach, ca. 12/min, gurgelnd – Erbrochenes im Mund.
+    - say:
+        - Befund: Atmung langsam und flach, ca. 12/min, nach dem Absaugen frei.
+  alter_fragen:
+    - Patient: (lallt) Vierund… dreißig.
+  lage_pruefen:
+    - Befund: "Stadionausgang nach Spielende, viele Menschen strömen vorbei, 4 °C, nasse Betontreppe, Rutschgefahr. Ein Betroffener sitzt zusammengesackt an der Wand, ein Ordner und sein Freund Hendrik sind bei ihm. Der Betroffene ist ein Mann, etwa Mitte dreißig."
+  platz_schaffen:
+    - Umstehende: (der Ordner lenkt den Strom um)
+  blutung_pruefen:
+    - Befund: Keine Blutung.
+  vorstellen:
+    - Patient: (lallt) Hmm … lass mich.
+  laut_ansprechen:
+    - Befund: Er öffnet auf lautes Ansprechen kurz die Augen.
+  schmerzreiz:
+    - Befund: Er wehrt gezielt ab und stöhnt.
+  was_passiert:
+    - Umstehende: Der hat seit Mittag getrunken. Auf der Treppe ist er hingeflogen, dann ist er noch gelaufen und hier zusammengesackt. Vor 'ner halben Stunde.
+  beschwerden_fragen:
+    - Patient: Kopf … hinten …
+  hws_manuell:
+    - Kollege: (stabilisiert den Kopf manuell)
+  atemwege_freimachen:
+    - Befund: Erbrochenes im Mund, er schluckt schwach.
+  absaugen:
+    - Kollege: (saugt den Mund ab)
+    - Befund: Atemwege frei.
+  seitenlage:
+    - Befund: Er liegt in stabiler Seitenlage, Erbrochenes kann ablaufen.
+  atemkontrolle:
+    - Befund: Er atmet, ca. 12 pro Minute, flach.
+  atmung_fragen:
+    - Patient: (murmelt) … ja …
+  schmerz_atmen:
+    - Patient: (keine verständliche Antwort)
+  zyanose:
+    - Befund: Keine Zyanose.
+  af_zaehlen:
+    - Befund: Atemfrequenz 12, flach.
+  spo2:
+    - Befund: SpO2 94 %.
+  auskultation:
+    - Befund: Lunge frei.
+  hautfarbe:
+    - Befund: Haut kalt.
+  puls:
+    - Befund: Puls regelmäßig, gut tastbar, ca. 62.
+  rekap:
+    - Befund: Rekap unter 2 Sekunden.
+  rr:
+    - Befund: RR 150/90.
+  trauma_check:
+    - Befund: Bauch weich und schmerzfrei, Becken stabil, Oberschenkel ohne Schwellung.
+  gcs:
+    - Befund: GCS 11 (Augen 2, verbal 4, motorisch 5).
+  orientierung:
+    - Patient: Torben … Stadion … weiß nich.
+  pupillen:
+    - Befund: Pupillen isokor, reagieren träge.
+  bz:
+    - Befund: BZ 52 mg/dl.
+  glukose_geben:
+    - Kollege: Er schluckt kaum – oral würde ich ihm jetzt nichts geben.
+  frieren_fragen:
+    - Patient: (zittert)
+  decke:
+    - Kollege: (deckt ihn mit der Rettungsdecke zu und legt eine Decke unter)
+  temperatur:
+    - Befund: Temperatur 35,6 °C.
+  bodycheck:
+    - Befund: Hämatom am Hinterkopf, nasse Hose, sonst keine Verletzungen.
+  sample_allergie:
+    - Umstehende: Weiß ich nicht.
+  sample_medikamente:
+    - Umstehende: Keine Ahnung, ob der was nimmt.
+  sample_vorerkrankung:
+    - Umstehende: Nicht dass ich wüsste.
+  sample_mahlzeit:
+    - Umstehende: Gegessen hat der heute nix. Nur Bier und Schnaps.
+  beruhigen:
+    - Umstehende: Der hat nur zu viel getrunken, das wird schon.
+  reevaluation:
+    - Befund: GCS 11, Atmung 12 pro Minute, SpO2 94 %.
+
+events:
+  - at: 90
+    when: {seitenlage: false}
+    say:
+      - Befund: Er würgt erneut.
+  - at: 200
+    when: {bz: false}
+    say:
+      - Befund: Er wird schläfriger, reagiert nur noch auf Schmerzreiz.
+
+key_actions:
+  - label: Atemweg gesichert (Absaugen / Seitenlage)
+    any: [seitenlage, absaugen]
+    critical: true
+  - label: Blutzucker gemessen
+    phase: full
+    any: [bz]
+    critical: true
+  - label: HWS bei Sturz mit Kopfanprall bedacht
+    any: [hws_manuell, immobilisieren]
+  - label: Wärmeerhalt
+    any: [decke]

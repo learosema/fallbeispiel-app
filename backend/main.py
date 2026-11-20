@@ -1,0 +1,190 @@
+"""FastAPI-Backend: liefert das Frontend aus public/ und spielt die Fallbeispiele.
+
+  GET  /api/scenarios   Liste der Fälle (ohne verborgene Fakten)
+  POST /api/turn        Protokoll → Antwort der Simulation auf die letzte Äußerung
+  POST /api/debrief     Protokoll → regelbasierte Checkliste
+  POST /api/feedback    Protokoll → KI-Bewertung (Algorithmus + Patientensicht) – nur mit Login, falls AUTH_HEADER gesetzt
+
+Umgebungsvariablen: siehe README.md (AUTH_HEADER, FEEDBACK_LIMIT, INTENT_*, JUDGE_*, LLM_*).
+"""
+from __future__ import annotations
+
+import os
+import threading
+import time
+from collections import defaultdict, deque
+from contextlib import asynccontextmanager
+from pathlib import Path
+from typing import Literal
+
+from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi.concurrency import run_in_threadpool
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel, Field, model_validator
+
+from . import classifier, content, engine, evaluate, judge
+
+PUBLIC_DIR = Path(__file__).resolve().parent.parent / "public"
+NO_STORE = {"Cache-Control": "no-store"}
+MAX_LOG_CHARS = 30_000  # ganzer Fall ≈ 15 000 Zeichen; begrenzt die Tokens pro KI-Bewertung
+
+
+class Utterance(BaseModel):
+    t: float = Field(ge=0, le=24 * 3600)
+    text: str = Field(default="", max_length=1000)
+    tick: bool = False  # Takt ohne Äußerung (fällige Ereignisse, z. B. AED-Analyse alle 2 Minuten)
+
+    @model_validator(mode="after")
+    def _text_or_tick(self):
+        if not self.tick and not self.text.strip():
+            raise ValueError("text fehlt")
+        return self
+
+
+class RunRequest(BaseModel):
+    scenario: str = Field(max_length=100)
+    mode: Literal["minute", "full"] = "minute"
+    callsign: str = Field(default="EVT1", min_length=1, max_length=40)
+    dispatcher: str = Field(default="RotkreuzHamburg", min_length=1, max_length=60)
+    log: list[Utterance] = Field(min_length=1, max_length=300)
+
+    @model_validator(mode="after")
+    def _log_size(self):
+        if sum(len(u.text) for u in self.log) > MAX_LOG_CHARS:
+            raise ValueError("Protokoll zu lang")
+        return self
+
+
+def error(msg: str, status: int) -> JSONResponse:
+    return JSONResponse({"error": msg}, status_code=status, headers=NO_STORE)
+
+
+def current_user(request: Request) -> str:
+    """Angemeldete Person laut Login-Proxy (Header aus AUTH_HEADER), lokal ohne Proxy „local“.
+
+    Nur die KI-Bewertung kostet Geld und braucht deshalb eine Anmeldung; Simulation und Checkliste sind offen.
+    Ist AUTH_HEADER gesetzt, muss der Header da sein – sonst ist niemand angemeldet.
+    Der Header ist nur vertrauenswürdig, wenn die App ausschließlich über den Proxy erreichbar ist.
+    """
+    header = os.environ.get("AUTH_HEADER", "").strip()
+    if not header:
+        return "local"
+    user = request.headers.get(header, "").strip().lower()
+    if not user:
+        raise HTTPException(401, "Nicht angemeldet – bitte die Seite neu laden.")
+    return user
+
+
+class RateLimit:
+    """Höchstens `limit` Aufrufe pro Person in `window` Sekunden (im Speicher, ein Prozess)."""
+
+    def __init__(self, limit: int, window: float):
+        self.limit, self.window = limit, window
+        self._calls: dict[str, deque[float]] = defaultdict(deque)
+        self._lock = threading.Lock()
+
+    def hit(self, user: str) -> bool:
+        now = time.monotonic()
+        with self._lock:
+            calls = self._calls[user]
+            while calls and calls[0] <= now - self.window:
+                calls.popleft()
+            if len(calls) >= self.limit:
+                return False
+            calls.append(now)
+            return True
+
+
+feedback_limit = RateLimit(int(os.environ.get("FEEDBACK_LIMIT", "20")), 3600)
+
+
+def limit_feedback(user: str = Depends(current_user)) -> None:
+    if not feedback_limit.hit(user):
+        raise HTTPException(429, "Zu viele KI-Bewertungen in der letzten Stunde – bitte später erneut versuchen.")
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    content.scenarios()  # Inhalte beim Start prüfen – Fehler sollen sofort auffallen
+    if os.environ.get("PRELOAD_MODEL", "1") != "0":
+        await run_in_threadpool(classifier.get)
+    yield
+
+
+app = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None)
+
+
+@app.middleware("http")
+async def revalidate_static(request, call_next):
+    """Statische Dateien immer beim Server nachfragen (ETag macht das billig).
+
+    Ohne Cache-Control speichert der Browser sie nach eigenem Ermessen – und der Service Worker
+    lädt über diesen HTTP-Cache, sodass nach Änderungen alte CSS/JS-Dateien ausgeliefert wurden.
+    """
+    response = await call_next(request)
+    if request.method in ("GET", "HEAD") and not request.url.path.startswith("/api/"):
+        response.headers.setdefault("Cache-Control", "no-cache")
+    return response
+
+
+@app.exception_handler(RequestValidationError)
+async def _invalid(_req, _exc):
+    return error("Ungültige Anfrage.", 400)
+
+
+@app.exception_handler(HTTPException)
+async def _http(_req, exc: HTTPException):
+    return error(str(exc.detail), exc.status_code)
+
+
+def _run(req: RunRequest) -> engine.Run:
+    scenario = content.scenarios().get(req.scenario)
+    if scenario is None:
+        raise HTTPException(404, "Unbekannter Fall.")
+    settings = engine.Settings(callsign=req.callsign.strip(), dispatcher=req.dispatcher.strip())
+    return engine.replay(scenario, req.mode, settings, [u.model_dump() for u in req.log], classifier.get())
+
+
+@app.get("/api/scenarios")
+async def list_scenarios():
+    return JSONResponse([s.meta for s in content.scenarios().values()], headers={"Cache-Control": "no-cache"})
+
+
+@app.post("/api/turn")
+async def turn(req: RunRequest):
+    run = await run_in_threadpool(_run, req)
+    last = run.turns[-1]
+    return JSONResponse({
+        "lines": [{"who": l.who, "text": l.text} for l in last.lines],
+        "ended": run.ended,
+        "next_event_at": run.next_event_at,
+        "intents": [h.intent for h in last.hits],
+    }, headers=NO_STORE)
+
+
+@app.post("/api/debrief")
+async def debrief(req: RunRequest):
+    run = await run_in_threadpool(_run, req)
+    result = evaluate.evaluate(run, classifier.get().embedder)
+    return JSONResponse({"result": result, "text": evaluate.as_text(result)}, headers=NO_STORE)
+
+
+@app.post("/api/feedback", dependencies=[Depends(limit_feedback)])
+async def feedback(req: RunRequest):
+    run = await run_in_threadpool(_run, req)
+    result = evaluate.evaluate(run, classifier.get().embedder)
+    try:
+        text = await run_in_threadpool(judge.judge, run, result)
+    except judge.JudgeError as exc:
+        return error(f"KI-Bewertung fehlgeschlagen: {exc}", 502)
+    return JSONResponse({"text": text or judge.fallback(result), "ai": text is not None, "provider": judge.provider()}, headers=NO_STORE)
+
+
+@app.get("/sw.js", include_in_schema=False)
+async def service_worker():
+    return FileResponse(PUBLIC_DIR / "sw.js", media_type="text/javascript", headers={"Cache-Control": "no-cache"})
+
+
+app.mount("/", StaticFiles(directory=PUBLIC_DIR, html=True), name="public")

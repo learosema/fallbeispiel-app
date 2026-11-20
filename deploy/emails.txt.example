@@ -1,0 +1,3 @@
+# Nach deploy/emails.txt kopieren: eine erlaubte E-Mail-Adresse pro Zeile.
+du@example.org
+testerin@example.org

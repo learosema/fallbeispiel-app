@@ -1,0 +1,124 @@
+id: bw-sommer
+group: Bewusstlosigkeit
+letter: SL
+title: Bewusstlos am Elbstrand
+teaser: "Seitenlage im Sommer: Wärmeerhalt trotzdem"
+dispatch: "Funkmeldung: Elbstrand, Sommerabend, ein Mann liegt reglos im Sand, Freunde sind bei ihm."
+debrief_notes: >
+  Mann (ca. 30), stark alkoholisiert, bewusstlos (GCS 8), atmet normal. Erwartet: Eigenschutz (Wasser, Gaffer), Ansprechen/Schmerzreiz,
+  Atemwege frei, Atemkontrolle, stabile Seitenlage, Nachforderung, Absaugbereitschaft, BZ/SpO2/Puls/Temperatur,
+  Wärmeerhalt trotz 29 °C (feuchter Sand, Wind, Alkohol), SAMPLER vom Freund, Atemkontrolle wiederholen.
+
+conscious: false
+breathing: normal
+request: {required: [RTW], optional: [NEF]}
+
+responses:
+  alter_fragen:
+    - Umstehende: Der ist dreißig.
+  lage_pruefen:
+    - Befund: "Elbstrand, 29 °C, Wind vom Wasser, viele Badegäste und Gaffer. Er liegt oberhalb der Wasserlinie auf feuchtem, kühlem Sand im Schatten eines Strandkorbs. Sein Freund Nils ist bei ihm. Der Betroffene ist ein junger Mann, etwa dreißig."
+  blutung_pruefen:
+    - Befund: Keine Blutung.
+  vorstellen:
+    - Befund: (keine Reaktion)
+    - Umstehende: Der wacht nicht auf! Ich hab alles versucht!
+  laut_ansprechen:
+    - Befund: Keine Reaktion auf lautes Ansprechen und Rütteln.
+  schmerzreiz:
+    - Befund: Auf Schmerzreiz nur ungezielte Abwehr.
+  was_passiert:
+    - Umstehende: Wir trinken seit Mittag. Er ist plötzlich eingeschlafen und nicht mehr wach zu kriegen.
+  atemwege_freimachen:
+    - Befund: Er schnarcht, nach Überstrecken des Kopfes und Anheben des Kinns sind die Atemwege frei.
+  atemkontrolle:
+    - when: {atemwege_freimachen: false}
+      say:
+        - Befund: Schnarchende Atmung.
+    - say:
+        - Befund: Normale Atmung, ca. 14 pro Minute.
+  seitenlage:
+    - Befund: Er liegt in stabiler Seitenlage, Mund tiefster Punkt, die Atemwege bleiben frei.
+  hlw:
+    - Kollege: Er atmet doch normal.
+  puls:
+    - Befund: Puls regelmäßig, kräftig tastbar, ca. 70.
+  spo2:
+    - Befund: SpO2 94 %.
+  af_zaehlen:
+    - Befund: Atemfrequenz 14.
+  rr:
+    - Befund: RR 120/75.
+  rekap:
+    - Befund: Rekap unter 2 Sekunden.
+  hautfarbe:
+    - when: {decke: false}
+      say:
+        - Befund: Haut warm, trocken, sandig.
+    - say:
+        - Befund: Haut warm.
+  zyanose:
+    - Befund: Keine Zyanose.
+  bz:
+    - Befund: BZ 88 mg/dl.
+  gcs:
+    - Befund: GCS 8.
+  pupillen:
+    - Befund: Pupillen isokor.
+  temperatur:
+    - when: {decke: false}
+      say:
+        - Befund: Körpertemperatur 35,9 °C.
+    - say:
+        - Befund: Körpertemperatur 35,9 °C, stabil.
+  frieren_fragen:
+    - Umstehende: Kalt? Bei 29 Grad?
+  decke:
+    - Kollege: (deckt ihn mit der Rettungsdecke zu und legt eine Decke unter)
+    - Umstehende: "Zudecken? Es sind doch 29 Grad!"
+  absaugen:
+    - Kollege: (stellt die Absaugpumpe bereit)
+  bodycheck:
+    - Befund: Keine Verletzungen. Leere Bierflaschen und eine Schnapsflasche neben ihm, deutlicher Alkoholgeruch.
+  sample_allergie:
+    - Umstehende: Allergien? Nicht dass ich wüsste.
+  sample_medikamente:
+    - Umstehende: Der nimmt nix, glaub ich.
+  sample_vorerkrankung:
+    - Umstehende: Der ist eigentlich gesund.
+  sample_mahlzeit:
+    - Umstehende: Mittags 'ne Bratwurst. Und so zehn Bier und ein paar Schnäpse.
+  platz_schaffen:
+    - Umstehende: (die Gaffer gehen ein Stück zurück)
+  reevaluation:
+    - when: {seitenlage: true}
+      say:
+        - Befund: Atmung normal, 14 pro Minute, Atemwege frei.
+    - say:
+        - Befund: Er schnarcht wieder.
+
+events:
+  - at: 120
+    when: {seitenlage: false}
+    say:
+      - Befund: Er würgt und erbricht auf dem Rücken liegend, es gurgelt.
+  - at: 240
+    when: {decke: false}
+    say:
+      - Befund: Seine Haut fühlt sich am Rücken kühl an.
+
+key_actions:
+  - label: Stabile Seitenlage
+    any: [seitenlage]
+    critical: true
+    within: 120
+  - label: Wärmeerhalt trotz Sommer (Decke, Isolation vom feuchten Sand)
+    any: [decke]
+    critical: true
+  - label: BZ gemessen
+    phase: full
+    any: [bz]
+  - label: SAMPLER vom Freund
+    phase: full
+    min: 3
+    of: [sample_allergie, sample_medikamente, sample_vorerkrankung, sample_mahlzeit, was_passiert, sample_risiko]

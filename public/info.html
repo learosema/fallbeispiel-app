@@ -47,7 +47,7 @@
   <main class="doc">
     <section class="hero">
       <h2>Die 1. Minute üben, so wie sie im SANmemo steht.</h2>
-      <p>Du sprichst, die App antwortet als Patient:in, Kollege, Umstehende und Leitstelle. Am Ende bekommst du eine Auswertung, ob du dem Algorithmus gefolgt bist.</p>
+      <p>Du sprichst, die App antwortet als Patient:in, Kollege, Umstehende und Leitstelle. Am Ende bekommst du eine Auswertung: ob du dem Algorithmus gefolgt bist und wie sich der Patient bei dir gefühlt hätte.</p>
       <a class="cta" href="./">Zur App</a>
     </section>
 
@@ -56,7 +56,7 @@
       <li><span>Fall wählen, zum Beispiel „Sturz auf nasser Treppe" oder einen Fall vom DOM oder vom Millerntor.</span></li>
       <li><span>Die 1. Minute durchsprechen: Lage, bedrohliche Blutung, Ansprechen, Schnellcheck (A bis E), Teambesprechung.</span></li>
       <li><span>Mit dem Funkspruch an die Leitstelle abschließen („EVT1 Ende").</span></li>
-      <li><span>Auf <em>Auswertung</em> tippen: Schritt für Schritt, mit tatsächlicher Reihenfolge und Abweichungen.</span></li>
+      <li><span>Auf <em>Auswertung</em> tippen: sofort eine Checkliste Schritt für Schritt, danach eine Bewertung durch die KI, auch aus Sicht des Patienten.</span></li>
     </ol>
     <p class="note">Die App ersetzt weder Ausbildung noch Praxis. Die Technik (Seitenlage, Herzdruckmassage, HWS-Griff) übst du weiter an Puppe und Kollegen. Hier trainierst du Ablauf, Fragen, Ansagen und Funk.</p>
 
@@ -65,17 +65,19 @@
     <div class="demo"><div class="log" id="demo"></div></div>
 
     <h3>Beispiel-Auswertung</h3>
-    <p>Zu diesem Gespräch könnte die Auswertung so aussehen. Sie zeigt, wie Lücken sichtbar werden, die im Gespräch selbst nicht korrigiert werden.</p>
+    <p>Zu diesem Gespräch könnte die Auswertung so aussehen (gekürzt). Oben die Checkliste, die sofort erscheint, darunter die Bewertung der KI. Sie zeigt, wie Lücken sichtbar werden, die im Gespräch selbst nicht korrigiert werden.</p>
     <div class="demo"><div class="log" id="debrief"></div></div>
 
     <h3>Was die Simulation macht und was nicht</h3>
     <ul>
       <li>Sie antwortet nur auf das, was du sagst. Sie gibt keine Tipps und korrigiert nicht während des Einsatzes.</li>
-      <li>Sagst du einen Befund selbst („Puls gut tastbar"), bestätigt sie knapp. Stimmt er nicht mit dem Fall überein, nennt sie den tatsächlichen Befund.</li>
+      <li>Patient:in, Kollege, Umstehende und Leitstelle antworten aus festen Antworten je Fall (ein Expertensystem, keine KI). Die App erkennt, welchen Schritt du gerade machst, und gibt dir den passenden Befund.</li>
+      <li>Wird ein Schritt nicht erkannt, fragt der Kollege nach („Was genau machst du?“). Dann sag es etwas konkreter.</li>
       <li>Der Kollege führt aus, was du ansagst („Kollege, bitte manuelle HWS-Stabilisierung"). Er gibt keine Empfehlungen.</li>
       <li>Der Zustand der Person entwickelt sich weiter: Fehlende oder falsche Maßnahmen verschlechtern ihn.</li>
-      <li>Wärmeerhalt zählt immer, unabhängig von der Außentemperatur. Bei Kälte friert die Person nur schneller. Nachfragen allein reicht nicht, du musst es ansagen oder tun.</li>
+      <li>Wärmeerhalt zählt, wenn die Person auskühlen kann: bei Kälte, Nässe, Schock oder auf dem Boden, auch im Sommer auf feuchtem Untergrund. Nachfragen allein reicht nicht, du musst es ansagen oder tun. Bei wachen Patient:innen im Warmen und während einer Reanimation wird keine Decke erwartet.</li>
       <li>Die Auswertung bewertet den Algorithmus, nicht die Geschwindigkeit. Die Zeit ist nur eine Randnotiz.</li>
+      <li>Nur für die Bewertung am Ende wird eine KI gefragt. Sie bekommt den ganzen Dialog und die Checkliste und beurteilt auch, wie sich der Patient behandelt gefühlt hätte.</li>
     </ul>
 
     <h3>Modi</h3>
@@ -92,10 +94,9 @@
     </footer>
   </main>
 
-  <script src="scenarios.js"></script>
   <script>
     // ---- Beispielgespräch (von Hand geschrieben, gekürzt) ----
-    const CLS = { Patient: "them", Kollege: "them kollege", Umstehende: "them", Befund: "sys befund", Leitstelle: "them funk" };
+    const CLS = { Patient: "them", Kollege: "them kollege", Umstehende: "them", Befund: "sys befund", Leitstelle: "them funk", AED: "them funk", Rettungsdienst: "them kollege" };
     const convo = [
       ["sys", "Einsatzmeldung: Funkmeldung: Landungsbrücken, Person auf einer Treppe gestürzt, sitzt am Boden und ist ansprechbar."],
       ["phase", "Lage"],
@@ -111,8 +112,9 @@
       ["Patient", "Ja, die Luft ist gut."],
       ["me", "Haben Sie Schmerzen beim Atmen?"],
       ["Patient", "Nein."],
-      ["me", "Puls gut tastbar, Rekap unter zwei Sekunden."],
-      ["Kollege", "Verstanden."],
+      ["me", "Ich fühle den Puls und mache die Rekap."],
+      ["Befund", "Puls gut tastbar, regelmäßig, ca. 78."],
+      ["Befund", "Rekap-Zeit unter 2 Sekunden."],
       ["me", "Ich taste Bauch, Becken und Oberschenkel ab."],
       ["Befund", "Bauch weich und schmerzfrei, Becken stabil und schmerzfrei, Oberschenkel unauffällig."],
       ["me", "Wie ist der Unfallhergang? Frieren Sie?"],
@@ -134,23 +136,31 @@
     const debrief = `ALGORITHMUS: Teilweise erfüllt
 
 1. MINUTE
-Sicherheit und Lage: ✅ Lage als sicher benannt, nasse Stufen erwähnt.
-Bedrohliche Blutung geprüft: ✅
-Vorstellung und Ansprache: ✅ „Wir sind vom DRK", „Was ist passiert?"
-HWS bei Trauma: ✅ Kollege rechtzeitig angewiesen.
-Atmung: ⚠️ Luft und Schmerzen beim Atmen gefragt, Zyanose nicht erwähnt.
-Kreislauf: ⚠️ Puls, Rekap und Trauma-Check genannt, Hautfarbe fehlt.
-Neurologie: ✅ Orientierung zu Person, Ort und Situation geprüft.
-Umfeld (Hergang, Frieren): ✅ Beides erfragt.
-Wärmeerhalt: ❌ Der Patient sagt, ihm sei kalt, und sitzt in der Nässe. Eine Decke wurde nicht angeboten, nachfragen allein reicht nicht.
-Teambesprechung: ⚠️ Lage und Verdacht genannt, Notarzt-Entscheidung nicht ausgesprochen.
-Funkspruch: ⚠️ Anruf, Meldung und „Ende" korrekt. Nachforderung RTW passt zu deinen Befunden, aber die Medikation wurde nicht erfragt (Blutverdünner), deshalb fehlte die Grundlage, über ein NEF zu entscheiden.
+✅ Sicherheit und Lage: „Lagebeurteilung: Die Lage ist sicher …“
+✅ Bedrohliche Blutung geprüft
+✅ Vorstellung und Ansprache: „Hallo, wir sind vom DRK! Was ist passiert?“
+✅ HWS bei Trauma (manuelle Stabilisierung)
+⚠️ Atmung (Luft? Schmerzen beim Atmen? Zyanose?): Fehlt: Zyanose (Lippenfarbe)
+⚠️ Kreislauf: Fehlt: Hautfarbe / Hautzustand
+✅ Neurologie (Reaktion angemessen, Orientierung)
+✅ Umfeld (Verletzungsmechanismus, Frieren)
+❌ Wärmeerhalt (Decke, Isolation vom Boden)
+✅ Teambesprechung (Lage, Verdachtsdiagnose, Notarzt)
+✅ Funkspruch an die Leitstelle
 
-TATSÄCHLICHE REIHENFOLGE: Lage → Blutung → Vorstellung → HWS → Atmung → Kreislauf → Trauma-Check → Umfeld → Neurologie → Teambesprechung → Funk
-ABWEICHUNGEN: Umfeld (Hergang, Frieren) kam vor der Prüfung der Reaktion, im SANmemo steht D vor E. Zyanose und Hautfarbe fehlten. Die Notarzt-Entscheidung wurde in der Teambesprechung nicht benannt. Wärmeerhalt fehlte, obwohl der Patient gefroren hat.
-ZEIT (nachrangig): Die 1. Minute dauerte netto etwa 1:50, kein Bewertungsmaßstab.
-GUT GEMACHT: Klarer Einstieg mit Lage und Blutung, HWS rechtzeitig, saubere Funkstruktur.
-VERBESSERN: Bei Frieren sofort eine Decke geben und vom nassen Boden isolieren, Schnellcheck vollständig sprechen (Zyanose, Hautfarbe), D vor E halten, in der Teambesprechung die Notarzt-Frage ausdrücklich klären.`;
+SCHLÜSSELMASSNAHMEN
+✅ Manuelle HWS-Stabilisierung nach Sturz mit Kopfanprall
+❌ Wärmeerhalt (er friert)
+
+TATSÄCHLICHE REIHENFOLGE: Lage → Blutung → Ansprache → HWS → Atmung → Kreislauf → Umfeld → Neurologie → Team → Funk
+ABWEICHUNGEN: Neurologie kam außer der Reihe; Wärme fehlt`;
+    const feedback = `ALGORITHMUS: Teilweise erfüllt
+Klarer Einstieg mit Lage, Blutung und rechtzeitiger HWS-Stabilisierung, der Funkspruch war sauber aufgebaut. Im Schnellcheck fehlten Zyanose und Hautfarbe. Vor allem: Herr Petersen sagt, ihm sei kalt – eine Decke kam nicht. 
+
+PATIENTENSICHT: Ich habe mich ernst genommen gefühlt, ihr habt euch vorgestellt und mir gesagt, was passiert. Aber ich saß die ganze Zeit frierend im Nassen, und niemand hat mir eine Decke gegeben. Gut fand ich, dass jemand meinen Kopf gehalten hat, als mir der Nacken wehtat.
+
+GUT GEMACHT: HWS früh übernommen; Funkspruch mit beiden Rufnamen und passender Nachforderung.
+VERBESSERN: Bei Frieren sofort zudecken und vom Boden isolieren; Schnellcheck vollständig sprechen (Zyanose, Hautfarbe).`;
 
     const log = document.getElementById("demo");
     for (const [kind, text] of convo) {
@@ -168,19 +178,23 @@ VERBESSERN: Bei Frieren sofort eine Decke geben und vom nassen Boden isolieren, 
       log.appendChild(d);
     }
     const dl = document.getElementById("debrief");
-    const dd = document.createElement("div"); dd.className = "msg debrief"; dd.textContent = debrief; dl.appendChild(dd);
-
-    // ---- Fallliste direkt aus scenarios.js, damit die Doku nicht veraltet ----
-    const byGroup = {};
-    for (const s of window.SCENARIOS) (byGroup[s.group || "Grundlagen"] ||= []).push(s);
-    const ul = document.getElementById("groups");
-    for (const [group, items] of Object.entries(byGroup)) {
-      const li = document.createElement("li");
-      const strong = document.createElement("strong"); strong.textContent = group;
-      const small = document.createElement("small");
-      small.textContent = items.map((s) => `${s.letter}: ${s.title}`).join(" · ");
-      li.append(strong, small); ul.appendChild(li);
+    for (const text of [debrief, feedback]) {
+      const dd = document.createElement("div"); dd.className = "msg debrief"; dd.textContent = text; dl.appendChild(dd);
     }
+
+    // ---- Fallliste direkt vom Server, damit die Doku nicht veraltet ----
+    fetch("/api/scenarios").then((r) => r.json()).then((list) => {
+      const byGroup = {};
+      for (const s of list) (byGroup[s.group || "Grundlagen"] ||= []).push(s);
+      const ul = document.getElementById("groups");
+      for (const [group, items] of Object.entries(byGroup)) {
+        const li = document.createElement("li");
+        const strong = document.createElement("strong"); strong.textContent = group;
+        const small = document.createElement("small");
+        small.textContent = items.map((s) => `${s.letter}: ${s.title}`).join(" · ");
+        li.append(strong, small); ul.appendChild(li);
+      }
+    }).catch(() => {});
   </script>
 </body>
 </html>

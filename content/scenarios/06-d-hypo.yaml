@@ -1,0 +1,150 @@
+id: d-hypo
+letter: D
+title: Verwirrte Person auf der Straße
+teaser: Neurologie / Hypoglykämie
+dispatch: "Einsatzmeldung: Fußgängerzone, Frau (54) verwirrt, wirkt betrunken, schwitzt stark."
+debrief_notes: >
+  Frau Demir (54), Typ-1-Diabetikerin, Insulin gespritzt, nichts gegessen: BZ 38 mg/dl. Erwartet: BZ bei jeder Bewusstseinsstörung,
+  GCS, Pupillen, FAST, Beruhigung/Eigenschutz, Glukose nur bei erhaltenen Schutzreflexen, Notruf, Reevaluation.
+  Wird kein BZ gemessen, bleibt die Ursache unklar.
+
+conscious: true
+trauma: false
+request: {required: [RTW], optional: [NEF]}
+skip: [hws]
+state: {glukose: false}
+
+responses:
+  atmung_beurteilen:
+    - Befund: Atmung ruhig und regelmäßig, ca. 18/min, keine Atemnot.
+  alter_fragen:
+    - when: {glukose: false}
+      say:
+        - Patient: Was? … Lassen Sie mich!
+    - say:
+        - Patient: Vierundfünfzig.
+  lage_pruefen:
+    - Befund: "Fußgängerzone, Vormittag, viele Passanten und Schaulustige, kein Verkehr. Eine Betroffene sitzt auf einer Bank, abwehrend, aber nicht gefährlich. Die Betroffene ist eine Frau mittleren Alters, etwa Mitte fünfzig."
+  blutung_pruefen:
+    - Befund: Keine Blutung.
+  vorstellen:
+    - when: {glukose: false}
+      say:
+        - Patient: Was wollen Sie? Lassen Sie mich!
+    - say:
+        - Patient: Hallo …
+  was_passiert:
+    - Umstehende: Sie saß hier und wirkte plötzlich total verwirrt. Sie schwitzt so.
+  beschwerden_fragen:
+    - when: {glukose: false}
+      say:
+        - Patient: Mir … nichts. Ich muss zum Termin.
+    - say:
+        - Patient: Mir war so komisch. Jetzt geht's besser.
+  beruhigen:
+    - Patient: (wird etwas ruhiger)
+  atemwege_freimachen:
+    - Befund: Atemwege frei.
+  atmung_fragen:
+    - Patient: Luft? Ja.
+  schmerz_atmen:
+    - Patient: Nein.
+  zyanose:
+    - Befund: Keine Zyanose.
+  af_zaehlen:
+    - Befund: Atemfrequenz 18.
+  spo2:
+    - Befund: SpO2 98 %.
+  auskultation:
+    - Befund: Lunge frei.
+  hautfarbe:
+    - Befund: Haut feucht, kaltschweißig, blass.
+  puls:
+    - Befund: Puls schnell, regelmäßig, gut tastbar, ca. 108.
+  rekap:
+    - Befund: Rekap unter 2 Sekunden.
+  rr:
+    - Befund: RR 140/85.
+  gcs:
+    - when: {glukose: false}
+      say:
+        - Befund: GCS 13 (Augen 4, verbal 4, motorisch 5), desorientiert, Sprache verwaschen.
+    - say:
+        - Befund: GCS 15, zunehmend klar.
+  orientierung:
+    - when: {glukose: false}
+      say:
+        - Patient: Demir … was … wo ist meine Tasche? Welcher Tag? Montag … nein …
+    - say:
+        - Patient: Ayşe Demir. In der Stadt. Ich hatte einen Termin.
+  pupillen:
+    - Befund: Pupillen isokor, reagieren prompt.
+  fast:
+    - Befund: Gesicht symmetrisch, Arme werden gleich gehalten, Sprache verwaschen und teils unpassend, aber keine Halbseitenzeichen.
+  bz:
+    - when: {glukose: false}
+      say:
+        - Befund: BZ 38 mg/dl.
+    - say:
+        - Befund: BZ 82 mg/dl.
+  glukose_geben:
+    - when: {bz: true}
+      say:
+        - Befund: Sie kann schlucken und trinkt den Saft mit Traubenzucker.
+        - Patient: (nach ein paar Minuten) Oh … mir geht's besser. Was ist passiert?
+      set: {glukose: true}
+    - say:
+        - Patient: Ich will nichts! (stößt den Becher weg)
+  frieren_fragen:
+    - Patient: Nein …
+  decke:
+    - Patient: (lässt es geschehen)
+  temperatur:
+    - Befund: Temperatur 36,4 °C.
+  bodycheck:
+    - Befund: In der Tasche ein Insulin-Pen und ein Diabetikerausweis, Einstichstellen am Bauch. Kein Alkoholgeruch, keine Verletzungen.
+  sample_allergie:
+    - Patient: Allergie … keine.
+  sample_medikamente:
+    - when: {glukose: false}
+      say:
+        - Patient: Spritze … heute früh …
+    - say:
+        - Patient: Insulin, ich hab heute früh gespritzt und dann nichts gegessen.
+  sample_vorerkrankung:
+    - when: {glukose: false}
+      say:
+        - Patient: (antwortet nicht passend) Ich muss los.
+    - say:
+        - Patient: Diabetes Typ 1.
+  sample_mahlzeit:
+    - Patient: Gestern … Abend.
+  reevaluation:
+    - when: {glukose: true}
+      say:
+        - Befund: BZ 82 mg/dl, GCS 15, Haut trocknet.
+    - say:
+        - Befund: Unverändert verwirrt, schwitzt weiter.
+  platz_schaffen:
+    - Umstehende: (die Schaulustigen gehen ein paar Schritte weiter)
+
+events:
+  - at: 150
+    when: {glukose: false}
+    say:
+      - Befund: Frau Demir wird schläfriger, reagiert nur noch auf lautes Ansprechen.
+
+key_actions:
+  - label: Blutzucker gemessen
+    phase: full
+    any: [bz]
+    critical: true
+  - label: Neurologische Untersuchung (GCS/Orientierung, Pupillen, FAST)
+    phase: full
+    all: [[gcs, orientierung], pupillen, fast]
+  - label: Glukosegabe (bei erhaltenen Schutzreflexen)
+    phase: full
+    any: [glukose_geben]
+  - label: Reevaluation nach Glukose
+    phase: full
+    any: [reevaluation]

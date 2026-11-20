@@ -1,0 +1,143 @@
+id: dom-fahrgeschaeft-kollaps
+group: Hamburger DOM
+letter: C
+title: Kollaps nach der Achterbahn
+teaser: Schwarz vor Augen nach der Fahrt
+dispatch: "Funkmeldung DOM: Jugendliche ist nach dem Aussteigen aus einem Fahrgeschäft zusammengesackt, ansprechbar."
+debrief_notes: >
+  Mira (17), vasovagale Synkope bei Hitze, wenig Trinken, Kreislaufbelastung. Erwartet: flach lagern/Beine hoch, nicht aufstehen lassen,
+  Puls/Rekap/RR, BZ, Trinken/Zucker anbieten, Hitze reduzieren, SAMPLER inkl. Familienanamnese und Herzsymptomen, Reevaluation,
+  begründete Entscheidung zur Abklärung, nicht allein lassen.
+
+conscious: true
+trauma: false
+request: {required: [RTW]}
+skip: [hws, waerme]   # wach und im Warmen: Decke nicht nötig
+
+responses:
+  atmung_beurteilen:
+    - Befund: Atmung ruhig und regelmäßig, ca. 20/min, keine Atemnot.
+  alter_fragen:
+    - Patient: Siebzehn.
+  lage_pruefen:
+    - Befund: "Sommer-DOM, 28 °C, sonnig, sehr voll, laute Musik. Das Fahrgeschäft ist angehalten, das Personal hat Mira auf eine Bank neben dem Ausgang gesetzt. Gedränge am Ausgang. Ihre Freundin Ayla ist dabei. Die Betroffene ist eine Jugendliche, etwa sechzehn, siebzehn."
+  blutung_pruefen:
+    - Befund: Keine Blutung.
+  vorstellen:
+    - Patient: (benommen) Hallo … sorry …
+  was_passiert:
+    - Umstehende: Nach der Fahrt hat sie gesagt, ihr wird schwarz vor Augen, und dann ist sie zur Seite gesackt. Aufgeschlagen ist sie nicht.
+  beschwerden_fragen:
+    - Patient: Mir ist so schwindelig. Ich hab Sterne gesehen.
+  beruhigen:
+    - Patient: Ist mir voll peinlich.
+  atemwege_freimachen:
+    - Befund: Atemwege frei.
+  atmung_fragen:
+    - Patient: Ja, Luft geht.
+  schmerz_atmen:
+    - Patient: Nein.
+  zyanose:
+    - Befund: Keine Zyanose.
+  af_zaehlen:
+    - Befund: Atemfrequenz 20.
+  spo2:
+    - Befund: SpO2 98 %.
+  auskultation:
+    - Befund: Lunge frei.
+  hautfarbe:
+    - when: {schocklage: false}
+      say:
+        - Befund: Haut blass, kühl, feucht.
+    - say:
+        - Befund: Haut wird rosiger.
+  puls:
+    - when: {schocklage: false}
+      say:
+        - Befund: Puls langsam, regelmäßig, schwach tastbar, ca. 58.
+    - say:
+        - Befund: Puls regelmäßig, gut tastbar, ca. 76.
+  rekap:
+    - when: {schocklage: false}
+      say:
+        - Befund: Rekap verzögert, ca. 3 Sekunden.
+    - say:
+        - Befund: Rekap unter 2 Sekunden.
+  rr:
+    - when: {schocklage: false}
+      say:
+        - Befund: RR 95/55.
+    - say:
+        - Befund: RR 110/70.
+  gcs:
+    - Befund: Wach, GCS 15.
+  orientierung:
+    - Patient: Mira. Auf dem DOM. Samstag.
+  pupillen:
+    - Befund: Pupillen isokor, reagieren prompt.
+  bz:
+    - Befund: BZ 78 mg/dl.
+  schocklage:
+    - Befund: (liegt flach, Beine hoch)
+    - Patient: Oh … das ist besser.
+  nicht_aufstehen:
+    - Patient: Okay.
+  oberkoerper_hoch:
+    - Patient: Mir wird wieder schwindelig …
+  glukose_geben:
+    - Patient: (trinkt) Danke.
+  aus_gefahr_bringen:
+    - Kollege: (hilft, sie in den Schatten zu bringen)
+  frieren_fragen:
+    - Patient: Nee, mir ist eher heiß.
+  decke:
+    - Patient: Echt? Ist doch so warm.
+  nasse_kleidung:
+    - Kollege: (öffnet die enge Jacke)
+  temperatur:
+    - Befund: Temperatur 37,1 °C.
+  bodycheck:
+    - Befund: Keine Verletzungen, keine Sturzfolgen. Enge Kleidung.
+  sample_allergie:
+    - Patient: Nein.
+  sample_medikamente:
+    - Patient: Nur die Pille.
+  sample_vorerkrankung:
+    - Patient: Nee. Herzrasen oder Brustschmerzen hatte ich auch nicht.
+  sample_risiko:
+    - Patient: Mein Onkel hatte mal was mit dem Herzen. Sonst … nö.
+  sample_mahlzeit:
+    - Patient: Heute früh was. Dann nur 'nen Energydrink und Zuckerwatte.
+  aufklaeren:
+    - Patient: Muss ich echt zum Arzt? … Okay, wenn das besser ist.
+  reevaluation:
+    - when: {schocklage: true}
+      say:
+        - Befund: Puls 76, RR 110/70, Rekap unter 2 Sekunden, sie fühlt sich besser.
+    - say:
+        - Befund: Puls 58, RR 95/55, weiter schwindelig.
+
+events:
+  - at: 90
+    when: {schocklage: false}
+    say:
+      - Patient: Ich will mal aufstehen … (wird wieder blass und schwankt)
+
+key_actions:
+  - label: Flach lagern / Beine hoch
+    any: [schocklage]
+    critical: true
+  - label: Kreislauf geprüft (Puls, Rekap)
+    all: [puls, rekap]
+  - label: Blutzucker gemessen
+    phase: full
+    any: [bz]
+  - label: Trinken/Zucker angeboten
+    phase: full
+    any: [glukose_geben]
+  - label: SAMPLER inkl. Herzbeschwerden und Risikofaktoren (Familie)
+    phase: full
+    all: [sample_vorerkrankung, sample_risiko]
+  - label: Reevaluation und begründete Abklärung
+    phase: full
+    all: [reevaluation, aufklaeren]

@@ -1,0 +1,145 @@
+id: x-kettensaege
+letter: x
+title: Kettensägen-Unfall
+teaser: Extreme Blutung am Bein
+dispatch: "Einsatzmeldung: Forstarbeiten, Person mit Schnittverletzung am Bein, stark blutend. Ein Kollege ist vor Ort."
+debrief_notes: >
+  Markus (45) hat eine spritzende Blutung am linken Oberschenkel innen. x zuerst: Tourniquet oder Druckverband/Abdrücken,
+  bevor irgendetwas anderes passiert. Ohne Blutstillung entwickelt sich rasch ein Schock. Danach Schocklage, Wärmeerhalt, RTW + NEF.
+
+conscious: true
+trauma: true
+bleeding: true
+request: {required: [RTW, NEF]}
+
+responses:
+  atmung_beurteilen:
+    - Befund: Atmung schnell, ca. 24/min, regelmäßig, keine Atemnot, er spricht hektisch.
+  alter_fragen:
+    - Patient: Fünfundvierzig … ist doch egal jetzt!
+  lage_pruefen:
+    - Befund: "Waldstück, nasskalt, Hanglage, rutschiger Boden mit Ästen. Die Kettensäge ist aus. Ein Betroffener, sein Kollege Jens drückt auf die Wunde. Große Blutlache. Der Betroffene ist ein Mann mittleren Alters, etwa Mitte vierzig."
+  blutung_pruefen:
+    - when: {blutung_stillen: false}
+      say:
+        - Befund: Tiefe Schnittwunde am linken Oberschenkel innen, hellrotes Blut spritzt pulsierend, die Hose ist durchtränkt.
+        - Umstehende: Ich krieg das nicht gestoppt!
+    - say:
+        - Befund: Die Blutung steht.
+  blutung_stillen:
+    - Kollege: (legt das Tourniquet oberhalb der Wunde an und zieht es fest)
+    - Befund: Nach dem Festziehen hört die Blutung auf. Markus schreit kurz vor Schmerz.
+    - Patient: Aaah! … Hört es auf?
+  vorstellen:
+    - Patient: Bitte, helft mir, das hört nicht auf!
+  was_passiert:
+    - Umstehende: Die Säge ist abgerutscht, direkt ins Bein. Vor vier Minuten etwa.
+  beschwerden_fragen:
+    - Patient: Das Bein! Und mir ist so schwindlig.
+  beruhigen:
+    - when: {blutung_stillen: false}
+      say:
+        - Patient: Wie soll ich ruhig bleiben, ich verblute!
+    - say:
+        - Patient: Okay … okay. Danke.
+  atemwege_freimachen:
+    - Befund: Atemwege frei, er spricht hektisch.
+  atmung_fragen:
+    - Patient: Luft geht … ich atme nur so schnell.
+  schmerz_atmen:
+    - Patient: Nein.
+  zyanose:
+    - Befund: Keine Zyanose, aber sehr blass.
+  af_zaehlen:
+    - Befund: Atemfrequenz 24.
+  spo2:
+    - Befund: SpO2 97 %.
+  auskultation:
+    - Befund: Atemgeräusch beidseits gleich, keine Nebengeräusche.
+  halsvenen:
+    - Befund: Halsvenen flach.
+  hautfarbe:
+    - Befund: Haut blass, kühl und schweißig.
+  puls:
+    - when: {blutung_stillen: false}
+      say:
+        - Befund: Radialispuls schnell, regelmäßig, schwach tastbar, ca. 124.
+    - say:
+        - Befund: Radialispuls schnell, regelmäßig, besser tastbar, ca. 112.
+  rekap:
+    - Befund: Rekap verzögert, ca. 4 Sekunden.
+  rr:
+    - when: {blutung_stillen: false}
+      say:
+        - Befund: RR 100/60.
+    - say:
+        - Befund: RR 105/65.
+  trauma_check:
+    - Befund: Bauch weich, Becken stabil, rechter Oberschenkel ohne Schwellung. Links die große Schnittwunde.
+  gcs:
+    - Befund: Wach, GCS 15, ängstlich, zunehmend unruhig.
+  orientierung:
+    - Patient: Markus … wir sind im Wald … was soll die Frage?
+  pupillen:
+    - Befund: Pupillen seitengleich, reagieren prompt.
+  bz:
+    - Befund: BZ 105 mg/dl.
+  dms:
+    - Patient: Ich spür den Fuß noch.
+  frieren_fragen:
+    - Patient: Ja … mir ist kalt.
+  decke:
+    - Kollege: (deckt Markus mit der Rettungsdecke zu)
+  temperatur:
+    - Befund: Temperatur 36,2 °C.
+  bodycheck:
+    - Befund: Keine weiteren Verletzungen, Kopf unverletzt.
+  schocklage:
+    - Befund: (liegt flach, Beine erhöht) Er wirkt etwas stabiler.
+  nicht_aufstehen:
+    - Patient: Ich kann eh nicht.
+  sample_allergie:
+    - Patient: Nein, keine.
+  sample_medikamente:
+    - Patient: Nehm ich nicht.
+  sample_vorerkrankung:
+    - Patient: Bin gesund.
+  sample_mahlzeit:
+    - Patient: Frühstück, vor drei Stunden.
+  wunde_versorgen:
+    - Kollege: (deckt die Wunde unterhalb des Tourniquets steril ab)
+  reevaluation:
+    - when: {blutung_stillen: true}
+      say:
+        - Befund: Tourniquet sitzt, keine Nachblutung. Puls 110, RR 105/65.
+    - say:
+        - Befund: Es blutet weiter stark.
+
+events:
+  - at: 20
+    when: {blutung_stillen: false}
+    say:
+      - Befund: Das Blut läuft weiter in Strömen, die Lache wird größer.
+  - at: 45
+    when: {blutung_stillen: false}
+    say:
+      - Patient: Mir wird schwarz vor Augen …
+    set: {schock: true}
+  - at: 90
+    when: {blutung_stillen: false}
+    say:
+      - Befund: Markus trübt ein, reagiert nur noch verlangsamt, die Haut ist grau.
+
+key_actions:
+  - label: Blutstillung (Tourniquet/Druckverband) vor allem anderen
+    any: [blutung_stillen]
+    critical: true
+    within: 45
+    before: [atmung_fragen, atmung_beurteilen, zyanose, hautfarbe, puls, rekap, orientierung, sample_allergie, sample_medikamente, trauma_check]
+  - label: Schocklage
+    any: [schocklage]
+  - label: Wärmeerhalt
+    any: [decke]
+  - label: Reevaluation der Blutstillung
+    phase: full
+    any: [reevaluation, puls, rr]
