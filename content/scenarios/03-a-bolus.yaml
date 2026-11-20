@@ -4,8 +4,8 @@ title: Bolusgeschehen im Restaurant
 teaser: Atemwegsverlegung
 dispatch: "Einsatzmeldung: Restaurant, Mann (62) hat sich beim Essen verschluckt, kann nicht mehr richtig atmen."
 debrief_notes: >
-  Herr Weber (62) hat ein Stück Steak verschluckt und bekommt kaum Luft – husten kann er deshalb nicht. Erwartet: sofort
-  5 Rückenschläge, dann 5 Oberbauchkompressionen im Wechsel (zum Husten auffordern bringt hier nichts und kostet Zeit). Ohne Hilfe wird er zyanotisch, dann bewusstlos (dann HLW).
+  Herr Weber (62) hat ein Stück Steak verschluckt: inkomplette Verlegung, Husten ineffektiv. Erwartet: Husten beurteilen/dazu auffordern,
+  5 Rückenschläge, dann 5 Oberbauchkompressionen im Wechsel. Ohne Hilfe wird er zyanotisch, dann bewusstlos (dann HLW).
   Auch bei Erfolg: Nachkontrolle und Transport (Verletzungen durch Heimlich möglich).
 
 conscious: true
@@ -48,7 +48,7 @@ responses:
   husten_auffordern:
     - when: {geloest: false}
       say:
-        - Befund: Er versucht es, bringt aber keine Luft heraus – nur ein pfeifendes Geräusch.
+        - Befund: Er hustet schwach, ohne Effekt. Pfeifendes Atemgeräusch.
     - say:
         - Patient: (hustet kräftig) Geht schon besser.
   rueckenschlaege:
@@ -184,7 +184,7 @@ events:
   - at: 40
     when: {geloest: false}
     say:
-      - Befund: Herr Weber wird zunehmend blau, das pfeifende Atemgeräusch wird leiser.
+      - Befund: Herr Weber wird zunehmend blau, der Husten wird schwächer.
   - at: 90
     when: {geloest: false}
     say:
@@ -192,6 +192,8 @@ events:
     set: {bewusstlos: true}
 
 key_actions:
+  - label: Husten beurteilt bzw. zum Husten aufgefordert
+    any: [husten_auffordern]
   - label: Rückenschläge
     any: [rueckenschlaege]
     critical: true
