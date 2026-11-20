@@ -35,7 +35,9 @@ class Intent:
     default: list[Variant]
     implies: list[str]
     overrides: list[str]
-    exclusive: bool = False   # wird er erkannt, entfallen alle anderen Intents der Äußerung
+    exclusive: bool = False
+    fallback: list[str] = field(default_factory=list)       # hat der Fall keine Antwort, die dieser Intents nehmen
+    unconscious: list[Variant] = field(default_factory=list)  # Antwort, wenn die Person bewusstlos ist   # wird er erkannt, entfallen alle anderen Intents der Äußerung
 
 
 @dataclass
@@ -106,9 +108,11 @@ def intents() -> dict[str, Intent]:
             implies=list(d.get("implies", [])),
             overrides=list(d.get("overrides", [])),
             exclusive=bool(d.get("exclusive", False)),
+            fallback=list(d.get("fallback", [])),
+            unconscious=_variants(d.get("unconscious"), f"intents.{iid}.unconscious"),
         )
     for i in out.values():
-        for ref in i.implies + i.overrides:
+        for ref in i.implies + i.overrides + i.fallback:
             if ref not in out:
                 raise ValueError(f"intents.{i.id}: unbekannter Intent {ref!r}")
     return out

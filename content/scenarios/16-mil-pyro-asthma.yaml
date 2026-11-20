@@ -15,8 +15,10 @@ request: {required: [RTW], optional: [NEF]}
 skip: [hws]
 
 responses:
+  alter_fragen:
+    - Patient: Neunund… zwanzig.
   lage_pruefen:
-    - Befund: "Stehplatzblock, dichte Rauchwolke, schlechte Sicht, laute Stimmung. Einige bengalische Feuer brennen noch, Funkenflug, Gedränge. Eine Betroffene sitzt am Rand auf einer Stufe, ihr Freund Ole sucht ihr Spray."
+    - Befund: "Stehplatzblock, dichte Rauchwolke, schlechte Sicht, laute Stimmung. Einige bengalische Feuer brennen noch, Funkenflug, Gedränge. Eine Betroffene sitzt am Rand auf einer Stufe, ihr Freund Ole sucht ihr Spray. Die Betroffene ist eine junge Frau, etwa Ende zwanzig."
   aus_gefahr_bringen:
     - Kollege: (hilft, Sophie aus dem Rauch in den Umlauf zu bringen)
     - Befund: An der frischen Luft wird der Hustenreiz etwas weniger.

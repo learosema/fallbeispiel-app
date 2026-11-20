@@ -15,7 +15,8 @@ from .content import Line, Scenario, Variant, intents
 
 ARRIVAL_SECONDS = 480  # Rettungsdienst trifft ca. 8 Minuten nach der Nachforderung ein
 FALLBACK = Line("Kollege", "Was genau machst du?")
-UNHANDLED = Line("Befund", "Dabei fällt nichts Besonderes auf.")
+# Erkannt, aber der Fall hat keine Antwort: lieber nachfragen als einen Befund erfinden.
+UNHANDLED = Line("Kollege", "Was genau meinst du?")
 
 RESOURCES = [  # (Kürzel, Muster) in der Reihenfolge, in der die Leitstelle sie wiederholt
     ("RTW", r"\brtw\b|rettungswagen|rettungsdienst"),
@@ -91,6 +92,22 @@ def pick(variants: list[Variant], state: dict[str, Any]) -> Variant | None:
     return next((v for v in variants if matches(v.when, state)), None)
 
 
+def respond(scenario: Scenario, iid: str, state: dict[str, Any]) -> Variant | None:
+    """Antwort auf einen Intent, in dieser Reihenfolge:
+    1. Antwort des Falls  2. bei Bewusstlosigkeit die allgemeine Antwort dafür („keine Reaktion“)
+    3. Antwort des Falls auf einen Ausweich-Intent („Atmung?“ → Atemkontrolle)  4. Standardantwort des Intents."""
+    cat = intents()
+    it = cat[iid]
+    v = pick(scenario.responses.get(iid, []), state)
+    if v is None and not scenario.conscious:
+        v = pick(it.unconscious, state)
+    for alt in it.fallback:
+        if v is not None:
+            break
+        v = pick(scenario.responses.get(alt, []), state)
+    return v or pick(it.default, state)
+
+
 # ---------- Funk ----------
 
 def funk(text: str, s: Settings, state: dict[str, Any], mode: str) -> tuple[list[Hit], list[Line], dict[str, Any]] | None:
@@ -112,7 +129,9 @@ def funk(text: str, s: Settings, state: dict[str, Any], mode: str) -> tuple[list
         "resources": resources, "kommen": kommen, "ende": ende, "ende_mit_rufname": ende and has_call,
         "anruf_und_meldung_zusammen": anruf and meldung,
         "patient": bool(re.search(r"patient|männlich|weiblich|\bmann\b|\bfrau\b|junge|mädchen|kind|person", t)),
-        "alter": bool(re.search(r"\d+|jahre|\bjahrig|mitte|anfang|ende (zwanzig|dreißig|dreissig|vierzig|fünfzig|fuenfzig|sechzig|siebzig|achtzig)", t)),
+        # ungefähr reicht: „älterer Mann“, „junge Frau“, „mittleren Alters“, „Mitte vierzig“, „68“
+        "alter": bool(re.search(r"\d+|jahre|\bjahrig|mitte|anfang|ende (zwanzig|dreißig|dreissig|vierzig|fünfzig|fuenfzig|sechzig|siebzig|achtzig)"
+                                r"|\bält|\balt\b|\bjung|jugendlich|mittleren alters|senior|kind|säugling|erwachsen", t)),
         "verdacht": bool(re.search(r"verdacht|vermutlich|wahrscheinlich|\bv\s?a\b", t)),
     }
     hits: list[Hit] = []
@@ -173,11 +192,10 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
             for h in hits:
                 if h.source == "implied":
                     continue
-                v = pick(scenario.responses.get(h.intent, []), state) or pick(catalogue[h.intent].default, state)
+                v = respond(scenario, h.intent, state)
                 if v is None:
                     unhandled.append(h.intent)
-                    if not scenario.responses.get(h.intent) and not catalogue[h.intent].default:
-                        lines.append(UNHANDLED)
+                    lines.append(UNHANDLED)
                     continue
                 lines += v.say
                 apply(v, t)

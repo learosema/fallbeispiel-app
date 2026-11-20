@@ -15,8 +15,14 @@ state: {geloest: false}
 skip: [hws, waerme]   # wach und im Warmen: Decke nicht nötig
 
 responses:
+  alter_fragen:
+    - when: {geloest: false}
+      say:
+        - Umstehende: Zweiundsechzig, glaube ich – er kann ja nicht reden!
+    - say:
+        - Patient: Zweiundsechzig.
   lage_pruefen:
-    - Befund: Restaurant, gut beleuchtet, viele Gäste, keine Gefahr. Ein Betroffener am Tisch, Umstehende drängen sich heran.
+    - Befund: "Restaurant, gut beleuchtet, viele Gäste, keine Gefahr. Ein Betroffener am Tisch, Umstehende drängen sich heran. Der Betroffene ist ein älterer Mann, etwa Anfang sechzig."
   blutung_pruefen:
     - Befund: Keine Blutung.
   vorstellen:

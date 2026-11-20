@@ -19,8 +19,22 @@ skip: [waerme]   # während der HLW stört eine Decke
 state: {aed_kommt: false, aed_dran: false, analyse_offen: false, beatmung_moeglich: false, absaug_bereit: false, o2_bereit: false, guedel: false, rd_da: false}
 
 responses:
+  rekap:
+    - Befund: Nicht beurteilbar – kein Kreislauf.
+  zyanose:
+    - Befund: Lippen und Gesicht blau-livide.
+  af_zaehlen:
+    - Befund: Keine eigene Atmung.
+  temperatur:
+    - Kollege: Nicht jetzt – wir drücken.
+  bodycheck:
+    - Befund: Keine äußeren Verletzungen.
+  trauma_check:
+    - Kollege: Nicht jetzt – wir drücken.
+  alter_fragen:
+    - Umstehende: Ich kenn ihn nicht … Anfang fünfzig?
   lage_pruefen:
-    - Befund: "Weg direkt am Wasser, trocken, 12 °C, etwa 20 Zuschauer, die Strecke ist hier gesperrt. Keine akute Gefahr, aber Gaffer drängen nach. Ein Betroffener liegt auf dem Weg."
+    - Befund: "Weg direkt am Wasser, trocken, 12 °C, etwa 20 Zuschauer, die Strecke ist hier gesperrt. Keine akute Gefahr, aber Gaffer drängen nach. Ein Betroffener liegt auf dem Weg. Der Betroffene ist ein sportlicher Mann, etwa Anfang fünfzig."
   blutung_pruefen:
     - Befund: Keine Blutung.
   vorstellen:

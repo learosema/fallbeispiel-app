@@ -16,8 +16,14 @@ request: {required: [RTW], optional: [NEF]}
 state: {krampft: true}
 
 responses:
+  alter_fragen:
+    - when: {krampft: true}
+      say:
+        - Umstehende: Vierundzwanzig!
+    - say:
+        - Patient: Vier… undzwanzig.
   lage_pruefen:
-    - Befund: "Winter-DOM, 2 °C, nasses Pflaster, laute Musik, dichtes Gedränge, viele Schaulustige. Ein Betroffener am Boden, seine Freundin Lea und Fremde stehen daneben."
+    - Befund: "Winter-DOM, 2 °C, nasses Pflaster, laute Musik, dichtes Gedränge, viele Schaulustige. Ein Betroffener am Boden, seine Freundin Lea und Fremde stehen daneben. Der Betroffene ist ein junger Mann, etwa Mitte zwanzig."
   platz_schaffen:
     - Umstehende: (die Leute weichen etwas zurück)
   blutung_pruefen:

@@ -14,8 +14,10 @@ breathing: normal
 request: {required: [RTW], optional: [NEF]}
 
 responses:
+  alter_fragen:
+    - Umstehende: Keine Ahnung, ich kenn ihn nicht. Ende fünfzig vielleicht?
   lage_pruefen:
-    - Befund: "Fischmarkt Altona, 6 °C, Nieselregen, nasse Bank und nasses Pflaster, viele Passanten, Verkehr in der Nähe. Ein Betroffener, der Passant Uwe ist bei ihm."
+    - Befund: "Fischmarkt Altona, 6 °C, Nieselregen, nasse Bank und nasses Pflaster, viele Passanten, Verkehr in der Nähe. Ein Betroffener, der Passant Uwe ist bei ihm. Der Betroffene ist ein Mann, etwa Ende fünfzig."
   blutung_pruefen:
     - Befund: Keine Blutung erkennbar.
   vorstellen:

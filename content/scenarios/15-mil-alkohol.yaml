@@ -14,8 +14,10 @@ trauma: true
 request: {required: [RTW], optional: [NEF]}
 
 responses:
+  alter_fragen:
+    - Patient: (lallt) Vierund… dreißig.
   lage_pruefen:
-    - Befund: "Stadionausgang nach Spielende, viele Menschen strömen vorbei, 4 °C, nasse Betontreppe, Rutschgefahr. Ein Betroffener sitzt zusammengesackt an der Wand, ein Ordner und sein Freund Hendrik sind bei ihm."
+    - Befund: "Stadionausgang nach Spielende, viele Menschen strömen vorbei, 4 °C, nasse Betontreppe, Rutschgefahr. Ein Betroffener sitzt zusammengesackt an der Wand, ein Ordner und sein Freund Hendrik sind bei ihm. Der Betroffene ist ein Mann, etwa Mitte dreißig."
   platz_schaffen:
     - Umstehende: (der Ordner lenkt den Strom um)
   blutung_pruefen:

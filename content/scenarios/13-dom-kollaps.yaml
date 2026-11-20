@@ -15,8 +15,10 @@ request: {required: [RTW]}
 skip: [hws, waerme]   # wach und im Warmen: Decke nicht nötig
 
 responses:
+  alter_fragen:
+    - Patient: Siebzehn.
   lage_pruefen:
-    - Befund: "Sommer-DOM, 28 °C, sonnig, sehr voll, laute Musik. Das Fahrgeschäft ist angehalten, das Personal hat Mira auf eine Bank neben dem Ausgang gesetzt. Gedränge am Ausgang. Ihre Freundin Ayla ist dabei."
+    - Befund: "Sommer-DOM, 28 °C, sonnig, sehr voll, laute Musik. Das Fahrgeschäft ist angehalten, das Personal hat Mira auf eine Bank neben dem Ausgang gesetzt. Gedränge am Ausgang. Ihre Freundin Ayla ist dabei. Die Betroffene ist eine Jugendliche, etwa sechzehn, siebzehn."
   blutung_pruefen:
     - Befund: Keine Blutung.
   vorstellen:

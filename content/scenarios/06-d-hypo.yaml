@@ -15,8 +15,14 @@ skip: [hws]
 state: {glukose: false}
 
 responses:
+  alter_fragen:
+    - when: {glukose: false}
+      say:
+        - Patient: Was? … Lassen Sie mich!
+    - say:
+        - Patient: Vierundfünfzig.
   lage_pruefen:
-    - Befund: Fußgängerzone, Vormittag, viele Passanten und Schaulustige, kein Verkehr. Eine Betroffene sitzt auf einer Bank, abwehrend, aber nicht gefährlich.
+    - Befund: "Fußgängerzone, Vormittag, viele Passanten und Schaulustige, kein Verkehr. Eine Betroffene sitzt auf einer Bank, abwehrend, aber nicht gefährlich. Die Betroffene ist eine Frau mittleren Alters, etwa Mitte fünfzig."
   blutung_pruefen:
     - Befund: Keine Blutung.
   vorstellen:

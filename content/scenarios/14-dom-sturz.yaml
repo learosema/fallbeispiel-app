@@ -16,8 +16,10 @@ request: {required: [RTW, NEF]}
 state: {gestaut: false}
 
 responses:
+  alter_fragen:
+    - Patient: Einund… dreißig.
   lage_pruefen:
-    - Befund: "DOM, Abend, dunkel, grelle Lichter, große Menschentraube. Das Fahrgeschäft ist per Not-Aus gestoppt, der Bereich um die Gondeln ist noch nicht freigegeben. Ein Betroffener liegt auf dem Pflaster neben der Absperrung, ca. 4 m tief gestürzt. Ein Mitarbeiter des Betreibers und sein Freund Tim sind da."
+    - Befund: "DOM, Abend, dunkel, grelle Lichter, große Menschentraube. Das Fahrgeschäft ist per Not-Aus gestoppt, der Bereich um die Gondeln ist noch nicht freigegeben. Ein Betroffener liegt auf dem Pflaster neben der Absperrung, ca. 4 m tief gestürzt. Ein Mitarbeiter des Betreibers und sein Freund Tim sind da. Der Betroffene ist ein junger Mann, etwa Anfang dreißig."
     - Umstehende: "(Mitarbeiter) Not-Aus ist drin, die Anlage steht. Ihr könnt hin."
   platz_schaffen:
     - Umstehende: (die Menge weicht zurück)

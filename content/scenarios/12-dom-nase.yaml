@@ -15,8 +15,10 @@ trauma: true
 request: {required: [RTW], optional: [NEF, Polizei]}
 
 responses:
+  alter_fragen:
+    - Patient: Achtundzwanzig, wieso?
   lage_pruefen:
-    - Befund: "DOM, spät abends, laut, viele Alkoholisierte. Die Beteiligten sind nicht mehr handgreiflich, aber die Stimmung ist aufgeheizt, Freunde drängeln. Der Schläger ist weg. Die Polizei kommt in ca. 5 Minuten."
+    - Befund: "DOM, spät abends, laut, viele Alkoholisierte. Die Beteiligten sind nicht mehr handgreiflich, aber die Stimmung ist aufgeheizt, Freunde drängeln. Der Schläger ist weg. Die Polizei kommt in ca. 5 Minuten. Der Betroffene ist ein junger Mann, etwa Ende zwanzig."
   polizei:
     - Kollege: (fragt über Funk nach, die Streife ist unterwegs)
   platz_schaffen:

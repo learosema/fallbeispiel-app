@@ -13,8 +13,10 @@ request: {required: [RTW, NEF]}
 skip: [hws, waerme]   # wach und im Warmen: Decke nicht nötig
 
 responses:
+  alter_fragen:
+    - Patient: Neun… zehn.
   lage_pruefen:
-    - Befund: Wohnung im 2. OG, hell, aufgeräumt, keine Gefahr. Eine Betroffene, ihre Mitbewohnerin ist da.
+    - Befund: "Wohnung im 2. OG, hell, aufgeräumt, keine Gefahr. Eine Betroffene, ihre Mitbewohnerin ist da. Die Betroffene ist eine junge Frau, etwa zwanzig."
   blutung_pruefen:
     - Befund: Keine Blutung.
   vorstellen:

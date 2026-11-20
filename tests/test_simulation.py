@@ -1,4 +1,6 @@
 """Tests für Inhalte, Engine und Auswertung – mit reinem Regex-Classifier (schnell, ohne Modell-Download)."""
+import re
+
 import pytest
 
 from backend import content, engine, evaluate
@@ -340,3 +342,52 @@ def test_blanket_still_expected_when_cold(clf):
     res = evaluate.evaluate(play(clf, "basis-sturz", ["hallo"]))
     waerme = next(it for it in res["sections"][0]["items"] if it["id"] == "waerme")
     assert waerme["status"] == evaluate.MISSING
+
+
+# ---------- Abdeckung: jede Kombination aus Fall und Intent hat eine Antwort ----------
+
+NO_REPLY_NEEDED = {"smalltalk", "funk_anruf", "funk_meldung", "funk_ende", "nachforderung"}
+
+
+@pytest.mark.parametrize("sid", list(content.scenarios()))
+def test_every_intent_has_an_answer(sid):
+    s = content.scenarios()[sid]
+    missing = [i for i in content.intents() if i not in NO_REPLY_NEEDED and engine.respond(s, i, dict(s.state)) is None]
+    assert not missing, f"{sid}: keine Antwort auf {missing}"
+
+
+def test_breathing_question_in_cpr_gives_breathing_finding(clf):
+    for text in ["Atmung?", "Kollege, wie beurteilst du die Atmung?", "wie ist die atmung"]:
+        run = play(clf, "bw-reanimation", [text])
+        assert said(run) == ["Keine normale Atmung, nur vereinzelte schnappende Atemzüge. Haut blass-livide."], (text, said(run))
+
+
+def test_patient_questions_to_unconscious_get_no_reaction(clf):
+    run = play(clf, "bw-seitenlage", ["wo tut es ihnen weh"])
+    assert said(run) == ["(keine Reaktion)"]
+
+
+def test_no_sugar_for_unconscious(clf):
+    run = play(clf, "bw-sommer", ["ich gebe ihm traubenzucker"])
+    assert "nichts in den Mund" in said(run)[0]
+
+
+@pytest.mark.parametrize("sid,expect", [("basis-sturz", "Achtundsechzig."), ("dom-fahrgeschaeft-kollaps", "Siebzehn."),
+                                        ("bw-reanimation", "Anfang fünfzig")])
+def test_age_question(clf, sid, expect):
+    run = play(clf, sid, ["wie alt sind sie?"])
+    assert [h.intent for h in run.turns[0].hits] == ["alter_fragen"]
+    assert expect in said(run)[0]
+
+
+@pytest.mark.parametrize("sid", list(content.scenarios()))
+def test_situation_mentions_rough_age(clf, sid):
+    lage = " ".join(said(play(clf, sid, ["wie ist die lage"])))
+    assert re.search(r"älter|jung|jugendlich|mittleren alters|etwa (anfang|mitte|ende) \w+|etwa \w+zig", lage, re.I), lage
+
+
+def test_rough_age_is_enough_for_radio(clf):
+    run = play(clf, "basis-sturz", ["rotkreuzhamburg von evt eins kommen",
+                                    "älterer mann gestürzt verdacht auf sht wir brauchen rtw kommen", "evt eins ende"])
+    funk = next(it for it in evaluate.evaluate(run)["sections"][0]["items"] if it["id"] == "funk")
+    assert "Alter" not in funk["note"], funk["note"]

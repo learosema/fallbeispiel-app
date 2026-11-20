@@ -17,8 +17,10 @@ bleeding: false
 request: {required: [RTW], optional: [NEF]}
 
 responses:
+  alter_fragen:
+    - Patient: Achtundsechzig.
   lage_pruefen:
-    - Befund: "Nasse, rutschige Stufen, leichter Regen, 5 °C, Tageslicht. Sonst keine Gefahr. Ein Betroffener, eine Passantin ist bei ihm."
+    - Befund: "Nasse, rutschige Stufen, leichter Regen, 5 °C, Tageslicht. Sonst keine Gefahr. Ein Betroffener, eine Passantin ist bei ihm. Der Betroffene ist ein älterer Mann, etwa Ende sechzig."
   blutung_pruefen:
     - Befund: Keine bedrohliche Blutung. Die rechte Handfläche ist aufgeschürft, an der Stirn eine Beule.
   vorstellen:

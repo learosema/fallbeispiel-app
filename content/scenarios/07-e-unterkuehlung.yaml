@@ -13,8 +13,10 @@ trauma: true
 request: {required: [RTW, NEF]}
 
 responses:
+  alter_fragen:
+    - Patient: Acht… undsechzig.
   lage_pruefen:
-    - Befund: Waldweg, Dämmerung, 3 °C, nasses Laub, rutschig, es wird bald dunkel. Ein Betroffener am Wegrand, ein Wanderer hat ihn gefunden.
+    - Befund: "Waldweg, Dämmerung, 3 °C, nasses Laub, rutschig, es wird bald dunkel. Ein Betroffener am Wegrand, ein Wanderer hat ihn gefunden. Der Betroffene ist ein älterer Mann, etwa Ende sechzig."
   blutung_pruefen:
     - Befund: Keine Blutung.
   vorstellen:

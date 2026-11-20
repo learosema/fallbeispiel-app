@@ -8,6 +8,9 @@
 #   implies   gilt automatisch mit als erledigt (ohne eigene Antwort)
 #   overrides wird dieser Intent erkannt, entfallen die genannten
 #   exclusive wird dieser Intent erkannt, entfallen alle anderen der Äußerung
+#   fallback  hat der Fall keine Antwort, gilt die Antwort des Falls auf diese Intents („Atmung?“ → Atemkontrolle)
+#   unconscious  Antwort, wenn die Person bewusstlos ist und der Fall selbst nichts festlegt
+# Reihenfolge: Antwort des Falls → unconscious → fallback → default → Kollege fragt nach.
 #
 # Die Funk-Intents (funk_anruf, funk_meldung, funk_ende) erkennt die Engine selbst anhand der Rufnamen.
 
@@ -174,6 +177,8 @@ vorstellen:
 
 was_passiert:
   label: Nach dem Hergang gefragt
+  unconscious:
+    - Befund: (keine Reaktion)
   patterns:
     - was ist (denn )?(passiert|los|geschehen)
     - was (war|ist) (denn )?los
@@ -222,6 +227,8 @@ schmerzreiz:
 
 beschwerden_fragen:
   label: Nach Beschwerden gefragt
+  unconscious:
+    - Befund: (keine Reaktion)
   patterns:
     - (wo |was )(tut|tuts|schmerzt)
     - tut (ihnen|dir|es|irgendwas|was|etwas) (irgendwo |sonst )?weh
@@ -284,6 +291,10 @@ absaugen:
 
 husten_auffordern:
   label: Zum Husten aufgefordert
+  default:
+    - Patient: (hustet kurz) Wieso? Ich hab mich nicht verschluckt.
+  unconscious:
+    - Befund: (keine Reaktion)
   patterns:
     - husten sie|hust(e|en)? (weiter|kräftig|fest)
     - kräftig husten|weiter husten
@@ -293,6 +304,10 @@ husten_auffordern:
 
 rueckenschlaege:
   label: Rückenschläge
+  default:
+    - Patient: Hey, was soll das? Ich hab mich nicht verschluckt!
+  unconscious:
+    - Befund: Keine Veränderung.
   patterns:
     - rückenschl
     - schl\w+ (kräftig )?(zwischen|auf) (die|den) schulterbl
@@ -306,6 +321,10 @@ rueckenschlaege:
 
 heimlich:
   label: Oberbauchkompression (Heimlich)
+  default:
+    - Patient: Au! Was machen Sie da?
+  unconscious:
+    - Befund: Keine Veränderung.
   patterns:
     - heimlich
     - oberbauch(kompression|stö|stoss|stöss)
@@ -316,10 +335,13 @@ heimlich:
 # ---------------------------------------------------------------- B
 atmung_fragen:
   label: „Bekommen Sie gut Luft?“
+  fallback: [atemkontrolle]   # „Atmung?“ beim Bewusstlosen = Atemkontrolle
   patterns:
     - (gut |genug |ausreichend )?luft\b
     - atemnot|luftnot|kurzatmig
     - wie (ist|geht) (die|ihre|deine|es mit der) atmung
+    - ^\W*atmung\W*$                       # „Atmung?“
+    - \b(wie|was) (\w+ ){0,3}(die |der )?atmung\b   # „Wie beurteilst du die Atmung?“
     - (können|kannst) (sie|du) (gut |normal |frei )?atmen
     - atmung (gut|normal|frei|unauffällig|ok|in ordnung)
     - atmet (normal|gut|ruhig|frei)
@@ -330,6 +352,8 @@ atmung_fragen:
 
 schmerz_atmen:
   label: Schmerzen beim Atmen
+  unconscious:
+    - Befund: (keine Reaktion)
   patterns:
     - schmerz\w* beim (ein|aus)?atmen
     - beim (ein|aus)?atmen (weh|schmerz)
@@ -341,6 +365,7 @@ schmerz_atmen:
 
 zyanose:
   label: Zyanose (Lippenfarbe)
+  fallback: [hautfarbe]
   patterns:
     - zyano
     - lippe
@@ -351,6 +376,7 @@ zyanose:
 
 af_zaehlen:
   label: Atemfrequenz
+  fallback: [atemkontrolle]
   patterns:
     - atemfrequenz
     - \baf\b
@@ -374,6 +400,8 @@ spo2:
 
 auskultation:
   label: Lunge abgehört (Auskultation)
+  default:
+    - Befund: Atemgeräusch beidseits gleich, keine Nebengeräusche.
   patterns:
     - abhör|abhören|\blunge\b
     - auskult
@@ -425,6 +453,8 @@ atemanweisung:
 
 halsvenen:
   label: Halsvenen beurteilt
+  default:
+    - Befund: Halsvenen nicht gestaut.
   patterns:
     - halsvene
     - gestaut
@@ -458,6 +488,8 @@ puls:
 
 rekap:
   label: Rekapillarisierungszeit
+  unconscious:
+    - Befund: Rekap-Zeit unter 2 Sekunden.
   patterns:
     - rekap|recap|re-kap
     - kapillar
@@ -476,6 +508,9 @@ rr:
 
 trauma_check:
   label: Trauma-Check (Bauch, Becken, Oberschenkel)
+  fallback: [bodycheck]
+  default:
+    - Befund: Bauch weich und schmerzfrei, Becken stabil, Oberschenkel ohne Schwellung.
   patterns:
     - trauma ?check
     - \btaste? (\w+ ){0,3}ab\b      # „ich taste sie ab“
@@ -513,16 +548,29 @@ nicht_aufstehen:
 # ---------------------------------------------------------------- D
 orientierung:
   label: Orientierung (Person, Ort, Zeit, Situation)
+  unconscious:
+    - Befund: (keine Reaktion)
   patterns:
     - wie heissen (sie|du)|wie heisst du|ihr name|dein name|wie ist ihr name
     - wo (sind|bist) (sie|du|wir)|wissen sie,? wo
     - welche?r? (tag|datum|jahr|monat|wochentag)|welches jahr
     - wissen sie,? (was|welcher|wie spät)
     - orientier
-    - wie alt sind sie|wie alt bist du|geburtsdatum|geburtstag
+    - geburtsdatum|geburtstag
   examples:
     - Wie heißen Sie und wissen Sie, wo wir gerade sind?
     - Welcher Tag ist heute?
+
+alter_fragen:
+  label: Nach dem Alter gefragt
+  patterns:
+    - wie alt (sind sie|bist du|ist er|ist sie|ist der|ist die)
+    - (ihr|dein|sein) alter
+    - alter\?
+  examples:
+    - Wie alt sind Sie denn?
+  unconscious:
+    - Umstehende: Keine Ahnung, wie alt er ist.
 
 gcs:
   label: Bewusstseinslage (GCS / AVPU)
@@ -556,6 +604,10 @@ bz:
 
 fast:
   label: FAST / neurologische Schnelltests
+  default:
+    - Befund: Gesicht symmetrisch, beide Arme werden gleich gehalten, Sprache klar.
+  unconscious:
+    - Befund: (keine Reaktion)
   patterns:
     - \bfast\b|be-?fast
     - lächeln
@@ -569,6 +621,10 @@ fast:
 
 glukose_geben:
   label: Zucker / Trinken angeboten
+  unconscious:
+    - Kollege: Er ist bewusstlos – nichts in den Mund.
+  default:
+    - Patient: (trinkt einen Schluck) Danke.
   patterns:
     - traubenzucker
     - (zucker|glukose|glucose|saft|cola|limo|wasser)\w* (geben|anbieten|trinken)
@@ -581,6 +637,9 @@ glukose_geben:
 
 krampf_dauer:
   label: Dauer des Anfalls erfasst
+  default:
+    - Umstehende: Seit ein paar Minuten.
+  fallback: [was_passiert]   # „Seit wann …?“ ohne Krampf = Frage nach dem Hergang
   patterns:
     - uhrzeit
     - zeit (stoppen|merken|notieren|nehmen|festhalten)
@@ -606,6 +665,10 @@ kopf_schuetzen:
 
 dms:
   label: Durchblutung, Motorik, Sensibilität (DMS)
+  default:
+    - Patient: Ja, ich spüre alles und kann alles bewegen.
+  unconscious:
+    - Befund: (keine Reaktion)
   patterns:
     - \bdms\b
     - kribbel|taubheit|taub\b
@@ -620,6 +683,8 @@ dms:
 # ---------------------------------------------------------------- E
 frieren_fragen:
   label: Nach Frieren gefragt
+  unconscious:
+    - Befund: (keine Reaktion)
   patterns:
     - \bkalt\b|frier|frös?t|zitter
     - warm genug
@@ -683,6 +748,8 @@ kuehlen:
 
 auge:
   label: Auge versorgt (nicht reiben, spülen/abdecken)
+  default:
+    - Befund: Keine Verletzung an den Augen, beide Pupillen seitengleich.
   patterns:
     - auge\w* (spülen|ausspülen|abdecken|anschauen|ansehen|untersuchen|verbinden)
     - (nicht|bitte nicht) (am auge )?reiben
@@ -693,6 +760,9 @@ auge:
 
 bodycheck:
   label: Ganzkörperuntersuchung
+  fallback: [trauma_check]
+  default:
+    - Befund: Keine weiteren Verletzungen zu finden.
   patterns:
     - body ?check
     - ganzkörper
@@ -706,6 +776,7 @@ bodycheck:
 
 temperatur:
   label: Körpertemperatur gemessen
+  fallback: [frieren_fragen]
   patterns:
     - temperatur
     - thermometer
@@ -807,6 +878,7 @@ sample_mahlzeit:
 # ---------------------------------------------------------------- Bewusstlosigkeit / Reanimation
 atemkontrolle:
   label: Atemkontrolle (sehen, hören, fühlen)
+  fallback: [af_zaehlen, atmung_fragen]   # beim Wachen: Befund zur Atmung
   patterns:
     - atemkontrolle
     - atmet (er|sie|der|die|das kind)\b
@@ -821,6 +893,8 @@ atemkontrolle:
 
 seitenlage:
   label: Stabile Seitenlage
+  default:
+    - Patient: Hinlegen? Ich bin doch wach.
   patterns:
     - seitenlage
     - auf die seite\b
@@ -867,6 +941,8 @@ hlw_30:
 
 hlw_details:
   label: HLW korrekt (Druckpunkt, Tiefe, Frequenz)
+  default:
+    - say: []
   patterns:
     - druckpunkt
     - mitte (des |vom )?brustkorb|brustbein|brustmitte
@@ -899,6 +975,8 @@ aed:
 
 schock_ausloesen:
   label: Schock ausgelöst
+  default:
+    - Kollege: Der AED ist gar nicht angeschlossen.
   patterns:
     - (?<!kein )\bschock\b(?! (empfohlen|wird))   # „Schock! Alle weg!“
     - schock\w* (aus|ab)?lös|lös\w* (den )?schock|schock (aus|ab)geben|schockknopf|schocktaste
@@ -962,6 +1040,8 @@ nachforderung:
 
 reevaluation:
   label: Reevaluation
+  default:
+    - Kollege: Was genau kontrollierst du?
   patterns:
     - reevalu|re-evalu
     - (nochmal|noch mal|erneut|wieder) (\w+ ){0,3}(messen|prüfen|kontrollieren|schauen|checken|untersuchen)

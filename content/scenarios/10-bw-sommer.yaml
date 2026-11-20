@@ -14,8 +14,10 @@ breathing: normal
 request: {required: [RTW], optional: [NEF]}
 
 responses:
+  alter_fragen:
+    - Umstehende: Der ist dreißig.
   lage_pruefen:
-    - Befund: "Elbstrand, 29 °C, Wind vom Wasser, viele Badegäste und Gaffer. Er liegt oberhalb der Wasserlinie auf feuchtem, kühlem Sand im Schatten eines Strandkorbs. Sein Freund Nils ist bei ihm."
+    - Befund: "Elbstrand, 29 °C, Wind vom Wasser, viele Badegäste und Gaffer. Er liegt oberhalb der Wasserlinie auf feuchtem, kühlem Sand im Schatten eines Strandkorbs. Sein Freund Nils ist bei ihm. Der Betroffene ist ein junger Mann, etwa dreißig."
   blutung_pruefen:
     - Befund: Keine Blutung.
   vorstellen:

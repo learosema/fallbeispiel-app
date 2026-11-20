@@ -13,8 +13,10 @@ bleeding: true
 request: {required: [RTW, NEF]}
 
 responses:
+  alter_fragen:
+    - Patient: Fünfundvierzig … ist doch egal jetzt!
   lage_pruefen:
-    - Befund: "Waldstück, nasskalt, Hanglage, rutschiger Boden mit Ästen. Die Kettensäge ist aus. Ein Betroffener, sein Kollege Jens drückt auf die Wunde. Große Blutlache."
+    - Befund: "Waldstück, nasskalt, Hanglage, rutschiger Boden mit Ästen. Die Kettensäge ist aus. Ein Betroffener, sein Kollege Jens drückt auf die Wunde. Große Blutlache. Der Betroffene ist ein Mann mittleren Alters, etwa Mitte vierzig."
   blutung_pruefen:
     - when: {blutung_stillen: false}
       say:

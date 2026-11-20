@@ -14,8 +14,10 @@ request: {required: [RTW, NEF]}
 skip: [hws]
 
 responses:
+  alter_fragen:
+    - Patient: Einundsiebzig.
   lage_pruefen:
-    - Befund: Wohnung, hell, keine Gefahr. Herr Krüger liegt im Flur vor dem Bad, seine Ehefrau ist bei ihm.
+    - Befund: "Wohnung, hell, keine Gefahr. Herr Krüger liegt im Flur vor dem Bad, seine Ehefrau ist bei ihm. Der Betroffene ist ein älterer Mann, etwa Anfang siebzig."
   blutung_pruefen:
     - Befund: Keine äußere Blutung.
   vorstellen:

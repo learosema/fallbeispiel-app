@@ -16,8 +16,10 @@ request: {required: [RTW]}
 skip: [hws]
 
 responses:
+  alter_fragen:
+    - Patient: Zweiundzwanzig.
   lage_pruefen:
-    - Befund: "Stehplatzbereich, ca. 5 °C, Rauchreste, Geruch nach verbranntem Kunststoff. Ein Rest der Fackel liegt noch qualmend am Boden. Gedränge, Ordner sichern ab. Ein Betroffener sitzt am Rand, sein Freund Finn ist dabei."
+    - Befund: "Stehplatzbereich, ca. 5 °C, Rauchreste, Geruch nach verbranntem Kunststoff. Ein Rest der Fackel liegt noch qualmend am Boden. Gedränge, Ordner sichern ab. Ein Betroffener sitzt am Rand, sein Freund Finn ist dabei. Der Betroffene ist ein junger Mann, etwa Anfang zwanzig."
   aus_gefahr_bringen:
     - Kollege: (schiebt den heißen Fackelrest mit dem Fuß beiseite und bringt Leon ein Stück weg)
   platz_schaffen:
