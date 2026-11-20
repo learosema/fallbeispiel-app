@@ -152,6 +152,7 @@ blutung_stillen:
     - (stille|stoppe) (die )?blutung
     - komprimier
     - wunde (aus)?tamponier|tamponade
+    - (kümmer|versorg)\w* (\w+ ){0,3}(die |der )?blutung
   examples:
     - Ich lege sofort ein Tourniquet oberhalb der Wunde an
     - Ich drücke die Wunde fest ab
@@ -760,7 +761,7 @@ kuehlen:
   examples:
     - Ich kühle den Arm mit lauwarmem Wasser
   default:
-    - Kollege: (holt ein Kühlpack aus dem Rucksack)
+    - Kollege: (holt ein Kühlpack aus dem Rucksack und kühlt)
 
 auge:
   label: Auge versorgt (nicht reiben, spülen/abdecken)
@@ -807,10 +808,12 @@ wunde_versorgen:
     - wundauflage|kompresse|pflaster
     - steril
     - wunde (abdecken|versorgen)
+    - versorg\w* (\w+ ){0,3}\w*wunde
+    - \w*wunde (\w+ ){0,2}(versorg|verbind|abdeck)
   examples:
     - Ich lege einen sterilen Verband auf die Wunde
   default:
-    - Kollege: (reicht das Verbandmaterial)
+    - Kollege: (versorgt die Wunde mit einem sterilen Verband)
 
 immobilisieren:
   label: Immobilisation (Stifneck, Vakuummatratze, Schiene)
@@ -824,7 +827,7 @@ immobilisieren:
   examples:
     - Wir legen den Halskragen an und nehmen die Vakuummatratze
   default:
-    - Kollege: (bereitet das Material zur Immobilisation vor)
+    - Kollege: (holt Stifneck bzw. Schiene und legt sie mit an)
 
 hws_manuell:
   label: Manuelle HWS-Stabilisierung
@@ -834,6 +837,7 @@ hws_manuell:
     - kopf (fest|ruhig)? ?(halten|fixieren|stabilisieren)
     - (halt|halte|fixier|stabilisier)\w* (bitte |mal )?(den )?kopf
     - manuell\w* (fixier|stabilis|immobil)
+    - (übernimm|nimm|halt)\w* (\w+ ){0,2}(den )?kopf
     - nicht den kopf bewegen|kopf nicht bewegen
   examples:
     - Kannst du bitte den Kopf festhalten?
@@ -864,7 +868,7 @@ sample_allergie:
 sample_medikamente:
   label: Medikamente
   patterns:
-    - medikament|medis\b|tablette|pillen?\b
+    - medikament|medis\b|tablette|\bpillen?\b
     - (nehmen|nimmst) (sie|du) (regelmässig )?(etwas|was)
     - blutverdünn|gerinnungshemm|marcumar
   examples:
@@ -982,7 +986,7 @@ hlw_details:
     - druckpunkt
     - mitte (des |vom )?brustkorb|brustbein|brustmitte
     - (5|fünf) bis (6|sechs)|zentimeter|\bcm\b
-    - (100|hundert) bis (120|hundertzwanzig)|frequenz
+    - (100|hundert) bis (120|hundertzwanzig)|druckfrequenz|frequenz (von )?(100|hundert)
     - entlast
   examples:
     - Druckpunkt Mitte Brustkorb, fünf bis sechs Zentimeter tief, hundert bis hundertzwanzig pro Minute

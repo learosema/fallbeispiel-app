@@ -443,3 +443,27 @@ def test_breathing_assessment_counts_for_checklist(clf):
     res = evaluate.evaluate(play(clf, "basis-sturz", ["Atmung?", "tut das atmen weh", "lippen"]))
     atmung = next(it for it in res["sections"][0]["items"] if it["id"] == "atmung")
     assert atmung["status"] == evaluate.OK
+
+
+@pytest.mark.parametrize("text,intent", [
+    ("Kollege, versorge die Wunde", "wunde_versorgen"),
+    ("Kollege, versorg bitte die Platzwunde", "wunde_versorgen"),
+    ("Kollege, übernimm den Kopf", "hws_manuell"),
+    ("kollege, kümmere dich um die blutung", "blutung_stillen"),
+    ("kannst du bitte den Blutdruck messen", "rr"),
+    ("miss mal den Blutzucker", "bz"),
+    ("leg ihm bitte eine Decke drüber", "decke"),
+    ("kannst du das bein schienen", "immobilisieren"),
+])
+def test_delegating_to_colleague(clf, text, intent):
+    assert intent in {h.intent for h in clf.classify(text)}, text
+
+
+@pytest.mark.parametrize("text,wrong", [("schau mal nach den pupillen", "sample_medikamente"),
+                                        ("zähl mal die atemfrequenz", "hlw_details")])
+def test_no_false_hits(clf, text, wrong):
+    assert wrong not in {h.intent for h in clf.classify(text)}
+
+
+def test_colleague_dresses_the_wound(clf):
+    assert said(play(clf, "dom-krampf", ["Kollege, versorge die Wunde"])) == ["(versorgt die Platzwunde am Hinterkopf mit Kompresse und Verband)"]

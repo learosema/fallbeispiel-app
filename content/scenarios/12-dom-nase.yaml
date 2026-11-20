@@ -30,7 +30,7 @@ responses:
   blutung_stillen:
     - Befund: Er drückt die Nasenflügel zusammen, das Bluten wird weniger.
   kuehlen:
-    - Kollege: (reicht ein Kühlpack für den Nacken)
+    - Kollege: (legt ein Kühlpack in den Nacken)
   vorstellen:
     - Patient: Was willst du? Mir geht's gut, ich will weiterfeiern.
   was_passiert:

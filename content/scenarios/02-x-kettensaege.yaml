@@ -27,7 +27,7 @@ responses:
     - say:
         - Befund: Die Blutung steht.
   blutung_stillen:
-    - Kollege: (reicht das Tourniquet)
+    - Kollege: (legt das Tourniquet oberhalb der Wunde an und zieht es fest)
     - Befund: Nach dem Festziehen hört die Blutung auf. Markus schreit kurz vor Schmerz.
     - Patient: Aaah! … Hört es auf?
   vorstellen:
@@ -107,7 +107,7 @@ responses:
   sample_mahlzeit:
     - Patient: Frühstück, vor drei Stunden.
   wunde_versorgen:
-    - Kollege: (legt eine Wundauflage bereit)
+    - Kollege: (deckt die Wunde unterhalb des Tourniquets steril ab)
   reevaluation:
     - when: {blutung_stillen: true}
       say:

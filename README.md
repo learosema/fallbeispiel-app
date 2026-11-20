@@ -36,8 +36,12 @@ heruntergeladen (~470 MB).
 Tests:
 
 ```sh
-uv run pytest
+uv run pytest                          # alles, inkl. Embedding-Modell
+INTENT_EMBEDDINGS=0 uv run pytest      # schnell, nur Regex
 ```
+
+Sätze, die in der Praxis falsch erkannt oder beantwortet wurden, gehören als Regressionstest in
+`tests/regressions.yaml` – ein Eintrag pro Satz mit erwarteten (und verbotenen) Intents bzw. Antworten.
 
 ## KI-Bewertung
 

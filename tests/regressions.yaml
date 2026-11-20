@@ -1,0 +1,109 @@
+# Regressionstests aus der Praxis: Sätze, die schon einmal falsch erkannt oder beantwortet wurden.
+# Neue Fälle einfach unten anhängen. Felder (alle außer text optional):
+#   text:      was gesagt/getippt wurde
+#   expect:    Intents, die erkannt werden müssen
+#   not:       Intents, die NICHT erkannt werden dürfen
+#   scenario:  Fall-ID, wenn die Antwort geprüft werden soll (Standard: basis-sturz)
+#   mode:      minute | full (Standard: minute)
+#   reply:     Text, der in der Antwort der Simulation vorkommen muss
+#   no_reply:  Text, der NICHT in der Antwort vorkommen darf
+#   vague:     true/false – soll die Äußerung als vage Befundsprache gelten?
+# Läuft zweimal: nur mit Regex (schnell) und mit dem Embedding-Modell (tests/test_embeddings.py).
+
+# ---- Untersuchungen
+- text: ich taste sie ab
+  expect: [trauma_check]
+  not: [bz, spo2]
+- text: ich taste ihn mal ab
+  expect: [trauma_check]
+- text: schau mal nach den pupillen
+  expect: [pupillen]
+  not: [sample_medikamente]
+- text: zähl mal die atemfrequenz
+  expect: [af_zaehlen]
+  not: [hlw_details]
+
+# ---- Atmung: Beurteilung (Befund) vs. Frage an den Patienten
+- text: Atmung?
+  expect: [atmung_beurteilen]
+  reply: Atmung ruhig und regelmäßig
+  no_reply: Luft bekomme ich gut
+- text: Kollege, wie beurteilst du die Atmung?
+  expect: [atmung_beurteilen]
+- text: Bekommen Sie gut Luft?
+  expect: [atmung_fragen]
+  reply: Luft bekomme ich gut
+- text: Atmung?
+  scenario: bw-reanimation
+  reply: Keine normale Atmung
+  no_reply: nichts Besonderes
+- text: bekommen sie gut luft?
+  scenario: bw-seitenlage
+  reply: (keine Reaktion)
+
+# ---- Alter
+- text: wie alt sind sie?
+  expect: [alter_fragen]
+  not: [orientierung]
+  reply: Achtundsechzig
+- text: Wie ist die Lage?
+  reply: älterer Mann
+
+# ---- Befundsprache: Fragen sind keine vagen Befunde
+- text: Puls?
+  expect: [puls]
+  vague: false
+- text: Rekap?
+  expect: [rekap]
+  vague: false
+- text: puls normal
+  vague: true
+- text: kreislauf ist im grünen bereich
+  vague: true
+
+# ---- Bolus
+- text: rücken klopfen
+  expect: [rueckenschlaege]
+  not: [bz, spo2]
+- text: rücken klopen
+  expect: [rueckenschlaege]
+- text: ich klopfe ihm kräftig auf den rücken
+  expect: [rueckenschlaege]
+  not: [decke]
+- text: wir legen ihn auf den rücken
+  not: [rueckenschlaege]
+
+# ---- Reanimation
+- text: 10 20 5 6 7 8 9 30
+  expect: [hlw, hlw_zaehlen, hlw_30]
+- text: zehn. zwanzig. fünf, sechs, sieben, acht, neun, dreißig
+  expect: [hlw_30]
+- text: 28, 29, 30
+  expect: [hlw_30]
+- text: um 9 30 ist er umgefallen
+  not: [hlw_zaehlen, hlw_30]
+- text: blutdruck 130 zu 80
+  not: [hlw_zaehlen, hlw_30]
+- text: Schock! Alle weg!
+  expect: [schock_ausloesen, schock_warnung]
+- text: kein schock empfohlen
+  not: [schock_ausloesen]
+
+# ---- Anweisungen an den Kollegen
+- text: Kollege, versorge die Wunde
+  expect: [wunde_versorgen]
+- text: Kollege, versorge die Wunde
+  scenario: dom-krampf
+  reply: versorgt die Platzwunde
+- text: Kollege, übernimm den Kopf
+  expect: [hws_manuell]
+- text: kollege, kümmere dich um die blutung
+  expect: [blutung_stillen]
+- text: kannst du das bein schienen
+  expect: [immobilisieren]
+
+# ---- Smalltalk wird nicht als Maßnahme gedeutet
+- text: okay alles klar
+  not: [platz_schaffen]
+- text: ich bin gleich wieder da
+  not: [platz_schaffen, spo2, lage_pruefen]

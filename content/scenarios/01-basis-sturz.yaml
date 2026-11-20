@@ -99,7 +99,7 @@ responses:
   bodycheck:
     - Befund: Beule an der Stirn, rechte Handfläche aufgeschürft, Prellung am Gesäß. Sonst keine Verletzungen.
   wunde_versorgen:
-    - Kollege: (reicht eine Kompresse für die Handfläche)
+    - Kollege: (deckt die aufgeschürfte Handfläche mit einer sterilen Kompresse ab)
   sample_allergie:
     - Patient: Allergien? Nein.
   sample_medikamente:

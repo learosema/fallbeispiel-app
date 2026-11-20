@@ -102,7 +102,7 @@ responses:
   immobilisieren:
     - Kollege: (holt Vakuummatratze und Schaufeltrage, bereitet den Stifneck vor)
   wunde_versorgen:
-    - Kollege: (reicht eine Kompresse für die Kopfwunde)
+    - Kollege: (deckt die Kopfwunde mit einer sterilen Kompresse ab)
   schocklage:
     - Patient: Aaah! Nicht bewegen!
     - Befund: Beim Umlagern fällt der Blutdruck weiter.

@@ -141,7 +141,7 @@ responses:
   bodycheck:
     - Befund: Platzwunde am Hinterkopf, Zungenbiss, eingenässt, durchnässt vom Boden. Sonst keine Verletzungen. Alkoholgeruch.
   wunde_versorgen:
-    - Kollege: (reicht Kompressen und Verband für den Hinterkopf)
+    - Kollege: (versorgt die Platzwunde am Hinterkopf mit Kompresse und Verband)
   sample_allergie:
     - Umstehende: Keine.
   sample_medikamente:
