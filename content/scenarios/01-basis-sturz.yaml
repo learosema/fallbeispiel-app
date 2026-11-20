@@ -104,6 +104,8 @@ responses:
     - Patient: Ich nehme einen Blutverdünner, Apixaban, wegen Vorhofflimmern. Und was für den Blutdruck.
   sample_vorerkrankung:
     - Patient: Vorhofflimmern und Bluthochdruck.
+  sample_risiko:
+    - Patient: Ich rauche nicht, trinke kaum. Nur das mit dem Herzen.
   sample_mahlzeit:
     - Patient: Gegessen hab ich vor drei Stunden.
   aufklaeren:
@@ -140,6 +142,8 @@ key_actions:
   - label: Wärmeerhalt (er friert)
     any: [decke]
   - label: Blutverdünner erfragt
+    phase: full
     any: [sample_medikamente]
   - label: Aufklärung, warum er nicht nach Hause gehen sollte
+    phase: full
     any: [aufklaeren]

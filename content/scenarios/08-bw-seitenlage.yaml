@@ -117,6 +117,7 @@ key_actions:
   - label: Wärmeerhalt
     any: [decke]
   - label: Atemkontrolle wiederholt / Reevaluation
+    phase: full
     any: [reevaluation]
   - label: Absaugbereitschaft
     any: [absaugen]

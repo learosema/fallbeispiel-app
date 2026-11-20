@@ -134,11 +134,15 @@ events:
 
 key_actions:
   - label: Blutzucker gemessen
+    phase: full
     any: [bz]
     critical: true
   - label: Neurologische Untersuchung (GCS/Orientierung, Pupillen, FAST)
+    phase: full
     all: [[gcs, orientierung], pupillen, fast]
   - label: Glukosegabe (bei erhaltenen Schutzreflexen)
+    phase: full
     any: [glukose_geben]
   - label: Reevaluation nach Glukose
+    phase: full
     any: [reevaluation]

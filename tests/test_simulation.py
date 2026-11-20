@@ -391,3 +391,21 @@ def test_rough_age_is_enough_for_radio(clf):
                                     "älterer mann gestürzt verdacht auf sht wir brauchen rtw kommen", "evt eins ende"])
     funk = next(it for it in evaluate.evaluate(run)["sections"][0]["items"] if it["id"] == "funk")
     assert "Alter" not in funk["note"], funk["note"]
+
+
+def test_full_case_key_actions_not_checked_in_first_minute(clf):
+    labels = [it["label"] for it in evaluate.evaluate(play(clf, "basis-sturz", GOOD_MINUTE))["sections"][-1]["items"]]
+    assert "Blutverdünner erfragt" not in labels
+    assert "Aufklärung, warum er nicht nach Hause gehen sollte" not in labels
+    assert "Manuelle HWS-Stabilisierung nach Sturz mit Kopfanprall" in labels
+    full = [it["label"] for it in evaluate.evaluate(play(clf, "basis-sturz", GOOD_MINUTE, mode="full"))["sections"][-1]["items"]]
+    assert "Blutverdünner erfragt" in full
+
+
+def test_sampler(clf):
+    assert "sample_risiko" in {h.intent for h in clf.classify("rauchen sie? gibt es herzkrankheiten in der familie?")}
+    assert "sample_mahlzeit" in {h.intent for h in clf.classify("wann war der letzte stuhlgang")}
+    lines = GOOD_MINUTE + ["was tut weh", "allergien", "medikamente", "vorerkrankungen", "wann zuletzt gegessen", "rauchen sie"]
+    res = evaluate.evaluate(play(clf, "basis-sturz", lines, mode="full"))
+    sampler = next(it for it in res["sections"][1]["items"] if it["id"] == "sample")
+    assert sampler["status"] == evaluate.OK and sampler["label"].startswith("SAMPLER")

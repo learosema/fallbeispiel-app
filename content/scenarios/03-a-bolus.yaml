@@ -202,4 +202,5 @@ key_actions:
     any: [heimlich]
     critical: true
   - label: Nachkontrolle und Transport trotz Erfolg
+    phase: full
     any: [aufklaeren, nachforderung]

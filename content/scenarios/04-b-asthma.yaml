@@ -113,9 +113,11 @@ key_actions:
   - label: Beruhigen und Atemanweisung
     any: [beruhigen, atemanweisung]
   - label: Sauerstoffgabe nach Sättigung
+    phase: full
     all: [spo2, sauerstoff]
     critical: true
   - label: Anaphylaxie ausgeschlossen (Haut, Schwellung)
+    phase: full
     any: [bodycheck, hautfarbe]
   - label: Notarzt nachgefordert
     any: [nachforderung]

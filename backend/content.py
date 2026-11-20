@@ -162,6 +162,8 @@ def _load_scenario(path: Path) -> Scenario:
         events.append(Event(float(e["at"]), e.get("since"), dict(e.get("when") or {}),
                             Variant(_lines(e.get("say"), f"{path.name}.events[{n}]"), {}, dict(e.get("set") or {})), repeat))
     for ka in d.get("key_actions") or []:
+        if ka.get("phase", "minute") not in ("minute", "full"):
+            raise ValueError(f"{path.name}: key_actions {ka.get('label')!r}: phase muss minute oder full sein")
         if ka.get("after") and ka["after"] not in known and ka["after"] not in flags:
             raise ValueError(f"{path.name}: key_actions {ka.get('label')!r}: after: weder Intent noch Flag: {ka['after']!r}")
         for ref in _item_refs(ka) + list(ka.get("before", [])):

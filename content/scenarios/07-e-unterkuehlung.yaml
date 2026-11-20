@@ -112,8 +112,10 @@ key_actions:
     any: [decke]
     critical: true
   - label: Nasse Kleidung entfernt
+    phase: full
     any: [nasse_kleidung]
   - label: Körpertemperatur gemessen
+    phase: full
     any: [temperatur]
   - label: Nicht aufstehen lassen / schonend lagern
     any: [nicht_aufstehen, immobilisieren]

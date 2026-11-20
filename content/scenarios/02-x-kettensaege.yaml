@@ -139,4 +139,5 @@ key_actions:
   - label: Wärmeerhalt
     any: [decke]
   - label: Reevaluation der Blutstillung
+    phase: full
     any: [reevaluation, puls, rr]

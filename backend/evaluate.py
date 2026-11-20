@@ -275,7 +275,9 @@ def evaluate(run: Run, embedder=None) -> dict[str, Any]:
     if run.mode == "full":
         full = [check_item(it, run) for it in alg["full"]]
         sections.append({"title": "xABCDE", "items": full})
-    keys = [check_key_action(ka, run) for ka in run.scenario.key_actions]
+    # Schlüsselmaßnahmen aus dem vollständigen ABCDE (phase: full, z. B. SAMPLER, BZ) zählen nicht in der 1. Minute
+    keys = [check_key_action(ka, run) for ka in run.scenario.key_actions
+            if run.mode == "full" or ka.get("phase", "minute") == "minute"]
     if keys:
         sections.append({"title": "SCHLÜSSELMASSNAHMEN", "items": keys})
 

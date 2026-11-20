@@ -92,6 +92,9 @@ responses:
     - Umstehende: Bluthochdruck. Und vor Jahren hatte er mal ein Magengeschwür.
   sample_mahlzeit:
     - Patient: Gestern Abend.
+    - Umstehende: Und sein Stuhl ist seit zwei Tagen ganz schwarz.
+  sample_risiko:
+    - Umstehende: Er nimmt seit Wochen Ibuprofen wegen dem Rücken. Und er trinkt abends gern mal ein Bier.
   reevaluation:
     - when: {schocklage: true}
       say:
@@ -120,4 +123,5 @@ key_actions:
   - label: Wärmeerhalt
     any: [decke]
   - label: Medikamente (Blutverdünner, Schmerzmittel) erfragt
+    phase: full
     any: [sample_medikamente]

@@ -125,4 +125,5 @@ key_actions:
   - label: Bewusstsein/Orientierung geprüft (SHT?)
     any: [gcs, orientierung]
   - label: Aufklärung / Ablehnung sauber geklärt
+    phase: full
     any: [aufklaeren]

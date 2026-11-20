@@ -7,7 +7,7 @@ dispatch: "Funkmeldung Millerntor: Ordner meldet einen Besucher auf der Treppe i
 debrief_notes: >
   Torben (34), ca. 2,5 Promille, Treppensturz mit Hämatom am Hinterkopf, GCS 11, BZ 52 mg/dl, Erbrochenes im Mund.
   Erwartet: Eigenschutz/Gedränge, Ansprache/Schmerzreiz, Atemwege frei, Seitenlage/Absaugbereitschaft, Messwerte, GCS/Pupillen,
-  BZ messen (Alkohol nicht als alleinige Erklärung), HWS bei Kopfanprall bedenken, Wärmeerhalt, SAMPLE, Rettungsdienst, nicht allein lassen.
+  BZ messen (Alkohol nicht als alleinige Erklärung), HWS bei Kopfanprall bedenken, Wärmeerhalt, SAMPLER, Rettungsdienst, nicht allein lassen.
 
 conscious: true
 trauma: true
@@ -111,6 +111,7 @@ key_actions:
     any: [seitenlage, absaugen]
     critical: true
   - label: Blutzucker gemessen
+    phase: full
     any: [bz]
     critical: true
   - label: HWS bei Sturz mit Kopfanprall bedacht

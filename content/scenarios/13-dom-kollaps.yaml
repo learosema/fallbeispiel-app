@@ -6,7 +6,7 @@ teaser: Schwarz vor Augen nach der Fahrt
 dispatch: "Funkmeldung DOM: Jugendliche ist nach dem Aussteigen aus einem Fahrgeschäft zusammengesackt, ansprechbar."
 debrief_notes: >
   Mira (17), vasovagale Synkope bei Hitze, wenig Trinken, Kreislaufbelastung. Erwartet: flach lagern/Beine hoch, nicht aufstehen lassen,
-  Puls/Rekap/RR, BZ, Trinken/Zucker anbieten, Hitze reduzieren, SAMPLE inkl. Familienanamnese und Herzsymptomen, Reevaluation,
+  Puls/Rekap/RR, BZ, Trinken/Zucker anbieten, Hitze reduzieren, SAMPLER inkl. Familienanamnese und Herzsymptomen, Reevaluation,
   begründete Entscheidung zur Abklärung, nicht allein lassen.
 
 conscious: true
@@ -101,8 +101,9 @@ responses:
   sample_medikamente:
     - Patient: Nur die Pille.
   sample_vorerkrankung:
-    - Patient: Nee. Mein Onkel hatte mal was mit dem Herzen.
-    - Patient: Herzrasen oder Brustschmerzen hatte ich nicht.
+    - Patient: Nee. Herzrasen oder Brustschmerzen hatte ich auch nicht.
+  sample_risiko:
+    - Patient: Mein Onkel hatte mal was mit dem Herzen. Sonst … nö.
   sample_mahlzeit:
     - Patient: Heute früh was. Dann nur 'nen Energydrink und Zuckerwatte.
   aufklaeren:
@@ -124,13 +125,17 @@ key_actions:
   - label: Flach lagern / Beine hoch
     any: [schocklage]
     critical: true
-  - label: Kreislauf geprüft (Puls, Rekap, RR)
-    all: [puls, rekap, rr]
+  - label: Kreislauf geprüft (Puls, Rekap)
+    all: [puls, rekap]
   - label: Blutzucker gemessen
+    phase: full
     any: [bz]
   - label: Trinken/Zucker angeboten
+    phase: full
     any: [glukose_geben]
-  - label: SAMPLE inkl. Herz-/Familienanamnese
-    any: [sample_vorerkrankung]
+  - label: SAMPLER inkl. Herzbeschwerden und Risikofaktoren (Familie)
+    phase: full
+    all: [sample_vorerkrankung, sample_risiko]
   - label: Reevaluation und begründete Abklärung
+    phase: full
     all: [reevaluation, aufklaeren]

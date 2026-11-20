@@ -135,12 +135,15 @@ key_actions:
     any: [hws_manuell]
     critical: true
   - label: B-Problem erkannt (Auskultation, SpO2, Halsvenen)
+    phase: full
     all: [auskultation, spo2, halsvenen]
   - label: Sauerstoffgabe
+    phase: full
     any: [sauerstoff]
   - label: Trauma-Check Bauch/Becken/Oberschenkel
     any: [trauma_check]
   - label: Wärmeerhalt
     any: [decke]
   - label: Strukturierte Übergabe
+    phase: full
     any: [uebergabe]

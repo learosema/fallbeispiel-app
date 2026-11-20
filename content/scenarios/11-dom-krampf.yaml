@@ -8,7 +8,7 @@ debrief_notes: >
   Jonas (24), bekannte Epilepsie, Medikament vergessen, Alkohol, Schlafmangel. Bei Eintreffen krampft er noch, danach postiktal.
   Platzwunde am Hinterkopf. Erwartet: Gedränge sichern, Anfallsdauer erfassen, nichts in den Mund, Kopf schützen; danach Atemkontrolle,
   Seitenlage bzw. Atemweg frei halten, Absaugbereitschaft, HWS bedenken (Kopfanprall), BZ, GCS/Orientierung, Wärmeerhalt (2 °C, nass),
-  Wunde versorgen, SAMPLE, Rettungsdienst nachfordern.
+  Wunde versorgen, SAMPLER, Rettungsdienst nachfordern.
 
 conscious: true
 trauma: true
@@ -172,8 +172,10 @@ key_actions:
     any: [seitenlage]
     critical: true
   - label: Blutzucker gemessen
+    phase: full
     any: [bz]
   - label: Wärmeerhalt (nass, kalt)
     any: [decke]
   - label: Platzwunde versorgt
+    phase: full
     any: [wunde_versorgen]

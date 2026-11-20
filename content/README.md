@@ -74,6 +74,9 @@ key_actions:                 # fallspezifische Schlüsselmaßnahmen für die Aus
   - label: Ab Beatmungsmöglichkeit laut bis 30 gezählt
     all: [hlw_zaehlen, hlw_30]
     after: beatmung_moeglich        # gilt erst ab diesem Flag/Intent; nie gesetzt → „–“
+  - label: Blutverdünner erfragt
+    any: [sample_medikamente]
+    phase: full                     # gehört ins E des ABCDE – im Modus „1. Minute“ nicht geprüft (Standard: minute)
 ```
 
 Sprecher: `Patient`, `Kollege`, `Umstehende`, `Befund`, `Leitstelle`, `AED`, `Rettungsdienst`.

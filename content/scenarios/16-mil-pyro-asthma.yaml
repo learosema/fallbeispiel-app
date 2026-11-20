@@ -7,7 +7,7 @@ dispatch: "Funkmeldung Millerntor: Im Stehplatzblock wurde Pyrotechnik gezündet
 debrief_notes: >
   Sophie (29), Asthma, Spray vergessen, Rauch im Block. Erwartet: Eigenschutz (Rauch, Funken, Gedränge), Patientin aus dem Rauch bringen,
   aufrecht lagern, Atemanweisung, O2, Pulsoxi (bei Rauch mit Vorsicht deuten), Auskultation, Heiserkeit/Rußspuren als Warnzeichen
-  (Inhalationstrauma?), SAMPLE inkl. Spray, Rettungsdienst nachfordern, Reevaluation.
+  (Inhalationstrauma?), SAMPLER inkl. Spray, Rettungsdienst nachfordern, Reevaluation.
 
 conscious: true
 trauma: false
@@ -117,8 +117,10 @@ key_actions:
   - label: Aufrechte Lagerung und Atemanweisung
     any: [oberkoerper_hoch, atemanweisung]
   - label: Sauerstoff nach SpO2
+    phase: full
     all: [spo2, sauerstoff]
   - label: Heiserkeit/Ruß als Warnzeichen geprüft
     any: [atemwege_freimachen]
   - label: Reevaluation
+    phase: full
     any: [reevaluation]

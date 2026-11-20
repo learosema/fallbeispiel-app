@@ -45,13 +45,13 @@ full:
   - {id: d, short: D, label: "D – Disability (Bewusstsein/Orientierung, Pupillen, Blutzucker)", all: [[gcs, orientierung], pupillen, bz]}
   - id: e
     short: E
-    label: E – Exposure/Environment (SAMPLE, Ganzkörperuntersuchung, Wärmeerhalt)
-    all: [[sample_allergie, sample_medikamente, sample_vorerkrankung, sample_mahlzeit, sample], bodycheck, decke]
+    label: E – Exposure/Environment (SAMPLER, Ganzkörperuntersuchung, Wärmeerhalt)
+    all: [[sample_allergie, sample_medikamente, sample_vorerkrankung, sample_mahlzeit, sample_risiko, sample], bodycheck, decke]
   - id: sample
-    short: SAMPLE
-    label: SAMPLE vollständig (Allergien, Medikamente, Vorerkrankungen, letzte Mahlzeit, Ereignis)
-    min: 4
-    of: [sample_allergie, sample_medikamente, sample_vorerkrankung, sample_mahlzeit, was_passiert]
+    short: SAMPLER
+    label: SAMPLER (Symptome, Allergien, Medikamente, Patientenvorgeschichte, Letzte Mahlzeit/Stuhlgang, Ereignis, Risikofaktoren)
+    min: 5
+    of: [beschwerden_fragen, sample_allergie, sample_medikamente, sample_vorerkrankung, sample_mahlzeit, was_passiert, sample_risiko]
   - {id: reevaluation, short: Reevaluation, label: "Reevaluation (erneut beurteilt bzw. wieder bei A begonnen)", special: reevaluation}
   - {id: uebergabe, short: Übergabe, label: "Strukturierte Übergabe an den Rettungsdienst", any: [uebergabe]}
 
@@ -77,7 +77,7 @@ reference: |
   B Breathing: Atmung beurteilen, Pulsoximetrie (mind. 94 %), O2-Gabe erwägen. Problem: Oberkörper hoch, Atemanweisungen, gestaute Halsvenen/Schockzeichen (Spannungspneumothorax?), Brustkorb-/Lungenverletzung: ggf. Lagerung auf verletzte Seite.
   C Circulation: Puls (80–100/min), Rekap-Zeit (max. 2 s), Blutdruck (ca. 120/80 mmHg). Problem: Ursache bekämpfen; Herzprobleme: Oberkörper hoch; akutes Abdomen: Beine angezogen; Volumenmangel: Schocklage.
   D Disability: Bewusstsein (wach / Ansprache / Schmerzreiz / bewusstlos), Orientierung zu Person, Situation, Ort, Zeit. Problem: Lagerung i. d. R. Oberkörper hoch; Schlaganfall? FAST (Face, Arm, Speech, Time).
-  E Exposure/Environment: SAMPLE-Anamnese, Ganzkörperuntersuchung inkl. DMS, Wärmeerhaltung bei Auskühlungsgefahr (Kälte, Nässe, Schock, Liegen am Boden – auch im Sommer möglich; Isolation vom Boden). Nicht nötig bei wachen Patient:innen im Warmen, nicht während einer HLW. Problem: Schaufeltrage/Spineboard/Vakuummatratze; Extremitätenverletzung: Immobilisieren (Schiene); Wunde: steriler Verband.
+  E Exposure/Environment: SAMPLER-Anamnese (Symptome, Allergien, Medikamente, Patientenvorgeschichte, Letzte Mahlzeit/Stuhlgang, Ereignis, Risikofaktoren) – erst hier, nicht in der 1. Minute, Ganzkörperuntersuchung inkl. DMS, Wärmeerhaltung bei Auskühlungsgefahr (Kälte, Nässe, Schock, Liegen am Boden – auch im Sommer möglich; Isolation vom Boden). Nicht nötig bei wachen Patient:innen im Warmen, nicht während einer HLW. Problem: Schaufeltrage/Spineboard/Vakuummatratze; Extremitätenverletzung: Immobilisieren (Schiene); Wunde: steriler Verband.
   Nach Abschluss von E wieder bei A beginnen: Diagnostik und Maßnahmen fortführen (Reevaluation).
 
 # Befundsprache: Ein Teilsatz über einen Befund gilt als „vage“, wenn er diesen Beispielen per Embedding

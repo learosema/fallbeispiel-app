@@ -229,6 +229,8 @@ key_actions:
     any: [schock_warnung]
     before: [schock_ausloesen]
   - label: Helferwechsel
+    phase: full
     any: [helferwechsel]
   - label: Strukturierte Übergabe an RTW/NEF
+    phase: full
     any: [uebergabe]

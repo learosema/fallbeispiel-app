@@ -7,7 +7,7 @@ dispatch: "Funkmeldung: Elbstrand, Sommerabend, ein Mann liegt reglos im Sand, F
 debrief_notes: >
   Mann (ca. 30), stark alkoholisiert, bewusstlos (GCS 8), atmet normal. Erwartet: Eigenschutz (Wasser, Gaffer), Ansprechen/Schmerzreiz,
   Atemwege frei, Atemkontrolle, stabile Seitenlage, Nachforderung, Absaugbereitschaft, BZ/SpO2/Puls/Temperatur,
-  Wärmeerhalt trotz 29 °C (feuchter Sand, Wind, Alkohol), SAMPLE vom Freund, Atemkontrolle wiederholen.
+  Wärmeerhalt trotz 29 °C (feuchter Sand, Wind, Alkohol), SAMPLER vom Freund, Atemkontrolle wiederholen.
 
 conscious: false
 breathing: normal
@@ -116,7 +116,9 @@ key_actions:
     any: [decke]
     critical: true
   - label: BZ gemessen
+    phase: full
     any: [bz]
-  - label: SAMPLE vom Freund
-    min: 2
-    of: [sample_allergie, sample_medikamente, sample_vorerkrankung, sample_mahlzeit]
+  - label: SAMPLER vom Freund
+    phase: full
+    min: 3
+    of: [sample_allergie, sample_medikamente, sample_vorerkrankung, sample_mahlzeit, was_passiert, sample_risiko]

@@ -825,13 +825,15 @@ hws_manuell:
   default:
     - Kollege: (kniet sich hinter den Kopf und übernimmt die manuelle HWS-Stabilisierung)
 
-# ---------------------------------------------------------------- SAMPLE
+# ---------------------------------------------------------------- SAMPLER
+# Symptome (beschwerden_fragen), Allergien, Medikamente, Patientenvorgeschichte,
+# Letzte Mahlzeit/Stuhlgang, Ereignis (was_passiert), Risikofaktoren
 sample:
-  label: SAMPLE-Anamnese
+  label: SAMPLER-Anamnese
   patterns:
     - \bsampler?\b
   examples:
-    - Ich mache jetzt die SAMPLE-Anamnese
+    - Ich mache jetzt die SAMPLER-Anamnese
   default:
     - Kollege: Was fragst du genau?
 
@@ -865,8 +867,9 @@ sample_vorerkrankung:
     - Sind Sie sonst gesund?
 
 sample_mahlzeit:
-  label: Letzte Mahlzeit / Getränke
+  label: Letzte Mahlzeit / Stuhlgang / Wasserlassen
   patterns:
+    - stuhlgang|stuhl\b|wasserlassen|urin|ausscheidung|auf (der )?toilette
     - gegessen|getrunken
     - letzte (mahlzeit|nahrung|essen)
     - mahlzeit
@@ -874,6 +877,22 @@ sample_mahlzeit:
     - was (haben sie|hast du) (heute )?(gegessen|getrunken)
   examples:
     - Wann haben Sie zuletzt etwas gegessen?
+
+sample_risiko:
+  label: Risikofaktoren
+  patterns:
+    - risikofaktor
+    - rauchen sie|rauchst du|raucher
+    - schwanger
+    - (in der )?familie\w*|familiär|erblich|vererb
+    - übergewicht
+  examples:
+    - Gibt es Herzerkrankungen in Ihrer Familie?
+    - Rauchen Sie?
+  default:
+    - Patient: Nicht dass ich wüsste.
+  unconscious:
+    - Umstehende: Weiß ich nicht.
 
 # ---------------------------------------------------------------- Bewusstlosigkeit / Reanimation
 atemkontrolle:

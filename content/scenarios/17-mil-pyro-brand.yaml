@@ -7,7 +7,7 @@ dispatch: "Funkmeldung Millerntor: Besucher hat sich bei Pyrotechnik verbrannt, 
 debrief_notes: >
   Leon (22), Verbrennung 2. Grades linker Unterarm (4–5 % KOF), angeschmolzene Jacke, Funkenpartikel im linken Auge, leichte Heiserkeit.
   Erwartet: Eigenschutz (Rest-Pyro), angeschmolzene Kleidung nicht abreißen, kühlen (lauwarm, zeitlich begrenzt, Auskühlung bei 5 °C beachten),
-  steriler Verband, Auge nicht reiben, vorsichtig spülen/abdecken, Sehen erfragen, Heiserkeit beobachten, Wärmeerhalt, SAMPLE inkl. Tetanus,
+  steriler Verband, Auge nicht reiben, vorsichtig spülen/abdecken, Sehen erfragen, Heiserkeit beobachten, Wärmeerhalt, SAMPLER inkl. Tetanus,
   Rettungsdienst/Augenabklärung.
 
 conscious: true
@@ -115,14 +115,18 @@ key_actions:
   - label: Angeschmolzene Kleidung belassen (nicht abreißen)
     any: [kleidung_belassen]
   - label: Kühlen (lauwarm, zeitlich begrenzt)
+    phase: full
     any: [kuehlen]
     critical: true
   - label: Steriler Verband
+    phase: full
     any: [wunde_versorgen]
   - label: Auge versorgt (nicht reiben, spülen/abdecken)
+    phase: full
     any: [auge]
     critical: true
   - label: Wärmeerhalt trotz Kühlung
     any: [decke]
   - label: Heiserkeit beobachtet / Reevaluation
+    phase: full
     any: [reevaluation, atemwege_freimachen]
