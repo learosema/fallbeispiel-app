@@ -16,6 +16,12 @@ request: {required: [RTW], optional: [NEF]}
 state: {krampft: true}
 
 responses:
+  atmung_beurteilen:
+    - when: {krampft: true}
+      say:
+        - Befund: Während des Krampfs unregelmäßige Atmung, Schaum vor dem Mund.
+    - say:
+        - Befund: Atmung ca. 22/min, anfangs schnarchend, Blut und Schaum im Mund.
   alter_fragen:
     - when: {krampft: true}
       say:

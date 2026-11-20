@@ -15,6 +15,15 @@ state: {geloest: false}
 skip: [hws, waerme]   # wach und im Warmen: Decke nicht nötig
 
 responses:
+  atmung_beurteilen:
+    - when: {bewusstlos: true}
+      say:
+        - Befund: Keine normale Atmung.
+    - when: {geloest: false}
+      say:
+        - Befund: Atmung angestrengt, pfeifendes Geräusch beim Einatmen, kaum Luftbewegung, er kann nicht sprechen.
+    - say:
+        - Befund: Atmung frei, ca. 22/min, noch etwas schnell, er spricht wieder.
   alter_fragen:
     - when: {geloest: false}
       say:

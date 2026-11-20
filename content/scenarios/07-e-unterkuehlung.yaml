@@ -13,6 +13,8 @@ trauma: true
 request: {required: [RTW, NEF]}
 
 responses:
+  atmung_beurteilen:
+    - Befund: Atmung langsam und flach, ca. 10/min.
   alter_fragen:
     - Patient: Acht… undsechzig.
   lage_pruefen:

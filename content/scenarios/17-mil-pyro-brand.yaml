@@ -16,6 +16,8 @@ request: {required: [RTW]}
 skip: [hws]
 
 responses:
+  atmung_beurteilen:
+    - Befund: Atmung ruhig, ca. 20/min, keine Atemnot, leichte Heiserkeit.
   alter_fragen:
     - Patient: Zweiundzwanzig.
   lage_pruefen:

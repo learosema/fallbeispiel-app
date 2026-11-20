@@ -14,7 +14,7 @@ minute_conscious:
   - {id: blutung, short: Blutung, label: "Bedrohliche Blutung geprüft", any: [blutung_pruefen]}
   - {id: ansprache, short: Ansprache, label: "Vorstellung und Ansprache (Hallo, wir sind vom DRK, was ist passiert?)", all: [vorstellen, was_passiert]}
   - {id: hws, short: HWS, label: "HWS bei Trauma (manuelle Stabilisierung)", any: [hws_manuell], only: trauma}
-  - {id: atmung, short: Atmung, label: "Atmung (Luft? Schmerzen beim Atmen? Zyanose?)", all: [atmung_fragen, schmerz_atmen, zyanose]}
+  - {id: atmung, short: Atmung, label: "Atmung (Luft? Schmerzen beim Atmen? Zyanose?)", all: [[atmung_fragen, atmung_beurteilen], schmerz_atmen, zyanose]}
   - id: kreislauf
     short: Kreislauf
     label: Kreislauf (Hautfarbe, Puls, Rekap-Zeit, bei Trauma Bauch/Becken/Oberschenkel)
@@ -31,7 +31,7 @@ minute_unconscious:
   - {id: blutung, short: Blutung, label: "Bedrohliche Blutung geprüft", any: [blutung_pruefen]}
   - {id: ansprechen, short: Ansprechen, label: "Laut ansprechen, anfassen, ggf. Schmerzreiz", any: [laut_ansprechen, schmerzreiz]}
   - {id: atemwege, short: Atemwege, label: "Atemwege freimachen (Kopf überstrecken, Kinn anheben)", any: [atemwege_freimachen]}
-  - {id: atemkontrolle, short: Atemkontrolle, label: "Atemkontrolle (sehen, hören, fühlen, max. 10 s)", any: [atemkontrolle]}
+  - {id: atemkontrolle, short: Atemkontrolle, label: "Atemkontrolle (sehen, hören, fühlen, max. 10 s)", any: [atemkontrolle, atmung_beurteilen]}
   - {id: seitenlage, short: Seitenlage, label: "Atmung normal: stabile Seitenlage", any: [seitenlage], only: breathing_normal}
   - {id: hlw, short: HLW, label: "Atmung nicht normal: sofort HLW 30:2", any: [hlw], only: breathing_abnormal}
   - {id: waerme, short: Wärme, label: "Wärmeerhalt (Decke, Isolation vom Boden)", any: [decke]}
@@ -39,7 +39,7 @@ minute_unconscious:
 
 full:
   - {id: x, short: x, label: "x – Extreme Blutung", any: [blutung_pruefen], extra: {bleeding: [blutung_stillen]}}
-  - {id: a, short: A, label: "A – Airway (Atemwege beurteilt)", any: [atemwege_freimachen, atemkontrolle, atmung_fragen]}
+  - {id: a, short: A, label: "A – Airway (Atemwege beurteilt)", any: [atemwege_freimachen, atemkontrolle, atmung_fragen, atmung_beurteilen]}
   - {id: b, short: B, label: "B – Breathing (Atemfrequenz, SpO2, Auskultation)", all: [af_zaehlen, spo2, auskultation]}
   - {id: c, short: C, label: "C – Circulation (Puls, Blutdruck, Rekap-Zeit)", all: [puls, rr, rekap]}
   - {id: d, short: D, label: "D – Disability (Bewusstsein/Orientierung, Pupillen, Blutzucker)", all: [[gcs, orientierung], pupillen, bz]}

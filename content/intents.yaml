@@ -333,22 +333,38 @@ heimlich:
     - Ich mache jetzt den Heimlich-Handgriff
 
 # ---------------------------------------------------------------- B
+# Zwei verschiedene Dinge: die Frage an den Patienten („Bekommen Sie gut Luft?“) und die eigene
+# Beurteilung der Atmung („Atmung?“, „Wie ist die Atmung?“) – die liefert einen Befund.
 atmung_fragen:
   label: „Bekommen Sie gut Luft?“
-  fallback: [atemkontrolle]   # „Atmung?“ beim Bewusstlosen = Atemkontrolle
   patterns:
     - (gut |genug |ausreichend )?luft\b
     - atemnot|luftnot|kurzatmig
-    - wie (ist|geht) (die|ihre|deine|es mit der) atmung
-    - ^\W*atmung\W*$                       # „Atmung?“
-    - \b(wie|was) (\w+ ){0,3}(die |der )?atmung\b   # „Wie beurteilst du die Atmung?“
     - (können|kannst) (sie|du) (gut |normal |frei )?atmen
-    - atmung (gut|normal|frei|unauffällig|ok|in ordnung)
-    - atmet (normal|gut|ruhig|frei)
+    - wie geht es (ihnen |dir )?mit (dem atmen|der atmung)
+    - (haben|hast) (sie|du) (\w+ ){0,2}(probleme|schwierigkeiten|mühe) (beim|mit dem) atmen
   examples:
     - Bekommen Sie gut Luft?
     - Haben Sie Probleme beim Atmen?
-    - Atmung ist unauffällig
+    - Können Sie normal atmen?
+  unconscious:
+    - Befund: (keine Reaktion)
+
+atmung_beurteilen:
+  label: Atmung beurteilt (Frequenz, Atemarbeit, Geräusche)
+  fallback: [atemkontrolle, af_zaehlen]   # beim Bewusstlosen = Atemkontrolle
+  patterns:
+    - ^\W*(und |die )?atmung\W*$                      # „Atmung?“
+    - \b(wie|was) (\w+ ){0,3}(die |der )?atmung\b     # „Wie ist / beurteilst du die Atmung?“
+    - atmung (beurteilen|beurteile|anschauen|ansehen|checken|prüfen)
+    - (beurteile|schaue?|guck\w*|prüfe) (\w+ ){0,2}(die )?atmung
+    - atmung (gut|normal|frei|unauffällig|ok|in ordnung|ruhig|schnell|flach|angestrengt)
+    - atmet (normal|gut|ruhig|frei|schnell|flach)
+    - atemarbeit|atemhilfsmuskulatur|atemmuster
+  examples:
+    - Wie ist die Atmung?
+    - Ich beurteile die Atmung
+    - Atmung ruhig und regelmäßig
 
 schmerz_atmen:
   label: Schmerzen beim Atmen

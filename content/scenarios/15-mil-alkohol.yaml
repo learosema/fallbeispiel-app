@@ -14,6 +14,12 @@ trauma: true
 request: {required: [RTW], optional: [NEF]}
 
 responses:
+  atmung_beurteilen:
+    - when: {absaugen: false}
+      say:
+        - Befund: Atmung langsam und flach, ca. 12/min, gurgelnd – Erbrochenes im Mund.
+    - say:
+        - Befund: Atmung langsam und flach, ca. 12/min, nach dem Absaugen frei.
   alter_fragen:
     - Patient: (lallt) Vierund… dreißig.
   lage_pruefen:

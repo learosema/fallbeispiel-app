@@ -13,6 +13,8 @@ bleeding: true
 request: {required: [RTW, NEF]}
 
 responses:
+  atmung_beurteilen:
+    - Befund: Atmung schnell, ca. 24/min, regelmäßig, keine Atemnot, er spricht hektisch.
   alter_fragen:
     - Patient: Fünfundvierzig … ist doch egal jetzt!
   lage_pruefen:
@@ -133,7 +135,7 @@ key_actions:
     any: [blutung_stillen]
     critical: true
     within: 45
-    before: [atmung_fragen, zyanose, hautfarbe, puls, rekap, orientierung, sample_allergie, sample_medikamente, trauma_check]
+    before: [atmung_fragen, atmung_beurteilen, zyanose, hautfarbe, puls, rekap, orientierung, sample_allergie, sample_medikamente, trauma_check]
   - label: Schocklage
     any: [schocklage]
   - label: Wärmeerhalt

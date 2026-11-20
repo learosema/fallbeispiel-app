@@ -14,6 +14,8 @@ request: {required: [RTW, NEF]}
 skip: [hws]
 
 responses:
+  atmung_beurteilen:
+    - Befund: Atmung etwas schnell, ca. 22/min, regelmäßig, keine Atemnot.
   alter_fragen:
     - Patient: Einundsiebzig.
   lage_pruefen:

@@ -16,6 +16,12 @@ request: {required: [RTW, NEF]}
 state: {gestaut: false}
 
 responses:
+  atmung_beurteilen:
+    - when: {gestaut: false}
+      say:
+        - Befund: Atmung schnell und flach, ca. 30/min, rechts weniger Brustkorbbewegung, er hält sich die rechte Seite.
+    - say:
+        - Befund: Atmung sehr schnell, ca. 34/min, zunehmende Atemnot, die rechte Brustseite bewegt sich kaum.
   alter_fragen:
     - Patient: Einund… dreißig.
   lage_pruefen:

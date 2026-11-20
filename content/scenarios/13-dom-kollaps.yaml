@@ -15,6 +15,8 @@ request: {required: [RTW]}
 skip: [hws, waerme]   # wach und im Warmen: Decke nicht nötig
 
 responses:
+  atmung_beurteilen:
+    - Befund: Atmung ruhig und regelmäßig, ca. 20/min, keine Atemnot.
   alter_fragen:
     - Patient: Siebzehn.
   lage_pruefen:

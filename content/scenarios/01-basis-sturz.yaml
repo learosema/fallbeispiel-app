@@ -17,6 +17,8 @@ bleeding: false
 request: {required: [RTW], optional: [NEF]}
 
 responses:
+  atmung_beurteilen:
+    - Befund: Atmung ruhig und regelmäßig, ca. 16/min, keine Atemnot, er spricht in ganzen Sätzen.
   alter_fragen:
     - Patient: Achtundsechzig.
   lage_pruefen:

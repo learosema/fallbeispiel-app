@@ -15,6 +15,8 @@ trauma: true
 request: {required: [RTW], optional: [NEF, Polizei]}
 
 responses:
+  atmung_beurteilen:
+    - Befund: Atmung ca. 20/min durch den Mund, gurgelndes Geräusch, wenn er den Kopf nach hinten nimmt – Blut im Rachen.
   alter_fragen:
     - Patient: Achtundzwanzig, wieso?
   lage_pruefen:

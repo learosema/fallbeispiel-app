@@ -13,6 +13,12 @@ request: {required: [RTW, NEF]}
 skip: [hws, waerme]   # wach und im Warmen: Decke nicht nötig
 
 responses:
+  atmung_beurteilen:
+    - when: {sauerstoff: false}
+      say:
+        - Befund: Atmung angestrengt, ca. 30/min, Einsatz der Atemhilfsmuskulatur, Pfeifen und verlängertes Ausatmen, sie spricht nur in Halbsätzen.
+    - say:
+        - Befund: Atmung weiter angestrengt, ca. 26/min, etwas ruhiger, längere Sätze möglich.
   alter_fragen:
     - Patient: Neun… zehn.
   lage_pruefen:

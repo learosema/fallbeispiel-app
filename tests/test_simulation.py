@@ -420,3 +420,26 @@ def test_questions_and_examinations_are_not_vague(clf, text):
 def test_stated_vague_finding_still_flagged(clf):
     run = play(clf, "basis-sturz", ["Puls?", "kurze teambesprechung: puls normal, kreislauf ok"])
     assert evaluate.vague_findings(run) == ["kurze teambesprechung: puls normal, kreislauf ok"]
+
+
+@pytest.mark.parametrize("text", ["Atmung?", "wie ist die atmung", "Kollege, wie beurteilst du die Atmung?", "ich beurteile die atmung"])
+def test_breathing_assessment_gives_finding_for_conscious_patient(clf, text):
+    run = play(clf, "basis-sturz", [text])
+    assert [h.intent for h in run.turns[0].hits] == ["atmung_beurteilen"], text
+    assert said(run) == ["Atmung ruhig und regelmäßig, ca. 16/min, keine Atemnot, er spricht in ganzen Sätzen."]
+
+
+def test_breathing_question_goes_to_patient(clf):
+    run = play(clf, "basis-sturz", ["bekommen sie gut luft?"])
+    assert [h.intent for h in run.turns[0].hits] == ["atmung_fragen"]
+    assert run.turns[0].lines[0].who == "Patient"
+
+
+def test_breathing_question_to_unconscious_gets_no_reaction(clf):
+    assert said(play(clf, "bw-seitenlage", ["bekommen sie gut luft?"])) == ["(keine Reaktion)"]
+
+
+def test_breathing_assessment_counts_for_checklist(clf):
+    res = evaluate.evaluate(play(clf, "basis-sturz", ["Atmung?", "tut das atmen weh", "lippen"]))
+    atmung = next(it for it in res["sections"][0]["items"] if it["id"] == "atmung")
+    assert atmung["status"] == evaluate.OK
