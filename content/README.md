@@ -80,7 +80,9 @@ key_actions:                 # fallspezifische Schlüsselmaßnahmen für die Aus
 ```
 
 Sprecher: `Patient`, `Kollege`, `Umstehende`, `Befund`, `Leitstelle`, `AED`, `Rettungsdienst`.
-Text in Klammern ist Regieanweisung und wird angezeigt, aber nicht vorgelesen.
+Text in Klammern ist eine Handlung oder Regieanweisung. Besteht eine Zeile nur daraus, wird sie erzählt
+(„Kollege: (übernimmt die HWS)“ → „Kollege übernimmt die HWS“); neben gesprochenem Text entfällt sie beim Vorlesen
+(„(aufgelöst) Er ist umgefallen!“ → „Er ist umgefallen!“). Handlungen daher als eigene Zeile schreiben.
 Enthält ein Text `: `, muss er in Anführungszeichen stehen: `- Befund: "Lage: sicher"`.
 
 Ereignisse feuern auch, wenn niemand spricht: Der Server meldet dem Browser, wann das nächste fällig ist,

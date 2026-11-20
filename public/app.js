@@ -177,11 +177,19 @@
     setTitle(hideTitle ? "Zufälliger Fall" : s.title);
     $("title").focus(); // Screenreader: neuer Fall wird angesagt
     $("handsfree").checked = settings.handsfree;
-    addMsg(s.dispatch.replace(/^Einsatzmeldung:\s*/, "Einsatzmeldung: "), "sys");
-    addMsg(mode === "minute"
+    const dispatch = s.dispatch.replace(/^Einsatzmeldung:\s*/, "Einsatzmeldung: ");
+    const intro = mode === "minute"
       ? `Du triffst mit deinem Kollegen ein (Funkrufname ${settings.callsign}, Leitstelle ${settings.dispatcher}). Übe die 1. Minute nach SANmemo bis zum Funkspruch.`
-      : "Du triffst mit deinem Kollegen ein. Beginne mit der 1. Minute, danach geht der Einsatz weiter.", "sys");
-    speak(s.dispatch.replace(/^Einsatzmeldung:\s*/, "Einsatzmeldung: "));
+      : "Du triffst mit deinem Kollegen ein. Beginne mit der 1. Minute, danach geht der Einsatz weiter.";
+    addMsg(dispatch, "sys");
+    addMsg(intro, "sys");
+    // nacheinander vorlesen (speak() bricht laufende Ausgaben ab, deshalb abwarten)
+    (async () => {
+      for (const text of [dispatch, intro]) {
+        if (scenario !== s) return;
+        await speak(text, PITCH.Befund);
+      }
+    })();
   }
 
   // ---------- Sprachausgabe ----------
@@ -205,12 +213,20 @@
       speechSynthesis.speak(u);
     });
   }
+  // Was vorgelesen wird:
+  // - eine reine Handlung in Klammern wird erzählt: „Kollege: (übernimmt die HWS)“ → „Kollege übernimmt die HWS“
+  // - kurze Tonangaben neben gesprochenem Text entfallen: „(aufgelöst) Er ist umgefallen!“ → „Er ist umgefallen!“
+  function spokenText(seg) {
+    const text = seg.text.trim();
+    const action = text.match(/^\(([^)]*)\)\.?$/);
+    if (action) return { text: seg.who === "Befund" ? action[1] : `${seg.who} ${action[1]}`, narration: true };
+    return { text: text.replace(/\([^)]*\)/g, "").replace(/\s+/g, " ").trim(), narration: false };
+  }
   async function speakReply(segs) {
-    // Regieanweisungen in Klammern werden angezeigt, aber nicht vorgelesen
     for (const seg of segs) {
       if (!scenario) return;
-      const spoken = seg.text.replace(/\([^)]*\)/g, "").trim();
-      if (spoken) await speak(spoken, PITCH[seg.who] || 1);
+      const { text, narration } = spokenText(seg);
+      if (text) await speak(text, narration ? PITCH.Befund : PITCH[seg.who] || 1);
     }
   }
 
