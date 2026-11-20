@@ -36,7 +36,7 @@
     return Math.max(0, (now - startedAt - busyMs - (busySince ? now - busySince : 0)) / 1000);
   }
   const startClock = () => { if (!startedAt) startedAt = Date.now(); };
-  setInterval(() => { if (scenario && startedAt && !debriefDone) $("timer").textContent = "⏱ " + fmt(netSec()); }, 500);
+  setInterval(() => { if (scenario && startedAt && !debriefDone) $("timer").textContent = fmt(netSec()); }, 500);
 
   // Takt: Die Simulation läuft weiter, auch wenn gerade niemand spricht (AED alle 2 Minuten, Auskühlen …)
   const tickDue = () => scenario && startedAt && !debriefDone && nextEventAt != null && netSec() >= nextEventAt;
@@ -51,80 +51,115 @@
   }, 500);
 
   // ---------- UI ----------
+  const APP_TITLE = "Fallbeispiel xABCDE";
+  let lastScenarioButton = null; // für den Fokus beim Zurückgehen
+
   function setStatus(text, error = false) {
     const el = $("status");
+    el.setAttribute("aria-live", error ? "assertive" : "polite"); // Fehler sofort ansagen
     el.textContent = text || "";
     el.classList.toggle("error", error);
   }
+  function scrollLog() { $("log").scrollTop = $("log").scrollHeight; }
   function addMsg(text, cls) {
-    const d = document.createElement("div");
-    d.className = "msg " + cls;
-    d.textContent = text;
-    $("log").appendChild(d);
-    $("log").scrollTop = $("log").scrollHeight;
-    return d;
+    const li = document.createElement("li");
+    li.className = "msg " + cls;
+    li.textContent = text;
+    $("log").appendChild(li);
+    scrollLog();
+    return li;
   }
 
-  // Antwort der Simulation in Sprecher-Zeilen zerlegen: "Patient: …", "Kollege: …", "Umstehende: …", "Befund: …"
+  // Antwort der Simulation: eine Zeile pro Sprecher (Patient, Kollege, Umstehende, Befund, Leitstelle, AED, Rettungsdienst)
   const WHO_CLASS = { Patient: "them", Kollege: "them kollege", Umstehende: "them", Befund: "sys befund", Leitstelle: "them funk", AED: "them funk", Rettungsdienst: "them kollege" };
   const PITCH = { Patient: 1, Kollege: 0.8, Umstehende: 1.2, Befund: 0.9, Leitstelle: 0.65, AED: 0.6, Rettungsdienst: 0.85 };
   function addReply(segs) {
     for (const seg of segs) {
-      const d = document.createElement("div");
-      d.className = "msg " + WHO_CLASS[seg.who];
+      const li = document.createElement("li");
+      li.className = "msg " + (WHO_CLASS[seg.who] || "them");
       const who = document.createElement("span");
       who.className = "who";
       who.textContent = seg.who;
-      d.append(who, document.createTextNode(seg.text));
-      $("log").appendChild(d);
+      const colon = document.createElement("span");
+      colon.className = "visually-hidden";
+      colon.textContent = ": ";
+      who.append(colon);
+      li.append(who, document.createTextNode(seg.text));
+      $("log").appendChild(li);
     }
-    $("log").scrollTop = $("log").scrollHeight;
+    scrollLog();
   }
 
+  function setTitle(text) {
+    $("title").textContent = text;
+    document.title = text === APP_TITLE ? APP_TITLE : `${text} – ${APP_TITLE}`;
+  }
   function showHome() {
     stopAll();
     scenario = null;
     $("home").hidden = false;
     $("session").hidden = true;
     $("backBtn").hidden = true;
-    $("title").textContent = "Fallbeispiel xABCDE";
+    setTitle(APP_TITLE);
+    (lastScenarioButton && lastScenarioButton.isConnected ? lastScenarioButton : $("title")).focus();
   }
   async function loadScenarios() {
+    const list = $("scenarioList");
     try {
       const res = await fetch("/api/scenarios");
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       SCENARIOS = await res.json();
       renderScenarios();
     } catch (err) {
-      $("scenarioList").textContent = "Die Fälle konnten nicht geladen werden (" + err.message + "). Läuft der Server?";
+      list.innerHTML = "";
+      const p = document.createElement("p");
+      p.className = "lead";
+      p.setAttribute("role", "alert");
+      p.textContent = "Die Fälle konnten nicht geladen werden (" + err.message + "). Läuft der Server?";
+      list.append(p);
+    } finally {
+      list.setAttribute("aria-busy", "false");
     }
   }
   function renderScenarios() {
     const list = $("scenarioList");
     list.innerHTML = "";
     const items = [...SCENARIOS, { id: "random", group: "Zufall", letter: "?", title: "Zufälliger Fall", teaser: "Überrasch mich" }];
-    let lastGroup = null;
+    const groups = new Map();
     for (const s of items) {
-      const group = s.group || "Grundlagen";
-      if (group !== lastGroup) {
-        const h = document.createElement("h2");
-        h.className = "group";
-        h.textContent = group;
-        list.appendChild(h);
-        lastGroup = group;
+      const g = s.group || "Grundlagen";
+      if (!groups.has(g)) groups.set(g, []);
+      groups.get(g).push(s);
+    }
+    let n = 0;
+    for (const [group, scenarios] of groups) {
+      const section = document.createElement("section");
+      const h = document.createElement("h3");
+      h.className = "group";
+      h.id = `group-${n++}`;
+      h.textContent = group;
+      section.setAttribute("aria-labelledby", h.id);
+      const ul = document.createElement("ul");
+      for (const s of scenarios) {
+        const li = document.createElement("li");
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "scenario";
+        b.innerHTML = `<span class="letter" aria-hidden="true"></span><span><strong></strong><small></small></span>`;
+        b.querySelector(".letter").textContent = s.letter;
+        b.querySelector(".letter").classList.toggle("small", s.letter.length > 1);
+        b.querySelector("strong").textContent = s.title;
+        b.querySelector("small").textContent = s.teaser;
+        b.addEventListener("click", () => {
+          lastScenarioButton = b;
+          const pick = s.id === "random" ? SCENARIOS[Math.floor(Math.random() * SCENARIOS.length)] : s;
+          startSession(pick, s.id === "random");
+        });
+        li.append(b);
+        ul.append(li);
       }
-      const b = document.createElement("button");
-      b.className = "scenario";
-      b.innerHTML = `<span class="letter"></span><span><strong></strong><small></small></span>`;
-      b.querySelector(".letter").textContent = s.letter;
-      b.querySelector(".letter").classList.toggle("small", s.letter.length > 1);
-      b.querySelector("strong").textContent = s.title;
-      b.querySelector("small").textContent = s.teaser;
-      b.addEventListener("click", () => {
-        const pick = s.id === "random" ? SCENARIOS[Math.floor(Math.random() * SCENARIOS.length)] : s;
-        startSession(pick, s.id === "random");
-      });
-      list.appendChild(b);
+      section.append(h, ul);
+      list.append(section);
     }
   }
 
@@ -133,12 +168,14 @@
     mode = settings.mode === "full" ? "full" : "minute";
     debriefDone = false;
     startedAt = null; busyMs = 0; busySince = null; userLog = []; nextEventAt = null;
-    $("timer").textContent = "⏱ 0:00";
+    $("timer").textContent = "0:00";
     $("log").innerHTML = "";
+    setStatus("");
     $("home").hidden = true;
     $("session").hidden = false;
     $("backBtn").hidden = false;
-    $("title").textContent = hideTitle ? "Zufälliger Fall" : s.title;
+    setTitle(hideTitle ? "Zufälliger Fall" : s.title);
+    $("title").focus(); // Screenreader: neuer Fall wird angesagt
     $("handsfree").checked = settings.handsfree;
     addMsg(s.dispatch.replace(/^Einsatzmeldung:\s*/, "Einsatzmeldung: "), "sys");
     addMsg(mode === "minute"
@@ -188,7 +225,7 @@
     recognition.interimResults = true;
     recognition.continuous = false;
     let finalText = "";
-    recognition.onstart = () => { listening = true; $("micBtn").classList.add("listening"); setStatus("Ich höre zu …"); };
+    recognition.onstart = () => { listening = true; $("micBtn").classList.add("listening"); $("micBtn").setAttribute("aria-pressed", "true"); setStatus("Ich höre zu …"); };
     recognition.onresult = (e) => {
       let interim = "";
       for (let i = e.resultIndex; i < e.results.length; i++) {
@@ -204,6 +241,7 @@
     recognition.onend = () => {
       listening = false;
       $("micBtn").classList.remove("listening");
+      $("micBtn").setAttribute("aria-pressed", "false");
       const text = (finalText || $("textInput").value).trim();
       if (text) { $("textInput").value = ""; send(text); }
       else if (tickDue() && !busy) turn({ tick: true });
@@ -216,6 +254,7 @@
     if (recognition) { recognition.onend = null; try { recognition.abort(); } catch {} }
     listening = false;
     $("micBtn").classList.remove("listening");
+    $("micBtn").setAttribute("aria-pressed", "false");
     if ("speechSynthesis" in window) speechSynthesis.cancel();
     setStatus("");
   }
