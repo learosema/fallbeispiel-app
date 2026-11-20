@@ -44,6 +44,7 @@ class Event:
     since: str | None
     when: dict[str, Any]
     variant: Variant
+    repeat: float | None = None   # Sekunden: feuert danach immer wieder, solange `when` passt
 
 
 @dataclass
@@ -151,9 +152,14 @@ def _load_scenario(path: Path) -> Scenario:
     for n, e in enumerate(d.get("events") or []):
         if e.get("since") and e["since"] not in known and e["since"] not in flags:
             raise ValueError(f"{path.name}: events[{n}].since: weder Intent noch gesetztes Flag: {e['since']!r}")
+        repeat = float(e["repeat"]) if e.get("repeat") else None
+        if repeat is not None and repeat < 10:
+            raise ValueError(f"{path.name}: events[{n}].repeat muss mindestens 10 Sekunden sein")
         events.append(Event(float(e["at"]), e.get("since"), dict(e.get("when") or {}),
-                            Variant(_lines(e.get("say"), f"{path.name}.events[{n}]"), {}, dict(e.get("set") or {}))))
+                            Variant(_lines(e.get("say"), f"{path.name}.events[{n}]"), {}, dict(e.get("set") or {})), repeat))
     for ka in d.get("key_actions") or []:
+        if ka.get("after") and ka["after"] not in known and ka["after"] not in flags:
+            raise ValueError(f"{path.name}: key_actions {ka.get('label')!r}: after: weder Intent noch Flag: {ka['after']!r}")
         for ref in _item_refs(ka) + list(ka.get("before", [])):
             if ref not in known:
                 raise ValueError(f"{path.name}: key_actions {ka.get('label')!r}: unbekannter Intent {ref!r}")

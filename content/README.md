@@ -56,8 +56,13 @@ events:                      # zeitgesteuert (Nettozeit der Sanitäter:in in Sek
     when: {decke: false}
     say:
       - Patient: Mir wird kalt …
-  - at: 60
-    since: nachforderung     # relativ zum ersten Auftreten eines Intents
+  - at: 480
+    since: nachforderung     # relativ zum ersten Auftreten eines Intents oder zum Setzen eines Flags
+    say: [...]
+  - at: 15
+    since: hlw
+    repeat: 120              # danach alle 120 s erneut, solange `when` passt (z. B. AED-Analyse)
+    when: {rd_da: false}
     say: [...]
 
 key_actions:                 # fallspezifische Schlüsselmaßnahmen für die Auswertung
@@ -65,12 +70,18 @@ key_actions:                 # fallspezifische Schlüsselmaßnahmen für die Aus
     any: [blutung_stillen]   # oder all: […] / min: n + of: […]
     critical: true           # fehlt sie, ist der Algorithmus „nicht erfüllt“
     within: 45               # sonst ⚠️ „erst nach …“
-    before: [puls, atmung_fragen]   # sonst ⚠️ „zu spät“
+    before: [puls, atmung_fragen]   # sonst ⚠️ „zu spät“ (dieselbe Äußerung zählt als rechtzeitig)
+  - label: Ab Beatmungsmöglichkeit laut bis 30 gezählt
+    all: [hlw_zaehlen, hlw_30]
+    after: beatmung_moeglich        # gilt erst ab diesem Flag/Intent; nie gesetzt → „–“
 ```
 
 Sprecher: `Patient`, `Kollege`, `Umstehende`, `Befund`, `Leitstelle`, `AED`, `Rettungsdienst`.
 Text in Klammern ist Regieanweisung und wird angezeigt, aber nicht vorgelesen.
 Enthält ein Text `: `, muss er in Anführungszeichen stehen: `- Befund: "Lage: sicher"`.
+
+Ereignisse feuern auch, wenn niemand spricht: Der Server meldet dem Browser, wann das nächste fällig ist,
+und der Browser schickt dann einen „Takt“.
 
 Die Leitstelle (Anruf, Meldung, „Ende“) und das Eintreffen des Rettungsdienstes ca. 8 Minuten nach der
 Nachforderung übernimmt die Engine; `{callsign}` und `{dispatcher}` werden in Texten ersetzt.

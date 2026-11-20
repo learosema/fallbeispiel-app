@@ -5,6 +5,7 @@ Das Ergebnis ist deterministisch und dient als Faktengrundlage für die KI-Bewer
 """
 from __future__ import annotations
 
+from dataclasses import replace
 from typing import Any
 
 import re
@@ -205,8 +206,28 @@ def check_reevaluation(run: Run) -> dict[str, Any]:
     return {"status": MISSING, "note": "Keine erneute Kontrolle nach den Maßnahmen."}
 
 
+def _since(run: Run, flag: str) -> Run | None:
+    """Sicht auf den Einsatz ab dem Moment, in dem `flag` gesetzt wurde (None, wenn nie)."""
+    if flag not in run.first_t:
+        return None
+    t0 = run.first_t[flag]
+    first: dict[str, tuple[int, int]] = {}
+    for n, turn in enumerate(run.turns):
+        if turn.t < t0:
+            continue
+        for h in turn.hits:
+            first.setdefault(h.intent, (n, h.pos))
+    return replace(run, first=first)
+
+
 def check_key_action(ka: dict[str, Any], run: Run) -> dict[str, Any]:
     item = {"id": "key", "label": ka["label"]} | {k: ka[k] for k in ("all", "any", "min", "of") if k in ka}
+    if ka.get("after"):  # gilt erst ab einem Zeitpunkt im Einsatz (z. B. „sobald beatmet werden kann“)
+        view = _since(run, ka["after"])
+        if view is None:
+            return {"id": "key", "label": ka["label"], "short": ka["label"], "status": NA, "note": "", "quote": "", "at": None,
+                    "critical": bool(ka.get("critical"))}
+        run = view
     out = check_item(item, run)
     out["critical"] = bool(ka.get("critical"))
     if out["status"] in (OK, PARTIAL) and out["at"]:

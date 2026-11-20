@@ -38,8 +38,9 @@ def normalize(text: str) -> str:
 
 
 def _compile(pattern: str) -> re.Pattern:
-    # Muster werden auf normalisierten Text angewendet – also auch dort ß → ss
-    return re.compile(pattern.lower().replace("ß", "ss"), re.I)
+    # Muster werden auf normalisierten Text angewendet – also auch dort ß → ss.
+    # Nicht .lower() – das machte aus \W (Nicht-Wortzeichen) ein \w; Groß/klein regelt re.I.
+    return re.compile(pattern.replace("ß", "ss"), re.I)
 
 
 class _Embedder:

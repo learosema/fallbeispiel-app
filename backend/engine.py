@@ -147,7 +147,7 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
     state: dict[str, Any] = dict(scenario.state)
     first: dict[str, tuple[int, int]] = {}
     first_t: dict[str, float] = {}
-    fired: set[int] = set()
+    fired: dict[int, int] = {}  # Ereignis → wie oft schon ausgelöst
     turns: list[Turn] = []
 
     def apply(v: Variant, t: float) -> None:
@@ -189,15 +189,9 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
 
         # zeitgesteuerte Ereignisse (Verschlechterung, Besserung, Eintreffen …)
         for k, ev in enumerate(scenario.events):
-            if k in fired:
-                continue
-            base = 0.0
-            if ev.since:
-                if ev.since not in first_t:
-                    continue
-                base = first_t[ev.since]
-            if t >= base + ev.at and matches(ev.when, state):
-                fired.add(k)
+            due = _due(ev, fired.get(k, 0), first_t)
+            if due is not None and t >= due and matches(ev.when, state):
+                fired[k] = fired.get(k, 0) + 1
                 lines += ev.variant.say
                 apply(ev.variant, t)
         if "nachforderung" in first_t and not state.get("rd_da") and t >= first_t["nachforderung"] + ARRIVAL_SECONDS:
@@ -218,15 +212,22 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
                _next_event_at(scenario, state, fired, first_t, turns[-1].t if turns else 0.0))
 
 
-def _next_event_at(scenario: Scenario, state: dict[str, Any], fired: set[int], first_t: dict[str, float], now: float) -> float | None:
+def _due(ev, count: int, first_t: dict[str, float]) -> float | None:
+    """Fälligkeit der nächsten Auslösung eines Ereignisses (None = nie mehr bzw. noch nicht absehbar)."""
+    if count and not ev.repeat:
+        return None
+    if ev.since and ev.since not in first_t:
+        return None
+    return (first_t[ev.since] if ev.since else 0.0) + ev.at + count * (ev.repeat or 0)
+
+
+def _next_event_at(scenario: Scenario, state: dict[str, Any], fired: dict[int, int], first_t: dict[str, float], now: float) -> float | None:
     """Wann wäre beim jetzigen Zustand das nächste Ereignis fällig? (None = keines)"""
     due: list[float] = []
     for k, ev in enumerate(scenario.events):
-        if k in fired or not matches(ev.when, state):
-            continue
-        if ev.since and ev.since not in first_t:
-            continue
-        due.append((first_t[ev.since] if ev.since else 0.0) + ev.at)
+        d = _due(ev, fired.get(k, 0), first_t)
+        if d is not None and matches(ev.when, state):
+            due.append(d)
     if "nachforderung" in first_t and not state.get("rd_da"):
         due.append(first_t["nachforderung"] + ARRIVAL_SECONDS)
     later = [d for d in due if d > now]

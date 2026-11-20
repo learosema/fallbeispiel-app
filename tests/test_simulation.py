@@ -118,38 +118,69 @@ def replay_log(clf, sid, log, mode="minute"):
     return engine.replay(content.scenarios()[sid], mode, engine.Settings(), log, clf)
 
 
-def test_reanimation_cycle_reaches_rosc(clf):
+COUNT_TO_30 = " ".join(str(i) for i in range(1, 31))
+
+
+def test_reanimation_runs_until_rescue_service(clf):
     log = [
         {"t": 5, "text": "hallo hören sie mich"},
-        {"t": 10, "text": "atemkontrolle keine normale atmung"},
+        {"t": 8, "text": "atemkontrolle keine normale atmung"},
+        {"t": 10, "text": "notruf rtw und nef nachfordern"},
         {"t": 15, "text": "ich beginne sofort mit der herzdruckmassage"},
     ]
     run = replay_log(clf, "bw-reanimation", log)
-    assert any("Elektroden" in x for x in said(run)), "Kollege baut den AED von sich aus an"
-    assert run.next_event_at == 30, "AED-Analyse 15 s nach Beginn der HLW"
+    assert run.next_event_at == 30, "zuerst AED: 15 s nach HLW-Beginn"
 
     log.append({"t": 30, "text": "", "tick": True})
     run = replay_log(clf, "bw-reanimation", log)
     assert [l.text for l in run.turns[-1].lines] == [
         "AED ist dran.", "Patient nicht berühren! Herzrhythmus wird analysiert …", "Schock empfohlen. Blinkende Taste drücken."]
 
-    log += [{"t": 40, "text": "", "tick": True}, {"t": 42, "text": "Schock! Alle weg!"}]
+    # Zählen vor der Beatmungsbereitschaft: nur drücken, keine Beatmung
+    log.append({"t": 40, "text": COUNT_TO_30})
     run = replay_log(clf, "bw-reanimation", log)
-    assert "Absaugbereitschaft hergestellt." in said(run, "Kollege")
-    assert run.state["schocks"] == 1 and run.next_event_at is not None
+    assert not any("Beatmungen" in x for x in said(run))
 
-    # zwei Minuten später die nächste Analyse, auch ohne dass jemand etwas sagt
-    log += [{"t": 162, "text": "", "tick": True}, {"t": 165, "text": "schock alle weg"},
-            {"t": 285, "text": "", "tick": True}]
+    log.append({"t": 45, "text": "", "tick": True})
     run = replay_log(clf, "bw-reanimation", log)
-    assert run.state["schocks"] == 2 and run.state["rosc"]
-    assert "Kein Schock empfohlen" in " ".join(said(run, "AED"))
-    assert not any("wie tief" in x for x in said(run)), "Kollege fragt nicht nach HLW-Details"
+    assert "Sauerstoff bereit, Beutel ist dran." in [l.text for l in run.turns[-1].lines]
+
+    log.append({"t": 46, "text": COUNT_TO_30})
+    run = replay_log(clf, "bw-reanimation", log)
+    assert "(gibt zwei Beatmungen mit dem Beutel)" in [l.text for l in run.turns[-1].lines]
+
+    # Schock, dann alle 2 Minuten erneut Analyse – kein ROSC
+    log.append({"t": 47, "text": "Schock! Alle weg!"})
+    for k in range(1, 4):
+        log += [{"t": 30 + 120 * k, "text": "", "tick": True}, {"t": 32 + 120 * k, "text": "schock alle weg"}]
+    run = replay_log(clf, "bw-reanimation", log)
+    assert sum("Schock abgegeben" in x for x in said(run, "AED")) == 4
+    assert not any("atmet wieder" in x or "Kein Schock" in x for x in said(run)), "ohne erweiterte Maßnahmen kein ROSC"
+
+    # RTW + NEF kommen 8 Minuten nach der Nachforderung, danach keine Analysen mehr
+    log += [{"t": 490, "text": "", "tick": True}, {"t": 500, "text": "übergabe: kollaps um 10 uhr, hlw seit 10:01, vier schocks"}]
+    run = replay_log(clf, "bw-reanimation", log)
+    assert any(l.who == "Rettungsdienst" and "Notarzt" in l.text for l in run.turns[-2].lines)
+    assert run.ended and run.next_event_at is None
 
     res = evaluate.evaluate(run)
-    warn = next(it for it in res["sections"][-1]["items"] if "Sicherheit beim Schock" in it["label"])
-    assert warn["status"] == evaluate.OK, "„Schock! Alle weg!“ in einer Äußerung ist rechtzeitig"
-    assert "Sanitäter:in: " not in evaluate.transcript(run).splitlines()[-1], "Takte erscheinen ohne Äußerung"
+    keys = {it["label"]: it for it in res["sections"][-1]["items"]}
+    assert keys["Sicherheit beim Schock („Schock! Alle weg!“)"]["status"] == evaluate.OK
+    assert keys["Sobald beatmet werden kann, laut bis 30 gezählt, dann 2 Beatmungen"]["status"] == evaluate.OK
+
+
+def test_counting_only_before_ventilation_is_not_enough(clf):
+    log = [{"t": 5, "text": "ich beginne mit der herzdruckmassage"}, {"t": 10, "text": COUNT_TO_30},
+           {"t": 20, "text": "", "tick": True}, {"t": 35, "text": "", "tick": True}, {"t": 60, "text": "ich drücke weiter"}]
+    res = evaluate.evaluate(replay_log(clf, "bw-reanimation", log))
+    key = next(it for it in res["sections"][-1]["items"] if "bis 30 gezählt" in it["label"])
+    assert key["status"] == evaluate.MISSING
+
+
+def test_no_rescue_service_without_request(clf):
+    log = [{"t": 5, "text": "ich beginne mit der herzdruckmassage"}] + [{"t": 5 + 60 * k, "text": "", "tick": True} for k in range(1, 12)]
+    run = replay_log(clf, "bw-reanimation", log)
+    assert not any(l.who == "Rettungsdienst" for t in run.turns for l in t.lines)
 
 
 def test_tick_without_due_event_says_nothing(clf):

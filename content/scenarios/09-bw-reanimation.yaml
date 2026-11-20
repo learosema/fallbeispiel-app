@@ -5,15 +5,17 @@ title: Bewusstlos, keine Atmung
 teaser: Reanimation mit AED
 dispatch: "Funkmeldung: Laufveranstaltung an der Außenalster, Läufer zusammengebrochen und reagiert nicht, Umstehende haben nichts unternommen."
 debrief_notes: >
-  Läufer (ca. 52), Kreislaufstillstand, nur Schnappatmung (= nicht normal). Erwartet: Ansprechen, Atemwege frei, Atemkontrolle max. 10 s,
-  Schnappatmung als nicht normal erkennen, Notruf/AED delegieren, sofort HLW 30:2 (Mitte Brustkorb, 5–6 cm, 100–120/min),
-  AED früh (der Kollege baut AED, Sauerstoff und Absaugung auf, während sie drückt), Sicherheit beim Schock („alle weg“), Pausen minimieren, Helferwechsel. Nach 2 Schocks ROSC: Atemkontrolle, Seitenlage,
-  Wärmeerhalt, Elektroden dranlassen, strukturierte Übergabe.
+  Läufer (ca. 52), Kreislaufstillstand mit Kammerflimmern, nur Schnappatmung (= nicht normal). Erwartet: Ansprechen, Atemwege frei,
+  Atemkontrolle max. 10 s, Schnappatmung als nicht normal erkennen, sofort HLW 30:2 – sobald Beutel/Sauerstoff bereit sind, zählt, wer drückt, laut bis 30, dann 2 Beatmungen durch den Kollegen (vorher nur drücken), Nachforderung RTW + NEF (ohne Nachforderung kommt
+  niemand). Der Kollege schließt zuerst den AED an, dann die Beatmung (Beutel + Sauerstoff), dann die Absaugung. Der AED analysiert alle 2 Minuten und empfiehlt jedes Mal einen Schock;
+  beim Schock „Schock! Alle weg!“. Durchgehend reanimieren mit minimalen Pausen und Helferwechsel bei der Analyse, bis RTW und NEF
+  übernehmen – ein Wiedererlangen des Kreislaufs ist ohne erweiterte Maßnahmen (z. B. Adrenalin) nicht zu erwarten und wird nicht gespielt.
+  Am Ende strukturierte Übergabe: Zeitpunkt des Kollaps, Beginn der HLW, Anzahl der Schocks, Vorgeschichte (Brustschmerz am Morgen).
 
 conscious: false
 breathing: abnormal
 request: {required: [RTW, NEF]}
-state: {analyse: 0, schocks: 0, rosc: false, aed_kommt: false, aed_dran: false, absaug_bereit: false, o2_bereit: false}
+state: {aed_kommt: false, aed_dran: false, analyse_offen: false, absaug_bereit: false, o2_bereit: false, beatmung_moeglich: false, rd_da: false}
 
 responses:
   lage_pruefen:
@@ -32,23 +34,16 @@ responses:
   atemwege_freimachen:
     - Befund: Kopf überstreckt, Kinn angehoben, die Atemwege sind frei.
   atemkontrolle:
-    - when: {rosc: true}
+    - when: {hlw: false}
       say:
-        - Befund: Er atmet wieder selbstständig, ca. 16 pro Minute.
-    - say:
         - Befund: Keine normale Atmung, nur vereinzelte schnappende Atemzüge. Haut blass-livide.
-  puls:
-    - when: {rosc: true}
-      say:
-        - Befund: Puls schnell, regelmäßig, schwach tastbar, ca. 110.
     - say:
-        - Befund: Kein Puls tastbar.
+        - Befund: Keine eigene Atmung.
+  puls:
+    - Befund: Kein Puls tastbar.
   nachforderung:
     - Kollege: (setzt über Funk den Notruf ab und fordert RTW und NEF an)
   hlw:
-    - when: {rosc: true}
-      say:
-        - Kollege: Stopp – er atmet wieder!
     - when: {aed_kommt: false}
       say:
         - Befund: (Herzdruckmassage läuft)
@@ -57,7 +52,18 @@ responses:
     - say:
         - Befund: (Herzdruckmassage läuft)
   beatmen:
-    - Befund: (der Brustkorb hebt sich bei der Beatmung)
+    - when: {beatmung_moeglich: true}
+      say:
+        - Kollege: (gibt zwei Beatmungen mit dem Beutel)
+        - Befund: (der Brustkorb hebt sich zweimal)
+    - say:
+        - Kollege: Beutel ist noch nicht dran – weiterdrücken.
+  hlw_30:   # wer drückt, zählt laut; ab Beatmungsmöglichkeit beatmet der Kollege bei „30“
+    - when: {beatmung_moeglich: true}
+      say:
+        - Kollege: (gibt zwei Beatmungen mit dem Beutel)
+        - Befund: (der Brustkorb hebt sich zweimal)
+    - say: []
   aed:
     - when: {aed_dran: true}
       say:
@@ -79,23 +85,17 @@ responses:
       say:
         - Kollege: Ist bereit.
     - say:
-        - Kollege: Sauerstoff bereit.
-      set: {o2_bereit: true}
+        - Kollege: Sauerstoff bereit, Beutel ist dran.
+      set: {o2_bereit: true, beatmung_moeglich: true}
   schock_warnung:   # „Schock! Alle weg!“ – zählt für die Auswertung, braucht keine eigene Antwort
     - say: []
   schock_ausloesen:
-    - when: {analyse: 1, schocks: 0}
+    - when: {analyse_offen: true}
       say:
         - AED: Schock wird abgegeben.
         - Befund: (der Körper zuckt kurz zusammen)
         - AED: Schock abgegeben. Beginnen Sie jetzt mit der Herz-Lungen-Wiederbelebung.
-      set: {schocks: 1, schock1: true}
-    - when: {analyse: 2, schocks: 1}
-      say:
-        - AED: Schock wird abgegeben.
-        - Befund: (der Körper zuckt kurz zusammen)
-        - AED: Schock abgegeben. Beginnen Sie jetzt mit der Herz-Lungen-Wiederbelebung.
-      set: {schocks: 2, schock2: true}
+      set: {analyse_offen: false}
     - say:
         - Kollege: Der AED hat keinen Schock freigegeben.
   helferwechsel:
@@ -103,43 +103,21 @@ responses:
   platz_schaffen:
     - Umstehende: (die Zuschauer weichen zurück)
   seitenlage:
-    - when: {rosc: true}
-      say:
-        - Befund: Er liegt in stabiler Seitenlage, die Elektroden bleiben aufgeklebt.
-    - say:
-        - Kollege: Seitenlage? Er atmet doch nicht normal!
+    - Kollege: Seitenlage? Er atmet doch nicht!
   spo2:
-    - when: {rosc: true}
-      say:
-        - Befund: SpO2 90 %.
-    - say:
-        - Befund: Kein Messwert.
-  sauerstoff:
-    - Kollege: (bereitet den Sauerstoff vor)
+    - Befund: Kein Messwert.
   rr:
-    - when: {rosc: true}
-      say:
-        - Befund: RR 100/60.
-    - say:
-        - Befund: Nicht messbar.
+    - Befund: Nicht messbar.
   gcs:
-    - when: {rosc: true}
-      say:
-        - Befund: GCS 5.
-    - say:
-        - Befund: GCS 3.
+    - Befund: GCS 3.
   pupillen:
     - Befund: Pupillen weit.
   bz:
-    - Befund: BZ 140 mg/dl.
+    - Kollege: Nicht jetzt – wir drücken.
   hautfarbe:
-    - when: {rosc: true}
-      say:
-        - Befund: Haut blass, wird langsam rosiger, kühl.
-    - say:
-        - Befund: Haut blass-livide.
+    - Befund: Haut blass-livide.
   decke:
-    - Kollege: (deckt ihn zu)
+    - Kollege: Erst mal weiterdrücken.
   sample_vorerkrankung:
     - Umstehende: Ein Freund von ihm meinte, er hatte heute Morgen Brustschmerzen. Und er nimmt was gegen Bluthochdruck.
   sample_medikamente:
@@ -149,58 +127,59 @@ responses:
   sample_mahlzeit:
     - Umstehende: Keine Ahnung.
   reevaluation:
-    - when: {rosc: true}
+    - Befund: Weiterhin keine Atmung, kein Puls.
+  uebergabe:
+    - when: {rd_da: true}
       say:
-        - Befund: Atmung 16/min, Puls 110, SpO2 90 %.
+        - Rettungsdienst: Danke. Wir übernehmen, ihr drückt bitte weiter, bis wir so weit sind.
+      set: {uebergeben: true}
     - say:
-        - Befund: Weiterhin keine Atmung, kein Puls.
+        - Kollege: Der Rettungsdienst ist noch nicht da – weiterdrücken.
 
 events:
   - at: 40
     when: {hlw: false}
     say:
       - Befund: Die Schnappatmung wird seltener, die Haut immer blauer.
-  # AED: Kollege baut ihn während der ersten Herzdruckmassage an, dann alle 2 Minuten Analyse
+  # Während der ersten Herzdruckmassage schließt der Kollege zuerst den AED an, dann die Beatmung
+  # (Beutel an Sauerstoff), dann die Absaugung. Der AED analysiert alle 2 Minuten, bis der Rettungsdienst
+  # übernimmt. Kammerflimmern bleibt – ohne erweiterte Maßnahmen (Adrenalin …) kein ROSC.
   - at: 15
     since: hlw
     say:
       - Kollege: AED ist dran.
+    set: {aed_dran: true}
+  - at: 15
+    since: hlw
+    repeat: 120
+    when: {rd_da: false}
+    say:
       - AED: Patient nicht berühren! Herzrhythmus wird analysiert …
       - AED: Schock empfohlen. Blinkende Taste drücken.
-    set: {aed_dran: true, analyse: 1}
-  - at: 25
+    set: {analyse_offen: true}
+  - at: 30
+    since: hlw
+    when: {o2_bereit: false}
+    say:
+      - Kollege: Sauerstoff bereit, Beutel ist dran.
+    set: {o2_bereit: true, beatmung_moeglich: true}
+  - at: 40
     since: hlw
     when: {absaug_bereit: false}
     say:
       - Kollege: Absaugbereitschaft hergestellt.
     set: {absaug_bereit: true}
-  - at: 35
-    since: hlw
-    when: {o2_bereit: false}
-    say:
-      - Kollege: Sauerstoff bereit.
-    set: {o2_bereit: true}
   - at: 45
     since: hlw
-    when: {analyse: 1, schocks: 0}
+    repeat: 120
+    when: {analyse_offen: true, rd_da: false}
     say:
       - AED: Blinkende Taste drücken.
-  - at: 120
-    since: schock1
-    say:
-      - AED: Patient nicht berühren! Herzrhythmus wird analysiert …
-      - AED: Schock empfohlen. Blinkende Taste drücken.
-    set: {analyse: 2}
-  - at: 120
-    since: schock2
-    say:
-      - AED: Patient nicht berühren! Herzrhythmus wird analysiert …
-      - AED: Kein Schock empfohlen. Beginnen Sie jetzt mit der Herz-Lungen-Wiederbelebung.
-      - Befund: Er hustet, bewegt sich und atmet wieder. Puls tastbar.
-    set: {analyse: 3, rosc: true}
+  # RTW und NEF kommen ca. 8 Minuten nach der Nachforderung – ohne Nachforderung kommt niemand.
   - at: 480
+    since: nachforderung
     say:
-      - Rettungsdienst: Rettungsdienst, wir übernehmen! Was habt ihr bisher gemacht?
+      - Rettungsdienst: Rettungsdienst und Notarzt sind da. Was habt ihr bisher gemacht?
     set: {rd_da: true}
 
 key_actions:
@@ -208,10 +187,17 @@ key_actions:
     any: [hlw]
     critical: true
     within: 60
+  - label: Notruf / Nachforderung RTW + NEF
+    any: [nachforderung]
+    critical: true
+    within: 90
+  - label: Sobald beatmet werden kann, laut bis 30 gezählt, dann 2 Beatmungen
+    all: [hlw_zaehlen, hlw_30]
+    after: beatmung_moeglich
   - label: Sicherheit beim Schock („Schock! Alle weg!“)
     any: [schock_warnung]
     before: [schock_ausloesen]
-  - label: Notruf / Nachforderung veranlasst
-    any: [nachforderung]
-  - label: Nach ROSC Atemkontrolle und Wärmeerhalt
-    all: [atemkontrolle, decke]
+  - label: Helferwechsel
+    any: [helferwechsel]
+  - label: Strukturierte Übergabe an RTW/NEF
+    any: [uebergabe]
