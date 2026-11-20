@@ -137,20 +137,29 @@ def test_reanimation_runs_until_rescue_service(clf):
         "AED ist dran.", "Patient nicht berühren! Herzrhythmus wird analysiert …", "Schock empfohlen. Blinkende Taste drücken."]
 
     # Zählen vor der Beatmungsbereitschaft: nur drücken, keine Beatmung
-    log.append({"t": 40, "text": COUNT_TO_30})
+    log.append({"t": 35, "text": COUNT_TO_30})
     run = replay_log(clf, "bw-reanimation", log)
     assert not any("Beatmungen" in x for x in said(run))
 
-    log.append({"t": 45, "text": "", "tick": True})
+    log.append({"t": 40, "text": "", "tick": True})
     run = replay_log(clf, "bw-reanimation", log)
-    assert "Sauerstoff bereit, Beutel ist dran." in [l.text for l in run.turns[-1].lines]
+    assert [l.text for l in run.turns[-1].lines] == ["Beutel mit Maske ist dran, Beatmung mit Raumluft möglich."]
 
-    log.append({"t": 46, "text": COUNT_TO_30})
+    log.append({"t": 41, "text": COUNT_TO_30})
     run = replay_log(clf, "bw-reanimation", log)
     assert "(gibt zwei Beatmungen mit dem Beutel)" in [l.text for l in run.turns[-1].lines]
 
+    # danach in dieser Reihenfolge: Absaugbereitschaft, Sauerstoff, Guedel-Tubus
+    log += [{"t": 50, "text": "", "tick": True}, {"t": 60, "text": "", "tick": True}, {"t": 70, "text": "", "tick": True}]
+    run = replay_log(clf, "bw-reanimation", log)
+    setup = [x for x in said(run, "Kollege") if x in (
+        "AED ist dran.", "Beutel mit Maske ist dran, Beatmung mit Raumluft möglich.", "Absaugbereitschaft hergestellt.",
+        "Sauerstoff ist angeschlossen.", "Guedel-Tubus liegt.")]
+    assert setup == ["AED ist dran.", "Beutel mit Maske ist dran, Beatmung mit Raumluft möglich.",
+                     "Absaugbereitschaft hergestellt.", "Sauerstoff ist angeschlossen.", "Guedel-Tubus liegt."]
+
     # Schock, dann alle 2 Minuten erneut Analyse – kein ROSC
-    log.append({"t": 47, "text": "Schock! Alle weg!"})
+    log.append({"t": 72, "text": "Schock! Alle weg!"})
     for k in range(1, 4):
         log += [{"t": 30 + 120 * k, "text": "", "tick": True}, {"t": 32 + 120 * k, "text": "schock alle weg"}]
     run = replay_log(clf, "bw-reanimation", log)
@@ -169,9 +178,25 @@ def test_reanimation_runs_until_rescue_service(clf):
     assert keys["Sobald beatmet werden kann, laut bis 30 gezählt, dann 2 Beatmungen"]["status"] == evaluate.OK
 
 
+@pytest.mark.parametrize("text", [
+    COUNT_TO_30,
+    "10 20 5 6 7 8 9 30",
+    "zehn. zwanzig. fünf, sechs, sieben, acht, neun, dreißig",
+    "einundzwanzig zweiundzwanzig ... achtundzwanzig neunundzwanzig dreißig",
+])
+def test_counting_to_30_variants(clf, text):
+    intents = {h.intent for h in clf.classify(text)}
+    assert {"hlw", "hlw_zaehlen", "hlw_30"} <= intents, intents
+
+
+@pytest.mark.parametrize("text", ["blutdruck 130 zu 80", "um 9 30 ist er umgefallen", "sättigung 95 puls 110"])
+def test_numbers_are_not_counting(clf, text):
+    assert not {"hlw_zaehlen", "hlw_30"} & {h.intent for h in clf.classify(text)}
+
+
 def test_counting_only_before_ventilation_is_not_enough(clf):
     log = [{"t": 5, "text": "ich beginne mit der herzdruckmassage"}, {"t": 10, "text": COUNT_TO_30},
-           {"t": 20, "text": "", "tick": True}, {"t": 35, "text": "", "tick": True}, {"t": 60, "text": "ich drücke weiter"}]
+           {"t": 20, "text": "", "tick": True}, {"t": 30, "text": "", "tick": True}, {"t": 60, "text": "ich drücke weiter"}]
     res = evaluate.evaluate(replay_log(clf, "bw-reanimation", log))
     key = next(it for it in res["sections"][-1]["items"] if "bis 30 gezählt" in it["label"])
     assert key["status"] == evaluate.MISSING

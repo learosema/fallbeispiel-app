@@ -807,7 +807,8 @@ hlw:
     - (beginne|beginnen|fange|starte) (\w+ )?(mit dem )?drücken
     - weiter drücken|drücke weiter|weiter (mit der )?(hlw|herzdruckmassage)
     - \b\d{1,2}\W+\d{1,2}\W+\d{1,2}\W+\d{1,2}\b          # lautes Zählen „1 2 3 4 …“
-    - \beins\W+zwei\W+drei\W+vier\b
+    - \b(eins|zwei|drei|vier|fünf|sechs|sieben|acht|neun|zehn|zwanzig|dreissig)\W+(eins|zwei|drei|vier|fünf|sechs|sieben|acht|neun|zehn|zwanzig|dreissig)\W+(eins|zwei|drei|vier|fünf|sechs|sieben|acht|neun|zehn|zwanzig|dreissig)\W+(eins|zwei|drei|vier|fünf|sechs|sieben|acht|neun|zehn|zwanzig|dreissig)\b   # „… fünf sechs sieben acht …“
+    - \b(8|acht|28|achtundzwanzig)\W+(9|neun|29|neunundzwanzig)\W+(30|dreissig)\b
   examples:
     - Ich beginne sofort mit der Herzdruckmassage
     - Wir machen weiter mit Drücken
@@ -816,10 +817,10 @@ hlw:
 
 hlw_zaehlen:
   label: Kompressionen laut gezählt
+  # gängig ist die Kurzform „… 10 … 20 … 5, 6, 7, 8, 9, 30“
   patterns:
     - \b\d{1,2}\W+\d{1,2}\W+\d{1,2}\W+\d{1,2}\b
-    - \beins\W+zwei\W+drei\W+vier\b
-    - \b(28|achtundzwanzig)\W+(29|neunundzwanzig)\W+(30|dreissig)\b
+    - \b(eins|zwei|drei|vier|fünf|sechs|sieben|acht|neun|zehn|zwanzig|dreissig)\W+(eins|zwei|drei|vier|fünf|sechs|sieben|acht|neun|zehn|zwanzig|dreissig)\W+(eins|zwei|drei|vier|fünf|sechs|sieben|acht|neun|zehn|zwanzig|dreissig)\W+(eins|zwei|drei|vier|fünf|sechs|sieben|acht|neun|zehn|zwanzig|dreissig)\b
   default:
     - say: []
 
@@ -827,8 +828,7 @@ hlw_30:
   label: Bis 30 gezählt (dann 2 Beatmungen)
   implies: [hlw_zaehlen]
   patterns:
-    - \b(28|achtundzwanzig)\W+(29|neunundzwanzig)\W+(30|dreissig)\b
-    - \b(29|neunundzwanzig)\W+(30|dreissig)\b
+    - \b(8|acht|28|achtundzwanzig)\W+(9|neun|29|neunundzwanzig)\W+(30|dreissig)\b   # „28 29 30“ oder Kurzform „8 9 30“
   default:
     - Kollege: (gibt zwei Beatmungen mit dem Beutel)
     - Befund: (der Brustkorb hebt sich zweimal)

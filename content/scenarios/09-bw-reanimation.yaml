@@ -6,8 +6,8 @@ teaser: Reanimation mit AED
 dispatch: "Funkmeldung: Laufveranstaltung an der Außenalster, Läufer zusammengebrochen und reagiert nicht, Umstehende haben nichts unternommen."
 debrief_notes: >
   Läufer (ca. 52), Kreislaufstillstand mit Kammerflimmern, nur Schnappatmung (= nicht normal). Erwartet: Ansprechen, Atemwege frei,
-  Atemkontrolle max. 10 s, Schnappatmung als nicht normal erkennen, sofort HLW 30:2 – sobald Beutel/Sauerstoff bereit sind, zählt, wer drückt, laut bis 30, dann 2 Beatmungen durch den Kollegen (vorher nur drücken), Nachforderung RTW + NEF (ohne Nachforderung kommt
-  niemand). Der Kollege schließt zuerst den AED an, dann die Beatmung (Beutel + Sauerstoff), dann die Absaugung. Der AED analysiert alle 2 Minuten und empfiehlt jedes Mal einen Schock;
+  Atemkontrolle max. 10 s, Schnappatmung als nicht normal erkennen, sofort HLW 30:2 – sobald Beutel und Maske dran sind, zählt, wer drückt, laut bis 30, dann 2 Beatmungen durch den Kollegen (vorher nur drücken), Nachforderung RTW + NEF (ohne Nachforderung kommt
+  niemand). Der Kollege baut nacheinander an: AED, Beatmung (Beutel + Maske, Raumluft), Absaugbereitschaft, Sauerstoff, ggf. Guedel-Tubus. Der AED analysiert alle 2 Minuten und empfiehlt jedes Mal einen Schock;
   beim Schock „Schock! Alle weg!“. Durchgehend reanimieren mit minimalen Pausen und Helferwechsel bei der Analyse, bis RTW und NEF
   übernehmen – ein Wiedererlangen des Kreislaufs ist ohne erweiterte Maßnahmen (z. B. Adrenalin) nicht zu erwarten und wird nicht gespielt.
   Am Ende strukturierte Übergabe: Zeitpunkt des Kollaps, Beginn der HLW, Anzahl der Schocks, Vorgeschichte (Brustschmerz am Morgen).
@@ -15,7 +15,7 @@ debrief_notes: >
 conscious: false
 breathing: abnormal
 request: {required: [RTW, NEF]}
-state: {aed_kommt: false, aed_dran: false, analyse_offen: false, absaug_bereit: false, o2_bereit: false, beatmung_moeglich: false, rd_da: false}
+state: {aed_kommt: false, aed_dran: false, analyse_offen: false, beatmung_moeglich: false, absaug_bereit: false, o2_bereit: false, guedel: false, rd_da: false}
 
 responses:
   lage_pruefen:
@@ -31,8 +31,6 @@ responses:
     - Befund: Keine Reaktion auf Schmerzreiz.
   was_passiert:
     - Umstehende: Er ist mitten im Lauf umgekippt, nicht gestolpert, nicht auf den Kopf gefallen. Seitdem bewegt er sich nicht.
-  atemwege_freimachen:
-    - Befund: Kopf überstreckt, Kinn angehoben, die Atemwege sind frei.
   atemkontrolle:
     - when: {hlw: false}
       say:
@@ -58,6 +56,12 @@ responses:
         - Befund: (der Brustkorb hebt sich zweimal)
     - say:
         - Kollege: Beutel ist noch nicht dran – weiterdrücken.
+  atemwege_freimachen:
+    - when: {guedel: true}
+      say:
+        - Befund: Guedel-Tubus liegt, die Atemwege sind frei.
+    - say:
+        - Befund: Kopf überstreckt, Kinn angehoben, die Atemwege sind frei.
   hlw_30:   # wer drückt, zählt laut; ab Beatmungsmöglichkeit beatmet der Kollege bei „30“
     - when: {beatmung_moeglich: true}
       say:
@@ -83,10 +87,10 @@ responses:
   sauerstoff:
     - when: {o2_bereit: true}
       say:
-        - Kollege: Ist bereit.
+        - Kollege: Ist angeschlossen.
     - say:
-        - Kollege: Sauerstoff bereit, Beutel ist dran.
-      set: {o2_bereit: true, beatmung_moeglich: true}
+        - Kollege: Sauerstoff ist angeschlossen.
+      set: {o2_bereit: true}
   schock_warnung:   # „Schock! Alle weg!“ – zählt für die Auswertung, braucht keine eigene Antwort
     - say: []
   schock_ausloesen:
@@ -141,9 +145,9 @@ events:
     when: {hlw: false}
     say:
       - Befund: Die Schnappatmung wird seltener, die Haut immer blauer.
-  # Während der ersten Herzdruckmassage schließt der Kollege zuerst den AED an, dann die Beatmung
-  # (Beutel an Sauerstoff), dann die Absaugung. Der AED analysiert alle 2 Minuten, bis der Rettungsdienst
-  # übernimmt. Kammerflimmern bleibt – ohne erweiterte Maßnahmen (Adrenalin …) kein ROSC.
+  # Während der ersten Herzdruckmassage baut der Kollege nacheinander an: AED, Beatmung (Beutel + Maske,
+  # zunächst Raumluft), Absaugbereitschaft, Sauerstoff, ggf. Guedel-Tubus. Der AED analysiert alle 2 Minuten,
+  # bis der Rettungsdienst übernimmt. Kammerflimmern bleibt – ohne erweiterte Maßnahmen (Adrenalin …) kein ROSC.
   - at: 15
     since: hlw
     say:
@@ -157,19 +161,31 @@ events:
       - AED: Patient nicht berühren! Herzrhythmus wird analysiert …
       - AED: Schock empfohlen. Blinkende Taste drücken.
     set: {analyse_offen: true}
-  - at: 30
+  - at: 25
     since: hlw
-    when: {o2_bereit: false}
+    when: {beatmung_moeglich: false}
     say:
-      - Kollege: Sauerstoff bereit, Beutel ist dran.
-    set: {o2_bereit: true, beatmung_moeglich: true}
-  - at: 40
+      - Kollege: Beutel mit Maske ist dran, Beatmung mit Raumluft möglich.
+    set: {beatmung_moeglich: true}
+  - at: 35
     since: hlw
     when: {absaug_bereit: false}
     say:
       - Kollege: Absaugbereitschaft hergestellt.
     set: {absaug_bereit: true}
   - at: 45
+    since: hlw
+    when: {o2_bereit: false}
+    say:
+      - Kollege: Sauerstoff ist angeschlossen.
+    set: {o2_bereit: true}
+  - at: 55
+    since: hlw
+    when: {guedel: false}
+    say:
+      - Kollege: Guedel-Tubus liegt.
+    set: {guedel: true}
+  - at: 50
     since: hlw
     repeat: 120
     when: {analyse_offen: true, rd_da: false}
