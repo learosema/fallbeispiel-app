@@ -19,6 +19,11 @@ CLAUSE_THRESHOLD = float(os.environ.get("INTENT_THRESHOLD", "0.72"))
 # Wortfenster sind standardmäßig aus (> 1): kurze Fenster erzeugten zu viele Fehltreffer.
 WINDOW_THRESHOLD = float(os.environ.get("INTENT_WINDOW_THRESHOLD", "1.01"))
 USE_EMBEDDINGS = os.environ.get("INTENT_EMBEDDINGS", "1") != "0"
+# Mindestabstand zum zweitbesten Intent: Liegen zwei Intents gleichauf, rät das Modell nur
+# („ich taste sie ab“ → Blutzucker 0,88 / SpO2 0,88 / Trauma-Check 0,87). Dann lieber nachfragen.
+MARGIN = float(os.environ.get("INTENT_MARGIN", "0.05"))
+# Füllsätze ohne Handlung (content/intents.yaml) – nie ein Treffer, aber Konkurrenz für alle anderen
+NONE_INTENT = "smalltalk"
 
 _SPLIT = re.compile(r"[.,;:!?\n]+|\s(?:und|dann|danach|außerdem|sowie|anschließend|jetzt|so)\s", re.I)
 
@@ -92,6 +97,8 @@ class IntentClassifier:
     def _regex_hits(self, text: str) -> list[Hit]:
         hits = []
         for iid, pats in self.patterns.items():
+            if iid == NONE_INTENT:
+                continue
             positions = [m.start() for p in pats for m in [p.search(text)] if m]
             if positions:
                 hits.append(Hit(iid, min(positions), 1.0, "regex"))
@@ -128,10 +135,15 @@ class IntentClassifier:
         sims = vecs @ self.example_matrix.T
         best: dict[str, Hit] = {}
         for (pos, _, thr), row in zip(spans, sims):
-            score, idx = float(row.max()), int(row.argmax())
-            if score < thr:
+            per_intent: dict[str, float] = {}
+            for s, iid in zip(row.tolist(), self.example_intents):
+                if s > per_intent.get(iid, -1.0):
+                    per_intent[iid] = s
+            ranked = sorted(per_intent.items(), key=lambda x: -x[1])
+            iid, score = ranked[0]
+            runner_up = ranked[1][1] if len(ranked) > 1 else 0.0
+            if iid == NONE_INTENT or score < thr or score - runner_up < MARGIN:
                 continue
-            iid = self.example_intents[idx]
             if iid not in best or pos < best[iid].pos:
                 best[iid] = Hit(iid, pos, score, "embedding")
         return list(best.values())

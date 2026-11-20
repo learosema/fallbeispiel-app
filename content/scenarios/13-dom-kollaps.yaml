@@ -12,7 +12,7 @@ debrief_notes: >
 conscious: true
 trauma: false
 request: {required: [RTW]}
-skip: [hws]
+skip: [hws, waerme]   # wach und im Warmen: Decke nicht nötig
 
 responses:
   lage_pruefen:

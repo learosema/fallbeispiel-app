@@ -76,3 +76,14 @@ def test_paraphrase_recognised(clf, text, intent):
 @pytest.mark.parametrize("text", ["schönes wetter heute", "ich finde das alles sehr spannend"])
 def test_small_talk_is_not_an_intent(clf, text):
     assert clf.classify(text) == []
+
+
+@pytest.mark.parametrize("text", [
+    "ich mache das jetzt mal so",
+    pytest.param("können sie das bitte halten", marks=pytest.mark.xfail(reason="Grenzfall: Anweisung an den Patienten, landet bei „nicht aufstehen“")),
+    "ich bin gleich wieder da", "okay alles klar",
+    "ja genau", "na gut dann eben so", "warte mal eben", "ach so ist das", "hm ich weiß nicht genau",
+])
+def test_ambiguous_short_sentences_are_not_guessed(clf, text):
+    """Liegen mehrere Intents gleichauf, lieber nachfragen als raten."""
+    assert clf.classify(text) == [], [(h.intent, round(h.score, 2)) for h in clf.classify(text)]

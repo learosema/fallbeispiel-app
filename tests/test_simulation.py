@@ -307,3 +307,36 @@ def test_vague_finding_language_is_flagged(clf):
 def test_unconscious_normal_breathing_is_not_flagged(clf):
     res = evaluate.evaluate(play(clf, "bw-seitenlage", ["atemkontrolle er atmet normal"]))
     assert res["vague"] == []
+
+
+# ---------- gemeldete fachliche Fehler ----------
+
+@pytest.mark.parametrize("text,intent", [
+    ("ich taste sie ab", "trauma_check"),
+    ("ich taste ihn mal ab", "trauma_check"),
+    ("rücken klopfen", "rueckenschlaege"),
+    ("rücken klopen", "rueckenschlaege"),
+    ("ich klopfe ihm kräftig auf den rücken", "rueckenschlaege"),
+    ("ich schlage ihm fünfmal auf den rücken", "rueckenschlaege"),
+    ("können sie mir erzählen wie es dazu kam", "was_passiert"),
+])
+def test_reported_phrases(clf, text, intent):
+    intents = {h.intent for h in clf.classify(text)}
+    assert intent in intents and "bz" not in intents, intents
+
+
+def test_lying_on_back_is_not_back_blows(clf):
+    assert "rueckenschlaege" not in {h.intent for h in clf.classify("wir legen ihn auf den rücken")}
+
+
+@pytest.mark.parametrize("sid", ["a-bolus", "b-asthma", "bw-reanimation", "dom-fahrgeschaeft-kollaps"])
+def test_blanket_not_expected_when_warm_and_awake_or_during_cpr(clf, sid):
+    res = evaluate.evaluate(play(clf, sid, ["hallo"]))
+    waerme = next(it for it in res["sections"][0]["items"] if it["id"] == "waerme")
+    assert waerme["status"] == evaluate.NA
+
+
+def test_blanket_still_expected_when_cold(clf):
+    res = evaluate.evaluate(play(clf, "basis-sturz", ["hallo"]))
+    waerme = next(it for it in res["sections"][0]["items"] if it["id"] == "waerme")
+    assert waerme["status"] == evaluate.MISSING

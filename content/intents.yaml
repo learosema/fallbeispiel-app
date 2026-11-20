@@ -11,6 +11,33 @@
 #
 # Die Funk-Intents (funk_anruf, funk_meldung, funk_ende) erkennt die Engine selbst anhand der Rufnamen.
 
+# ---------------------------------------------------------------- keine Handlung
+# Füllsätze ohne fachlichen Inhalt. Liegt eine Äußerung näher an diesen Beispielen (oder nicht
+# deutlich vor ihnen), wird kein Intent erkannt und der Kollege fragt nach – besser als falsch raten.
+# Nur für die Embedding-Erkennung, nie als Treffer.
+smalltalk:
+  label: Keine fachliche Handlung
+  examples:
+    - Okay
+    - Alles klar
+    - Ja
+    - Nein danke
+    - Moment bitte
+    - Einen Augenblick
+    - Ich mache weiter
+    - Das machen wir jetzt so
+    - Ich komme gleich
+    - Warte kurz
+    - Gut so
+    - Verstanden
+    - Kannst du mir das mal geben?
+    - Halt mal kurz
+    - Was ist das hier?
+    - Schauen wir mal
+    - Ich überlege kurz
+    - Äh, also
+    - Weiter geht's
+
 # ---------------------------------------------------------------- Sicherheit / Lage
 lage_pruefen:
   label: Sicherheit und Lage
@@ -157,6 +184,7 @@ was_passiert:
     - (erzählen|erzähl) sie (mir )?(was|mal)
     - was genau ist
     - wie (kam|kommt) es (dazu)?
+    - wie es (dazu )?(kam|gekommen)
   examples:
     - Was ist denn passiert?
     - Können Sie mir erzählen, wie das passiert ist?
@@ -271,6 +299,8 @@ rueckenschlaege:
     - zwischen die schulterbl
     - auf den rücken (schlag|klopf)
     - (5|fünf) schläge
+    - rücken\w* (\w+ ){0,2}(klop|schlag|schläg|hau)    # „Rücken klopfen“ (auch „klopen“)
+    - \b(klop|schlag|schläg|hau)\w* (\w+ ){0,4}(auf|zwischen) (den|die) (rücken|schulterbl)
   examples:
     - Ich beuge ihn nach vorne und gebe fünf Schläge zwischen die Schulterblätter
 
@@ -448,6 +478,8 @@ trauma_check:
   label: Trauma-Check (Bauch, Becken, Oberschenkel)
   patterns:
     - trauma ?check
+    - \btaste? (\w+ ){0,3}ab\b      # „ich taste sie ab“
+    - abtast
     - \bbauch\b|abdomen
     - becken
     - oberschenkel
