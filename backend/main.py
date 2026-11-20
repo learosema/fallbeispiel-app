@@ -99,14 +99,14 @@ async def turn(req: RunRequest):
 @app.post("/api/debrief", dependencies=[Depends(check_access)])
 async def debrief(req: RunRequest):
     run = await run_in_threadpool(_run, req)
-    result = evaluate.evaluate(run)
+    result = evaluate.evaluate(run, classifier.get().embedder)
     return JSONResponse({"result": result, "text": evaluate.as_text(result)}, headers=NO_STORE)
 
 
 @app.post("/api/feedback", dependencies=[Depends(check_access)])
 async def feedback(req: RunRequest):
     run = await run_in_threadpool(_run, req)
-    result = evaluate.evaluate(run)
+    result = evaluate.evaluate(run, classifier.get().embedder)
     try:
         text = await run_in_threadpool(judge.judge, run, result)
     except judge.JudgeError as exc:

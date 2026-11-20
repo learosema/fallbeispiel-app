@@ -79,3 +79,44 @@ reference: |
   D Disability: Bewusstsein (wach / Ansprache / Schmerzreiz / bewusstlos), Orientierung zu Person, Situation, Ort, Zeit. Problem: Lagerung i. d. R. Oberkörper hoch; Schlaganfall? FAST (Face, Arm, Speech, Time).
   E Exposure/Environment: SAMPLE-Anamnese, Ganzkörperuntersuchung inkl. DMS, Wärmeerhaltung (immer richtig, unabhängig von der Außentemperatur; Isolation vom Boden). Problem: Schaufeltrage/Spineboard/Vakuummatratze; Extremitätenverletzung: Immobilisieren (Schiene); Wunde: steriler Verband.
   Nach Abschluss von E wieder bei A beginnen: Diagnostik und Maßnahmen fortführen (Reevaluation).
+
+# Befundsprache: Ein Teilsatz über einen Befund gilt als „vage“, wenn er diesen Beispielen per Embedding
+# deutlich ähnlicher ist als den konkreten Befunden und den reinen Handlungen/Fragen.
+# Ergänzen, wenn etwas falsch erkannt wird – je Gruppe kurze, typische Sätze.
+finding_language:
+  vague:
+    - Puls ist normal
+    - Puls ist okay
+    - Puls ist gut
+    - Kreislauf passt
+    - Kreislauf ist stabil und in Ordnung
+    - Haut sieht unauffällig aus
+    - Hautfarbe ist normal
+    - Rekap ist okay
+    - Blutdruck ist im Normbereich
+    - Die Werte sind alle gut
+    - Vitalwerte sind normal
+    - Sättigung ist in Ordnung
+  concrete:
+    - Puls regelmäßig und gut tastbar
+    - Puls gut tastbar
+    - Puls schnell und schwach tastbar
+    - Puls nicht tastbar
+    - Puls etwa 80, regelmäßig, kräftig
+    - Rekap unter zwei Sekunden
+    - Rekapillarisierungszeit verzögert
+    - Rekap verlängert
+    - Haut blass und kaltschweißig
+    - Haut rosig und warm
+    - Blutdruck 130 zu 80
+    - Sättigung 97 Prozent
+    - Atemfrequenz 16 pro Minute
+  action:
+    - Ich fühle den Puls
+    - Ich messe den Blutdruck
+    - Ich schaue mir die Haut an
+    - Ich prüfe die Rekapillarisierungszeit
+    - Ich lege das Pulsoxymeter an
+    - Kannst du bitte den Blutdruck messen?
+    - Wie ist der Puls?
+    - Wie ist die Hautfarbe?

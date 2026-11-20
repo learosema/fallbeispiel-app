@@ -129,19 +129,60 @@ def check_funk(run: Run) -> dict[str, Any]:
 # „Puls normal“ sagt nichts aus – besser: „Puls regelmäßig, gut tastbar, schnell“, „Rekap unter 2 s / verzögert“.
 # „Normale Atmung“ bei der Atemkontrolle ist dagegen der Begriff des Algorithmus und wird nicht beanstandet.
 _VAGUE = re.compile(r"\b(normal|unauffällig|ok|okay|in ordnung|passt)\b")
-_VAGUE_TOPICS = re.compile(r"\bpuls|rekap|kapillar|nagelbett|kreislauf|\bhaut|hautfarbe|blutdruck|\brr\b|herzfrequenz|sättigung|spo2|atemfrequenz")
+_VAGUE_TOPICS = re.compile(r"\bpuls|rekap|kapillar|nagelbett|kreislauf|\bhaut|hautfarbe|blutdruck|\brr\b|herzfrequenz|sättigung|spo2|atemfrequenz|\bwerte\b|vital")
+# Embedding-Weg für Umschreibungen ohne Stichwort („Kreislauf im grünen Bereich“, „Blutdruck im Rahmen“):
+# vage, wenn der Teilsatz den vagen Beispielen ähnlich genug und näher als konkreten Befunden und reinen
+# Handlungen/Fragen ist. Vorher wird das Themenwort durch „wert“ ersetzt – sonst vergleicht das Modell vor
+# allem „Puls“ mit „Puls“ statt „ist im Rahmen“ mit „gut tastbar“. Schwellen an Testsätzen gemessen
+# (tests/test_embeddings.py): vage ≥ +0,03, konkret/Handlung ≤ −0,03.
+VAGUE_MIN_SIM = 0.55
+VAGUE_MARGIN = 0.0
+_TOPIC_WORDS = re.compile(r"\b(der |die |das |den )?(puls\w*|rekap\w*|kapillar\w*|nagelbett\w*|kreislauf\w*|haut\w*|blutdruck\w*|rr|herzfrequenz|sättigung|spo2|atemfrequenz|werte|vitalwerte|vitalzeichen)\b")
 
 
-def vague_findings(run: Run) -> list[str]:
-    """Äußerungen, in denen ein Befund nur als „normal“/„unauffällig“ benannt wird."""
+def _mask(text: str) -> str:
+    from .classifier import normalize
+
+    return re.sub(r"\s+", " ", _TOPIC_WORDS.sub(" wert ", normalize(text))).strip()
+
+
+def _prototypes(embedder) -> dict[str, Any]:
+    if not hasattr(embedder, "_finding_protos"):
+        groups = algorithm().get("finding_language") or {}
+        embedder._finding_protos = {k: embedder.embed([_mask(x) for x in groups.get(k, [])])
+                                    for k in ("vague", "concrete", "action") if groups.get(k)}
+    return embedder._finding_protos
+
+
+def is_vague(clause: str, embedder=None) -> bool:
+    """Ist dieser Teilsatz ein nur als „normal“/„in Ordnung“ benannter Befund?"""
+    from .classifier import normalize
+
+    text = normalize(clause)
+    if not _VAGUE_TOPICS.search(text):
+        return False
+    if _VAGUE.search(text):
+        return True
+    if embedder is None:
+        return False
+    protos = _prototypes(embedder)
+    if "vague" not in protos:
+        return False
+    e = embedder.embed([_mask(text)])
+    v = float((e @ protos["vague"].T).max())
+    other = max((float((e @ protos[k].T).max()) for k in ("concrete", "action") if k in protos), default=0.0)
+    return v >= VAGUE_MIN_SIM and v - other > VAGUE_MARGIN
+
+
+def vague_findings(run: Run, embedder=None) -> list[str]:
+    """Äußerungen, in denen ein Befund nur als „normal“/„unauffällig“ o. Ä. benannt wird."""
     out = []
     for t in run.turns:
         if t.funk:
             continue
-        for clause in re.split(r"[.,;!?]|\bund\b", t.text.lower()):
-            if _VAGUE.search(clause) and _VAGUE_TOPICS.search(clause):
-                out.append(t.text.strip())
-                break
+        clauses = [c for c in re.split(r"[.,;!?]|\bund\b", t.text.lower()) if c.strip()]
+        if any(is_vague(c, embedder) for c in clauses):
+            out.append(t.text.strip())
     return out
 
 
@@ -203,7 +244,7 @@ def _out_of_order(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [seq[p][1] for p in range(len(seq)) if p not in keep]
 
 
-def evaluate(run: Run) -> dict[str, Any]:
+def evaluate(run: Run, embedder=None) -> dict[str, Any]:
     alg = algorithm()
     minute_def = alg["minute_conscious"] if run.scenario.conscious else alg["minute_unconscious"]
     minute = [check_item(it, run) for it in minute_def]
@@ -236,7 +277,7 @@ def evaluate(run: Run) -> dict[str, Any]:
     time = f"Gesamtzeit {fmt(total)}" + (f", Funkspruch abgeschlossen nach {fmt(funk_end)}" if funk_end is not None else "")
 
     issues = sorted((it for it in relevant if it["status"] != OK), key=lambda it: (not it.get("critical"), it["status"] != MISSING))
-    vague = vague_findings(run)
+    vague = vague_findings(run, embedder)
     improve = [it["label"] + (f" ({it['note']})" if it["note"] else "") for it in issues][:4]
     if vague:
         improve.append("Befunde konkret benennen statt „normal“ (z. B. „Puls regelmäßig, gut tastbar“, „Rekap unter 2 s“)")
