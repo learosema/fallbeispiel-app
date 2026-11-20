@@ -847,6 +847,7 @@ aed:
 schock_ausloesen:
   label: Schock ausgelöst
   patterns:
+    - (?<!kein )\bschock\b(?! (empfohlen|wird))   # „Schock! Alle weg!“
     - schock\w* (aus|ab)?lös|lös\w* (den )?schock|schock (aus|ab)geben|schockknopf|schocktaste
     - (knopf|taste) drücken
     - schock (abgeben|geben|auslösen)

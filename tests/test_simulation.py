@@ -114,17 +114,54 @@ def test_bolus_needs_back_blows_and_heimlich(clf):
     assert said(run, "Patient")[-1] == "Jetzt geht's wieder."
 
 
+def replay_log(clf, sid, log, mode="minute"):
+    return engine.replay(content.scenarios()[sid], mode, engine.Settings(), log, clf)
+
+
 def test_reanimation_cycle_reaches_rosc(clf):
-    run = play(clf, "bw-reanimation", [
-        "hallo hören sie mich", "atemkontrolle", "keine normale atmung ich beginne sofort mit der herzdruckmassage",
-        "alle weg ich löse den schock aus", "weiter drücken",
-        "alle weg schock auslösen", "weiter mit der herzdruckmassage", "atmet er",
-    ])
-    text = said(run)
-    assert any("Elektroden" in x for x in text), "Kollege baut den AED von sich aus an"
-    assert not any("wie tief" in x for x in text), "Kollege fragt nicht nach HLW-Details"
+    log = [
+        {"t": 5, "text": "hallo hören sie mich"},
+        {"t": 10, "text": "atemkontrolle keine normale atmung"},
+        {"t": 15, "text": "ich beginne sofort mit der herzdruckmassage"},
+    ]
+    run = replay_log(clf, "bw-reanimation", log)
+    assert any("Elektroden" in x for x in said(run)), "Kollege baut den AED von sich aus an"
+    assert run.next_event_at == 30, "AED-Analyse 15 s nach Beginn der HLW"
+
+    log.append({"t": 30, "text": "", "tick": True})
+    run = replay_log(clf, "bw-reanimation", log)
+    assert [l.text for l in run.turns[-1].lines] == [
+        "AED ist dran.", "Patient nicht berühren! Herzrhythmus wird analysiert …", "Schock empfohlen. Blinkende Taste drücken."]
+
+    log += [{"t": 40, "text": "", "tick": True}, {"t": 42, "text": "Schock! Alle weg!"}]
+    run = replay_log(clf, "bw-reanimation", log)
+    assert "Absaugbereitschaft hergestellt." in said(run, "Kollege")
+    assert run.state["schocks"] == 1 and run.next_event_at is not None
+
+    # zwei Minuten später die nächste Analyse, auch ohne dass jemand etwas sagt
+    log += [{"t": 162, "text": "", "tick": True}, {"t": 165, "text": "schock alle weg"},
+            {"t": 285, "text": "", "tick": True}]
+    run = replay_log(clf, "bw-reanimation", log)
     assert run.state["schocks"] == 2 and run.state["rosc"]
-    assert "atmet wieder" in text[-1]
+    assert "Kein Schock empfohlen" in " ".join(said(run, "AED"))
+    assert not any("wie tief" in x for x in said(run)), "Kollege fragt nicht nach HLW-Details"
+
+    res = evaluate.evaluate(run)
+    warn = next(it for it in res["sections"][-1]["items"] if "Sicherheit beim Schock" in it["label"])
+    assert warn["status"] == evaluate.OK, "„Schock! Alle weg!“ in einer Äußerung ist rechtzeitig"
+    assert "Sanitäter:in: " not in evaluate.transcript(run).splitlines()[-1], "Takte erscheinen ohne Äußerung"
+
+
+def test_tick_without_due_event_says_nothing(clf):
+    run = replay_log(clf, "basis-sturz", [{"t": 5, "text": "hallo"}, {"t": 6, "text": "", "tick": True}])
+    assert run.turns[-1].lines == []
+
+
+def test_next_event_at_points_to_deterioration(clf):
+    run = play(clf, "basis-sturz", ["hallo"])
+    assert run.next_event_at == 60  # „will nach Hause“ bei 60 s, Frieren bei 75 s
+    run = play(clf, "basis-sturz", ["wir decken sie zu", "ich kläre sie auf, sie sollten ins krankenhaus"])
+    assert run.next_event_at is None or run.next_event_at > 150
 
 
 def test_rescue_service_arrives_and_handover_ends(clf):

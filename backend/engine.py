@@ -58,6 +58,7 @@ class Run:
     first: dict[str, tuple[int, int]]       # Intent → (Äußerung, Position) des ersten Auftretens
     first_t: dict[str, float]
     ended: bool
+    next_event_at: float | None = None      # Nettozeit, zu der das nächste Ereignis fällig wird (für den Takt im Browser)
 
 
 def compact(text: str) -> str:
@@ -149,12 +150,21 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
     fired: set[int] = set()
     turns: list[Turn] = []
 
+    def apply(v: Variant, t: float) -> None:
+        state.update(v.set)
+        for key, val in v.set.items():  # gesetzte Flags merken, damit Ereignisse `since: <flag>` nutzen können
+            if val and key not in first_t:
+                first_t[key] = t
+
     for n, entry in enumerate(log):
         t, text = float(entry.get("t", 0)), str(entry.get("text", ""))
+        tick = bool(entry.get("tick"))  # Takt ohne Äußerung: nur die Zeit ist fortgeschritten
         lines: list[Line] = []
         unhandled: list[str] = []
-        f = funk(text, settings, state, mode)
-        if f:
+        f = None if tick else funk(text, settings, state, mode)
+        if tick:
+            hits, info = [], None
+        elif f:
             # Während eines Funkspruchs zählt nur der Funk – „Verdacht auf …“ ist dann keine Teambesprechung.
             hits, funk_lines, info = f
             lines += funk_lines
@@ -170,7 +180,7 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
                         lines.append(UNHANDLED)
                     continue
                 lines += v.say
-                state.update(v.set)
+                apply(v, t)
         for h in hits:
             state[h.intent] = True
             if h.intent not in first:
@@ -189,7 +199,7 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
             if t >= base + ev.at and matches(ev.when, state):
                 fired.add(k)
                 lines += ev.variant.say
-                state.update(ev.variant.set)
+                apply(ev.variant, t)
         if "nachforderung" in first_t and not state.get("rd_da") and t >= first_t["nachforderung"] + ARRIVAL_SECONDS:
             state["rd_da"] = True
             lines.append(Line("Rettungsdienst", "Hallo, Rettungsdienst. Was habt ihr?"))
@@ -197,11 +207,27 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
             state["_beendet"] = True
             lines.append(Line("Befund", "Der Patient ist übergeben. Du kannst die Auswertung starten."))
 
-        if not hits and not lines:
+        if not hits and not lines and not tick:
             lines.append(FALLBACK)
         seen: set[Line] = set()
         lines = [Line(l.who, _fill(l.text, settings)) for l in lines]
         lines = [l for l in lines if not (l in seen or seen.add(l))]
         turns.append(Turn(t, text, hits, lines, info, unhandled))
 
-    return Run(scenario, mode, settings, turns, state, first, first_t, bool(state.get("_beendet")))
+    return Run(scenario, mode, settings, turns, state, first, first_t, bool(state.get("_beendet")),
+               _next_event_at(scenario, state, fired, first_t, turns[-1].t if turns else 0.0))
+
+
+def _next_event_at(scenario: Scenario, state: dict[str, Any], fired: set[int], first_t: dict[str, float], now: float) -> float | None:
+    """Wann wäre beim jetzigen Zustand das nächste Ereignis fällig? (None = keines)"""
+    due: list[float] = []
+    for k, ev in enumerate(scenario.events):
+        if k in fired or not matches(ev.when, state):
+            continue
+        if ev.since and ev.since not in first_t:
+            continue
+        due.append((first_t[ev.since] if ev.since else 0.0) + ev.at)
+    if "nachforderung" in first_t and not state.get("rd_da"):
+        due.append(first_t["nachforderung"] + ARRIVAL_SECONDS)
+    later = [d for d in due if d > now]
+    return min(later) if later else None

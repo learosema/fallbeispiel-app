@@ -143,9 +143,14 @@ def _load_scenario(path: Path) -> Scenario:
             raise ValueError(f"{path.name}: Antwort für unbekannten Intent {iid!r}")
         responses[iid] = _variants(raw, f"{path.name}.responses.{iid}")
     events = []
+    flags = set(d.get("state") or {})
+    for raw in list((d.get("responses") or {}).values()) + [d.get("events") or []]:
+        for v in raw if isinstance(raw, list) else []:
+            if isinstance(v, dict):
+                flags |= set(v.get("set") or {})
     for n, e in enumerate(d.get("events") or []):
-        if e.get("since") and e["since"] not in known:
-            raise ValueError(f"{path.name}: events[{n}].since: unbekannter Intent {e['since']!r}")
+        if e.get("since") and e["since"] not in known and e["since"] not in flags:
+            raise ValueError(f"{path.name}: events[{n}].since: weder Intent noch gesetztes Flag: {e['since']!r}")
         events.append(Event(float(e["at"]), e.get("since"), dict(e.get("when") or {}),
                             Variant(_lines(e.get("say"), f"{path.name}.events[{n}]"), {}, dict(e.get("set") or {}))))
     for ka in d.get("key_actions") or []:

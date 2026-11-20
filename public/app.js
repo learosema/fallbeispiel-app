@@ -22,12 +22,13 @@
   let listening = false;
   let recognition = null;
   let debriefDone = false;
+  let nextEventAt = null; // Nettozeit, zu der laut Server das nächste Ereignis fällig ist (z. B. AED-Analyse)
 
   // Zeitmessung: zählt nur die Zeit der Nutzerin, nicht das Warten auf/Vorlesen der Antwort
   let startedAt = null;
   let busyMs = 0;
   let busySince = null;
-  let userLog = [];       // { t: Sekunden, text } – geht bei jeder Äußerung komplett an den Server
+  let userLog = [];       // { t: Sekunden, text } bzw. { t, text: "", tick: true } – geht jedes Mal komplett an den Server
   const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, "0")}`;
   function netSec() {
     if (!startedAt) return 0;
@@ -36,6 +37,18 @@
   }
   const startClock = () => { if (!startedAt) startedAt = Date.now(); };
   setInterval(() => { if (scenario && startedAt && !debriefDone) $("timer").textContent = "⏱ " + fmt(netSec()); }, 500);
+
+  // Takt: Die Simulation läuft weiter, auch wenn gerade niemand spricht (AED alle 2 Minuten, Auskühlen …)
+  const tickDue = () => scenario && startedAt && !debriefDone && nextEventAt != null && netSec() >= nextEventAt;
+  setInterval(() => {
+    if (!tickDue() || busy) return;
+    if (listening) {
+      // nur unterbrechen, wenn gerade nichts erkannt wurde – onend schickt dann den Takt
+      if (!$("textInput").value.trim() && recognition) { try { recognition.stop(); } catch {} }
+      return;
+    }
+    turn({ tick: true });
+  }, 500);
 
   // ---------- UI ----------
   function setStatus(text, error = false) {
@@ -119,7 +132,7 @@
     scenario = s;
     mode = settings.mode === "full" ? "full" : "minute";
     debriefDone = false;
-    startedAt = null; busyMs = 0; busySince = null; userLog = [];
+    startedAt = null; busyMs = 0; busySince = null; userLog = []; nextEventAt = null;
     $("timer").textContent = "⏱ 0:00";
     $("log").innerHTML = "";
     $("home").hidden = true;
@@ -193,6 +206,7 @@
       $("micBtn").classList.remove("listening");
       const text = (finalText || $("textInput").value).trim();
       if (text) { $("textInput").value = ""; send(text); }
+      else if (tickDue() && !busy) turn({ tick: true });
       else { setStatus(""); if (settings.handsfree && scenario && !busy) setTimeout(startListening, 300); }
     };
     try { recognition.start(); } catch { /* läuft schon */ }
@@ -224,21 +238,25 @@
   function beginBusy(text) { busy = true; busySince = Date.now(); setStatus(text); }
   function endBusy() { busyMs += Date.now() - busySince; busySince = null; busy = false; }
 
-  async function send(text) {
+  const send = (text) => turn({ text });
+
+  async function turn({ text = "", tick = false }) {
     if (!scenario || busy) return;
     startClock();
-    userLog.push({ t: Math.round(netSec() * 10) / 10, text });
-    addMsg(text, "me");
-    beginBusy("…");
+    userLog.push(tick ? { t: Math.round(netSec() * 10) / 10, text: "", tick: true } : { t: Math.round(netSec() * 10) / 10, text });
+    if (!tick) addMsg(text, "me");
+    beginBusy(tick ? "" : "…");
     let ok = false;
     try {
       const data = await api("/api/turn");
+      nextEventAt = data.next_event_at ?? null;
       setStatus("");
       addReply(data.lines);
       await speakReply(data.lines);  // Vorlesen zählt nicht zur Nettozeit
       ok = true;
     } catch (err) {
       userLog.pop();
+      nextEventAt = null;  // keinen Takt-Sturm bei Serverfehlern
       setStatus("Fehler: " + err.message, true);
     } finally {
       endBusy();

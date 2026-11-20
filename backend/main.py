@@ -20,7 +20,7 @@ from fastapi.concurrency import run_in_threadpool
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from . import classifier, content, engine, evaluate, judge
 
@@ -30,7 +30,14 @@ NO_STORE = {"Cache-Control": "no-store"}
 
 class Utterance(BaseModel):
     t: float = Field(ge=0, le=24 * 3600)
-    text: str = Field(min_length=1, max_length=1000)
+    text: str = Field(default="", max_length=1000)
+    tick: bool = False  # Takt ohne Äußerung (fällige Ereignisse, z. B. AED-Analyse alle 2 Minuten)
+
+    @model_validator(mode="after")
+    def _text_or_tick(self):
+        if not self.tick and not self.text.strip():
+            raise ValueError("text fehlt")
+        return self
 
 
 class RunRequest(BaseModel):
@@ -92,6 +99,7 @@ async def turn(req: RunRequest):
     return JSONResponse({
         "lines": [{"who": l.who, "text": l.text} for l in last.lines],
         "ended": run.ended,
+        "next_event_at": run.next_event_at,
         "intents": [h.intent for h in last.hits],
     }, headers=NO_STORE)
 

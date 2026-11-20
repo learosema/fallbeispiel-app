@@ -13,7 +13,7 @@ debrief_notes: >
 conscious: false
 breathing: abnormal
 request: {required: [RTW, NEF]}
-state: {analyse: 0, schocks: 0, rosc: false}
+state: {analyse: 0, schocks: 0, rosc: false, aed_kommt: false, aed_dran: false, absaug_bereit: false, o2_bereit: false}
 
 responses:
   lage_pruefen:
@@ -49,23 +49,11 @@ responses:
     - when: {rosc: true}
       say:
         - Kollege: Stopp – er atmet wieder!
-    - when: {analyse: 0}
+    - when: {aed_kommt: false}
       say:
         - Befund: (Herzdruckmassage läuft)
-        - Kollege: (schaltet den AED ein, klebt die Elektroden rechts unter dem Schlüsselbein und links seitlich unter der Achsel, legt Sauerstoff und Beutel bereit und stellt die Absaugung bereit)
-        - AED: "Herzrhythmus wird analysiert. Patient nicht berühren. Schock empfohlen."
-      set: {aed_dran: true, analyse: 1, absaugbereit: true}
-    - when: {analyse: 1, schocks: 1}
-      say:
-        - Befund: Zwei Minuten Herzdruckmassage sind um.
-        - AED: "Herzrhythmus wird analysiert. Patient nicht berühren. Schock empfohlen."
-      set: {analyse: 2}
-    - when: {analyse: 2, schocks: 2}
-      say:
-        - Befund: Zwei Minuten sind um.
-        - AED: "Herzrhythmus wird analysiert. Patient nicht berühren. Kein Schock empfohlen."
-        - Befund: Er hustet, bewegt sich, atmet wieder. Puls tastbar.
-      set: {rosc: true, analyse: 3}
+        - Kollege: (holt den AED, schaltet ihn ein und klebt die Elektroden rechts unter dem Schlüsselbein und links seitlich unter der Achsel)
+      set: {aed_kommt: true}
     - say:
         - Befund: (Herzdruckmassage läuft)
   beatmen:
@@ -73,22 +61,43 @@ responses:
   aed:
     - when: {aed_dran: true}
       say:
-        - AED: "Elektroden sind angeschlossen."
+        - Kollege: AED ist dran.
+    - when: {aed_kommt: true}
+      say:
+        - Kollege: Bin dabei.
     - say:
-        - Kollege: (holt den AED und baut ihn auf)
-  schock_warnung:
-    - Umstehende: (treten zurück)
+        - Kollege: (holt den AED und schaltet ihn ein)
+  absaugen:
+    - when: {absaug_bereit: true}
+      say:
+        - Kollege: Ist bereit.
+    - say:
+        - Kollege: Absaugbereitschaft hergestellt.
+      set: {absaug_bereit: true}
+  sauerstoff:
+    - when: {o2_bereit: true}
+      say:
+        - Kollege: Ist bereit.
+    - say:
+        - Kollege: Sauerstoff bereit.
+      set: {o2_bereit: true}
+  schock_warnung:   # „Schock! Alle weg!“ – zählt für die Auswertung, braucht keine eigene Antwort
+    - say: []
   schock_ausloesen:
     - when: {analyse: 1, schocks: 0}
       say:
-        - AED: "Schock wird abgegeben. Beginnen Sie sofort mit der Herz-Lungen-Wiederbelebung."
-      set: {schocks: 1}
+        - AED: Schock wird abgegeben.
+        - Befund: (der Körper zuckt kurz zusammen)
+        - AED: Schock abgegeben. Beginnen Sie jetzt mit der Herz-Lungen-Wiederbelebung.
+      set: {schocks: 1, schock1: true}
     - when: {analyse: 2, schocks: 1}
       say:
-        - AED: "Schock wird abgegeben. Beginnen Sie sofort mit der Herz-Lungen-Wiederbelebung."
-      set: {schocks: 2}
+        - AED: Schock wird abgegeben.
+        - Befund: (der Körper zuckt kurz zusammen)
+        - AED: Schock abgegeben. Beginnen Sie jetzt mit der Herz-Lungen-Wiederbelebung.
+      set: {schocks: 2, schock2: true}
     - say:
-        - AED: "Kein Schock empfohlen."
+        - Kollege: Der AED hat keinen Schock freigegeben.
   helferwechsel:
     - Kollege: (übernimmt die Herzdruckmassage)
   platz_schaffen:
@@ -151,6 +160,44 @@ events:
     when: {hlw: false}
     say:
       - Befund: Die Schnappatmung wird seltener, die Haut immer blauer.
+  # AED: Kollege baut ihn während der ersten Herzdruckmassage an, dann alle 2 Minuten Analyse
+  - at: 15
+    since: hlw
+    say:
+      - Kollege: AED ist dran.
+      - AED: Patient nicht berühren! Herzrhythmus wird analysiert …
+      - AED: Schock empfohlen. Blinkende Taste drücken.
+    set: {aed_dran: true, analyse: 1}
+  - at: 25
+    since: hlw
+    when: {absaug_bereit: false}
+    say:
+      - Kollege: Absaugbereitschaft hergestellt.
+    set: {absaug_bereit: true}
+  - at: 35
+    since: hlw
+    when: {o2_bereit: false}
+    say:
+      - Kollege: Sauerstoff bereit.
+    set: {o2_bereit: true}
+  - at: 45
+    since: hlw
+    when: {analyse: 1, schocks: 0}
+    say:
+      - AED: Blinkende Taste drücken.
+  - at: 120
+    since: schock1
+    say:
+      - AED: Patient nicht berühren! Herzrhythmus wird analysiert …
+      - AED: Schock empfohlen. Blinkende Taste drücken.
+    set: {analyse: 2}
+  - at: 120
+    since: schock2
+    say:
+      - AED: Patient nicht berühren! Herzrhythmus wird analysiert …
+      - AED: Kein Schock empfohlen. Beginnen Sie jetzt mit der Herz-Lungen-Wiederbelebung.
+      - Befund: Er hustet, bewegt sich und atmet wieder. Puls tastbar.
+    set: {analyse: 3, rosc: true}
   - at: 480
     say:
       - Rettungsdienst: Rettungsdienst, wir übernehmen! Was habt ihr bisher gemacht?
@@ -161,7 +208,7 @@ key_actions:
     any: [hlw]
     critical: true
     within: 60
-  - label: Sicherheit beim Schock („alle weg“)
+  - label: Sicherheit beim Schock („Schock! Alle weg!“)
     any: [schock_warnung]
     before: [schock_ausloesen]
   - label: Notruf / Nachforderung veranlasst

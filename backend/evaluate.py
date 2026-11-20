@@ -213,7 +213,8 @@ def check_key_action(ka: dict[str, Any], run: Run) -> dict[str, Any]:
         n = out["at"][0]
         late = []
         for b in ka.get("before", []):
-            if b in run.first and run.first[b] < out["at"]:
+            # gleiche Äußerung zählt als rechtzeitig („Schock! Alle weg!“ ist ein Kommando)
+            if b in run.first and run.first[b][0] < out["at"][0]:
                 late.append(intents()[b].label)
         if late:
             out["status"] = PARTIAL
@@ -296,8 +297,11 @@ def evaluate(run: Run, embedder=None) -> dict[str, Any]:
 def transcript(run: Run) -> str:
     out = []
     for t in run.turns:
-        out.append(f"[{fmt(t.t)}] Sanitäter:in: {t.text}")
-        out += [f"        {l.who}: {l.text}" for l in t.lines]
+        if t.text.strip():
+            out.append(f"[{fmt(t.t)}] Sanitäter:in: {t.text}")
+            out += [f"        {l.who}: {l.text}" for l in t.lines]
+        else:  # Takt: nur die Simulation hat etwas gesagt
+            out += [f"[{fmt(t.t)}]     {l.who}: {l.text}" for l in t.lines]
     return "\n".join(out)
 
 
