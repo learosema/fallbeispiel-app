@@ -1,0 +1,15 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      # Heruntergeladene Hugging-Face-Modelle überleben Neustarts
+      - hf-cache:/models
+    restart: unless-stopped
+
+volumes:
+  hf-cache:

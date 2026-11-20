@@ -1,4 +1,4 @@
-const CACHE = "xabcde-v9";
+const CACHE = "xabcde-v10";
 const ASSETS = ["./", "index.html", "info.html", "style.css", "app.js", "scenarios.js", "algorithm.js", "manifest.webmanifest", "icon.svg", "icon-192.png", "icon-512.png", "apple-touch-icon.png"];
 
 self.addEventListener("install", (e) => {

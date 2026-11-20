@@ -1,0 +1,24 @@
+[project]
+name = "fallbeispiel-app"
+version = "0.1.0"
+description = "Fallbeispiel-Trainer mit lokalem LLM (transformers) und FastAPI-Backend"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "transformers>=4.46",
+    "torch>=2.4",
+    "accelerate>=1.0",
+]
+
+[tool.uv]
+package = false
+
+# CPU-Build von PyTorch (spart ~2 GB CUDA-Pakete). Für NVIDIA-GPUs diesen Block entfernen.
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }

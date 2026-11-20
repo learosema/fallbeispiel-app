@@ -4,7 +4,7 @@
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
   // ---------- Einstellungen ----------
-  const API_URL = "/api/chat"; // Netlify Function, hält den LLM-Key serverseitig
+  const API_URL = "/api/chat"; // Python-Backend mit lokalem Modell
   const DEFAULTS = { accessCode: "", rate: 1, speak: true, handsfree: false, mode: "minute", callsign: "EVT1", dispatcher: "RotkreuzHamburg" };
   let settings = { ...DEFAULTS };
   try {
