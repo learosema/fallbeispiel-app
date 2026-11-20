@@ -51,7 +51,7 @@ responses:                   # Intent → Antwort
         - Befund: Der Fremdkörper löst sich.
       set: {geloest: true}   # eigene Flags setzen
 
-events:                      # zeitgesteuert (Nettozeit der Sanitäter:in in Sekunden), feuern je einmal
+events:                      # zeitgesteuert (Nettozeit der Sanitäter:in in Sekunden), feuern einmal – mit repeat wiederholt
   - at: 75
     when: {decke: false}
     say:
