@@ -3,6 +3,22 @@
 // Alle Fälle sind frei erfunden und dienen nur der Ausbildung.
 window.SCENARIOS = [
   {
+    id: "basis-sturz",
+    letter: "1.",
+    title: "Sturz auf nasser Treppe",
+    teaser: "Basisfall für die 1. Minute: ansprechbar, Trauma",
+    dispatch: "Funkmeldung: Landungsbrücken, Person auf einer Treppe gestürzt, sitzt am Boden und ist ansprechbar.",
+    scene: "Nachmittag, Landungsbrücken, Treppe zur Brücke, ca. 5 °C, leichter Regen, Tageslicht, wenige Passanten. Keine akute Gefahr, nur nasse, rutschige Stufen. 1 Betroffener, eine Passantin ist bei ihm. Hergang: auf den nassen Stufen ausgerutscht, die letzten vier Stufen hinuntergestürzt, dabei mit der Stirn kurz am Geländer angeschlagen, dann auf Gesäß und Rücken gelandet.",
+    team: "Du bist mit einem Kollegen im Fußtrupp, Sanitätsrucksack dabei. Der Rettungsdienst muss nachgefordert werden und trifft ca. 8 Minuten nach Nachforderung ein.",
+    role: "Du spielst den Patienten Herrn Petersen (68, wach, orientiert, ein wenig beschämt und verunsichert, antwortet kurz) und die Passantin, die den Sturz gesehen hat. Dazu den Kollegen.",
+    hidden: `Antwortet auf die Begrüßung normal. Sagt auf Nachfrage: ist ausgerutscht und gestürzt. Kein Bewusstseinsverlust laut Passantin, er erinnert sich an alles.
+Beschwerden: leichte Nackenschmerzen beim Drehen des Kopfes, Prellung/Beule an der Stirn, Schmerz am Gesäß, rechte Handfläche aufgeschürft. Kribbeln oder Lähmungen: nein.
+Schnellcheck: A/B: Luft gut, keine Schmerzen beim Atmen, keine Zyanose, AF 16, SpO2 97 % (nur wenn gemessen). C: Haut leicht blass, kühl, Puls gut tastbar, regelmäßig, ca. 78, Rekap unter 2 Sekunden, RR 145/85 (nur wenn gemessen). Trauma-Check: Bauch weich und schmerzfrei, Becken stabil und schmerzfrei, Oberschenkel unauffällig (nur wenn abgetastet). D: wach, GCS 15, orientiert zu Person, Ort, Zeit, Situation, reagiert angemessen, etwas aufgeregt. E: ihm ist kalt (nass vom Sitzen auf der Treppe, 5 °C), er friert, zittert leicht. Sonst keine Verletzungen.
+SAMPLE (nur auf Nachfrage): Allergie keine, nimmt einen Blutverdünner (Apixaban) wegen Vorhofflimmern, außerdem Blutdruckmittel, letzte Mahlzeit vor 3 Std.
+Wichtig: Kopfanprall unter Blutverdünner und Nackenschmerzen nach Sturz bedeuten Abklärung in der Klinik/Rettungsdienst, auch wenn es ihm gut geht. Er will zuerst nur »nach Hause«. Ohne Wärmeerhalt friert er zunehmend und zittert; bekommt er eine Decke, wird es spürbar besser (»danke, das tut gut«).`,
+    keyActions: "1. Minute: Sicherheit/Lage (nasse Stufen), bedrohliche Blutung, Vorstellung (Wir sind vom DRK, Was ist passiert?), Kollege übernimmt manuelle HWS-Stabilisierung, Luft/Schmerzen beim Atmen/Zyanose, Hautfarbe, Puls, Rekap, Trauma-Check Bauch/Becken/Oberschenkel, Reaktion/Orientierung, Hergang, Frieren (Wärmeerhalt), Teambesprechung: Lage (Sturz, Kopfanprall, Nackenschmerz), Verdacht E-Problem/Trauma, Rettungsdienst/Notarzt nachfordern (Blutverdünner), SAMPLE, Immobilisation."
+  },
+  {
     id: "x-kettensaege",
     letter: "x",
     title: "Kettensägen-Unfall",
@@ -128,6 +144,27 @@ Vorerkrankungen laut Zeugin: Freund sagt, er hatte Brustschmerzen am Morgen, hat
 Einsatz wird von RD nach ca. 8 Minuten übernommen: strukturierte Übergabe erwartet (Zeit des Kollaps, Beginn HLW, Schocks, ROSC-Zeit).
 WICHTIG FÜR DIE SIMULATION: Die Nutzerin beschreibt, was sie tut. Wenn sie nur "HLW" sagt, frage knapp nach Druckpunkt, Tiefe, Frequenz, Verhältnis 30:2. Gib alle zwei Minuten kurz die vergangene Zeit an ("Zwei Minuten sind um, der AED fordert zur Analyse auf"). Antworte nicht für sie.`,
     keyActions: "Eigenschutz/Lage, Ansprechen/Schmerzreiz, Atemwege frei machen, Atemkontrolle max. 10 s, Schnappatmung als nicht normal erkennen, Notruf/AED veranlassen (Aufgaben delegieren), sofortige HLW 30:2 (Druckpunkt, 5–6 cm, 100–120/min, Entlastung), AED früh, Sicherheit beim Schock, Pausen minimieren, Wechsel nach ca. 2 Min, Nachforderung, nach ROSC ABCDE/Wärmeerhalt/Atemkontrolle wiederholen, strukturierte Übergabe."
+  },
+
+  {
+    id: "bw-sommer",
+    group: "Bewusstlosigkeit",
+    letter: "SL",
+    title: "Bewusstlos am Elbstrand",
+    teaser: "Seitenlage im Sommer: Wärmeerhalt trotzdem",
+    dispatch: "Funkmeldung: Elbstrand, Sommerabend, ein Mann liegt reglos im Sand, Freunde sind bei ihm.",
+    scene: "Sommerabend, Elbstrand, 29 °C, tiefstehende Sonne, Wind vom Wasser, viele Badegäste, Gaffer. Keine akute Gefahr; der Mann liegt oberhalb der Wasserlinie auf feuchtem, kühlem Sand im Schatten eines Strandkorbs. 1 Betroffener, sein Freund Nils ist bei ihm. Hergang laut Nils: trinkt seit Mittag Alkohol, ist plötzlich eingeschlafen und nicht mehr wach zu bekommen.",
+    role: "Du spielst den Freund Nils (22, ängstlich, redet schnell) und beschreibst das Beobachtbare am Patienten (Mann, ca. 30, bewusstlos) nüchtern als Befund.",
+    hidden: `Bewusstlos: reagiert nicht auf lautes Ansprechen und Rütteln, auf Schmerzreiz nur ungezielte Abwehr (GCS 8). Leere Bierflaschen und eine Schnapsflasche neben ihm, deutlicher Alkoholgeruch. Er liegt auf dem Rücken.
+Atemwege: schnarchend, solange er auf dem Rücken liegt; nach Kopf überstrecken/Kinn anheben frei. Atemkontrolle (sehen, hören, fühlen, bis 10 s): normale Atmung, ca. 14/min. Puls kräftig, 70.
+Auf Nachfrage: SpO2 94 %, BZ 88 mg/dl, RR 120/75, Rekap 2 s, Pupillen isokor. Haut warm, trocken, sandig. Körpertemperatur 35,9 °C (Alkohol erweitert die Gefäße, Wärmeverlust).
+Auf Rücken belassen: nach ca. 2 Minuten Erbrechen mit Aspiration, SpO2 fällt. In Seitenlage ok.
+Wärmeerhalt: Er liegt bewusstlos auf feuchtem Sand und Wind weht, deshalb verliert er Wärme, wenn auch langsamer als bei Kälte. Ohne Decke/Rettungsdecke und Isolation vom Boden sinkt die Temperatur über ca. 10 Minuten langsam auf ca. 35,4 °C, die Haut wird kühler. Mit Decke und Isolation bleibt sie stabil.
+Wird er zugedeckt, wundert sich Nils: »Zudecken? Es sind doch 29 Grad!«. Antworte darauf nur als Nils, ohne sie zu bestätigen oder zu korrigieren.
+SAMPLE auf Nachfrage bei Nils: keine Allergien bekannt, nimmt keine Medikamente soweit er weiß, Mittagessen: eine Bratwurst, Alkohol seit Mittag, ca. 10 Bier und mehrere Schnäpse. Keine Verletzungen, keine Sturzbeobachtung.
+Der Mann wird innerhalb des Einsatzes nicht wach, RD übernimmt.
+WICHTIG FÜR DIE SIMULATION: Die Nutzerin beschreibt, was sie tut. Wenn sie nur »Seitenlage« oder »Wärmeerhalt« sagt, frage knapp nach den Schritten bzw. wie (Decke, Isolation vom Boden). Antworte nicht für sie.`,
+    keyActions: "Eigenschutz (Wasser, Gaffer, Sonne), Ansprechen/Schmerzreiz, Atemwege frei machen, Atemkontrolle max. 10 s, normale Atmung: stabile Seitenlage, Notruf/Nachforderung, Absaugbereitschaft, BZ/SpO2/Puls/Temperatur, Wärmeerhalt trotz Sommer (Decke/Rettungsdecke, Isolation vom feuchten Boden), SAMPLE vom Freund, Atemkontrolle wiederholen, Übergabe."
   },
 
   // ---------- Hamburger DOM (Heiligengeistfeld) ----------

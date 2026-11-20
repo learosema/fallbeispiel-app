@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>So funktioniert's – Fallbeispiel xABCDE</title>
+  <meta name="theme-color" content="#b3261e">
+  <meta name="description" content="Die 1. Minute und den Funkspruch nach SANmemo per Sprache üben: Ablauf, Beispielgespräch und Auswertung.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    html, body { height: auto; min-height: 100%; }
+    main.doc { display: block; width: 100%; max-width: 720px; margin: 0 auto; padding: 8px 16px 48px; }
+    .topbar a.icon-btn { display: grid; place-items: center; text-decoration: none; }
+    .hero { padding: 20px 0 8px; }
+    .hero h2 { font-size: 1.6rem; line-height: 1.2; margin: 0 0 8px; }
+    .hero p { color: var(--muted); margin: 0 0 16px; }
+    .cta { display: inline-block; background: var(--accent); color: var(--accent-fg); text-decoration: none; padding: 12px 20px; border-radius: 12px; font-weight: 600; }
+    .doc h3 { margin: 32px 0 8px; font-size: 1.2rem; }
+    .doc p, .doc li { max-width: 62ch; }
+    .doc ol, .doc ul { padding-left: 1.2em; }
+    .steps { counter-reset: s; list-style: none; padding: 0; display: grid; gap: 10px; }
+    .steps li { counter-increment: s; display: flex; gap: 12px; align-items: flex-start; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+    .steps li::before { content: counter(s); flex: none; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: var(--accent-fg); display: grid; place-items: center; font-weight: 700; font-size: .9rem; }
+    .note { background: var(--sys); border-radius: 10px; padding: 10px 12px; color: var(--muted); font-size: .92rem; }
+    .demo { border: 1px solid var(--line); border-radius: 16px; padding: 12px; background: var(--bg); }
+    .demo .log { overflow: visible; padding-bottom: 0; }
+    .phase { align-self: stretch; text-align: center; font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 10px 0 0; display: flex; align-items: center; gap: 10px; }
+    .phase::before, .phase::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+    .msg.debrief { font-size: .92rem; line-height: 1.5; }
+    .groups { display: grid; gap: 12px; padding: 0; list-style: none; }
+    .groups li { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+    .groups strong { display: block; }
+    .groups small { color: var(--muted); }
+    footer { color: var(--muted); font-size: .85rem; margin-top: 40px; }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="icon-btn" href="./" aria-label="Zur App">←</a>
+    <h1>So funktioniert's</h1>
+    <span class="icon-btn" aria-hidden="true"></span>
+  </header>
+
+  <main class="doc">
+    <section class="hero">
+      <h2>Die 1. Minute üben, so wie sie im SANmemo steht.</h2>
+      <p>Du sprichst, die App antwortet als Patient:in, Kollege, Umstehende und Leitstelle. Am Ende bekommst du eine Auswertung, ob du dem Algorithmus gefolgt bist.</p>
+      <a class="cta" href="./">Zur App</a>
+    </section>
+
+    <h3>Ablauf</h3>
+    <ol class="steps">
+      <li><span>Fall wählen, zum Beispiel „Sturz auf nasser Treppe" oder einen Fall vom DOM oder vom Millerntor.</span></li>
+      <li><span>Die 1. Minute durchsprechen: Lage, bedrohliche Blutung, Ansprechen, Schnellcheck (A bis E), Teambesprechung.</span></li>
+      <li><span>Mit dem Funkspruch an die Leitstelle abschließen („EVT1 Ende").</span></li>
+      <li><span>Auf <em>Auswertung</em> tippen: Schritt für Schritt, mit tatsächlicher Reihenfolge und Abweichungen.</span></li>
+    </ol>
+    <p class="note">Die App ersetzt weder Ausbildung noch Praxis. Die Technik (Seitenlage, Herzdruckmassage, HWS-Griff) übst du weiter an Puppe und Kollegen. Hier trainierst du Ablauf, Fragen, Ansagen und Funk.</p>
+
+    <h3>Beispielgespräch</h3>
+    <p>Fall: <strong>Sturz auf nasser Treppe</strong> (Landungsbrücken), Modus „1. Minute". Das Gespräch ist ein von Hand geschriebenes, gekürztes Beispiel, kein aufgezeichneter Lauf. Echte Antworten der Simulation können im Wortlaut abweichen.</p>
+    <div class="demo"><div class="log" id="demo"></div></div>
+
+    <h3>Beispiel-Auswertung</h3>
+    <p>Zu diesem Gespräch könnte die Auswertung so aussehen. Sie zeigt, wie Lücken sichtbar werden, die im Gespräch selbst nicht korrigiert werden.</p>
+    <div class="demo"><div class="log" id="debrief"></div></div>
+
+    <h3>Was die Simulation macht und was nicht</h3>
+    <ul>
+      <li>Sie antwortet nur auf das, was du sagst. Sie gibt keine Tipps und korrigiert nicht während des Einsatzes.</li>
+      <li>Sagst du einen Befund selbst („Puls gut tastbar"), bestätigt sie knapp. Stimmt er nicht mit dem Fall überein, nennt sie den tatsächlichen Befund.</li>
+      <li>Der Kollege führt aus, was du ansagst („Kollege, bitte manuelle HWS-Stabilisierung"). Er gibt keine Empfehlungen.</li>
+      <li>Der Zustand der Person entwickelt sich weiter: Fehlende oder falsche Maßnahmen verschlechtern ihn.</li>
+      <li>Wärmeerhalt zählt immer, unabhängig von der Außentemperatur. Bei Kälte friert die Person nur schneller. Nachfragen allein reicht nicht, du musst es ansagen oder tun.</li>
+      <li>Die Auswertung bewertet den Algorithmus, nicht die Geschwindigkeit. Die Zeit ist nur eine Randnotiz.</li>
+    </ul>
+
+    <h3>Modi</h3>
+    <ul>
+      <li><strong>1. Minute:</strong> endet nach Teambesprechung und Funkspruch.</li>
+      <li><strong>Ganzer Fall:</strong> danach geht es weiter mit vollständigem ABCDE, Maßnahmen, Reevaluation und Übergabe.</li>
+    </ul>
+
+    <h3>Fälle</h3>
+    <ul class="groups" id="groups"></ul>
+
+    <footer>
+      <p>Alle Fälle sind frei erfunden und dienen nur der Ausbildung. Der Algorithmus folgt dem DRK-SANmemo (2024), die Funkmeldung der Praxis beim DRK Hamburg. Medizinische Details bitte mit der Ausbildung abgleichen.</p>
+    </footer>
+  </main>
+
+  <script src="scenarios.js"></script>
+  <script>
+    // ---- Beispielgespräch (von Hand geschrieben, gekürzt) ----
+    const CLS = { Patient: "them", Kollege: "them kollege", Umstehende: "them", Befund: "sys befund", Leitstelle: "them funk" };
+    const convo = [
+      ["sys", "Einsatzmeldung: Funkmeldung: Landungsbrücken, Person auf einer Treppe gestürzt, sitzt am Boden und ist ansprechbar."],
+      ["phase", "Lage"],
+      ["me", "Lagebeurteilung: Die Lage ist sicher, nur die Stufen sind nass und rutschig. Keine bedrohliche Blutung."],
+      ["Kollege", "Verstanden."],
+      ["phase", "Ansprache"],
+      ["me", "Hallo, wir sind vom DRK! Was ist passiert?"],
+      ["Patient", "Hallo. Ich bin auf der Treppe ausgerutscht und gestürzt."],
+      ["me", "Kollege, bitte manuelle HWS-Stabilisierung."],
+      ["Kollege", "(übernimmt die manuelle HWS-Stabilisierung)"],
+      ["phase", "Schnellcheck"],
+      ["me", "Bekommen Sie gut Luft?"],
+      ["Patient", "Ja, die Luft ist gut."],
+      ["me", "Haben Sie Schmerzen beim Atmen?"],
+      ["Patient", "Nein."],
+      ["me", "Puls gut tastbar, Rekap unter zwei Sekunden."],
+      ["Kollege", "Verstanden."],
+      ["me", "Ich taste Bauch, Becken und Oberschenkel ab."],
+      ["Befund", "Bauch weich und schmerzfrei, Becken stabil und schmerzfrei, Oberschenkel unauffällig."],
+      ["me", "Wie ist der Unfallhergang? Frieren Sie?"],
+      ["Patient", "Ich bin die letzten Stufen runtergefallen, mit der Stirn ans Geländer. Und ja, mir ist kalt, ich sitze ja in der Nässe."],
+      ["Umstehende", "Bewusstlos war er nicht, ich habe alles gesehen."],
+      ["me", "Wissen Sie, wie Sie heißen, wo Sie sind und was passiert ist?"],
+      ["Patient", "Petersen. Landungsbrücken. Ich bin gestürzt."],
+      ["phase", "Teambesprechung"],
+      ["me", "Lage: Sturz auf nasser Treppe mit Kopfanprall und leichten Nackenschmerzen. Verdacht auf Trauma. Wir fordern den Rettungsdienst nach."],
+      ["Kollege", "Verstanden."],
+      ["phase", "Funkspruch"],
+      ["me", "RotkreuzHamburg von EVT1, kommen."],
+      ["Leitstelle", "Hier RotkreuzHamburg."],
+      ["me", "Wir haben hier einen Patienten, männlich, Ende sechzig, gestürzt, Kopfanprall und Nackenschmerzen, Verdacht auf HWS-Verletzung, wir brauchen einmal RTW, kommen."],
+      ["Leitstelle", "RTW kommt, verstanden."],
+      ["me", "EVT1 Ende."],
+      ["Befund", "Die 1. Minute ist beendet. Du kannst die Auswertung starten."]
+    ];
+    const debrief = `ALGORITHMUS: Teilweise erfüllt
+
+1. MINUTE
+Sicherheit und Lage: ✅ Lage als sicher benannt, nasse Stufen erwähnt.
+Bedrohliche Blutung geprüft: ✅
+Vorstellung und Ansprache: ✅ „Wir sind vom DRK", „Was ist passiert?"
+HWS bei Trauma: ✅ Kollege rechtzeitig angewiesen.
+Atmung: ⚠️ Luft und Schmerzen beim Atmen gefragt, Zyanose nicht erwähnt.
+Kreislauf: ⚠️ Puls, Rekap und Trauma-Check genannt, Hautfarbe fehlt.
+Neurologie: ✅ Orientierung zu Person, Ort und Situation geprüft.
+Umfeld (Hergang, Frieren): ✅ Beides erfragt.
+Wärmeerhalt: ❌ Der Patient sagt, ihm sei kalt, und sitzt in der Nässe. Eine Decke wurde nicht angeboten, nachfragen allein reicht nicht.
+Teambesprechung: ⚠️ Lage und Verdacht genannt, Notarzt-Entscheidung nicht ausgesprochen.
+Funkspruch: ⚠️ Anruf, Meldung und „Ende" korrekt. Nachforderung RTW passt zu deinen Befunden, aber die Medikation wurde nicht erfragt (Blutverdünner), deshalb fehlte die Grundlage, über ein NEF zu entscheiden.
+
+TATSÄCHLICHE REIHENFOLGE: Lage → Blutung → Vorstellung → HWS → Atmung → Kreislauf → Trauma-Check → Umfeld → Neurologie → Teambesprechung → Funk
+ABWEICHUNGEN: Umfeld (Hergang, Frieren) kam vor der Prüfung der Reaktion, im SANmemo steht D vor E. Zyanose und Hautfarbe fehlten. Die Notarzt-Entscheidung wurde in der Teambesprechung nicht benannt. Wärmeerhalt fehlte, obwohl der Patient gefroren hat.
+ZEIT (nachrangig): Die 1. Minute dauerte netto etwa 1:50, kein Bewertungsmaßstab.
+GUT GEMACHT: Klarer Einstieg mit Lage und Blutung, HWS rechtzeitig, saubere Funkstruktur.
+VERBESSERN: Bei Frieren sofort eine Decke geben und vom nassen Boden isolieren, Schnellcheck vollständig sprechen (Zyanose, Hautfarbe), D vor E halten, in der Teambesprechung die Notarzt-Frage ausdrücklich klären.`;
+
+    const log = document.getElementById("demo");
+    for (const [kind, text] of convo) {
+      if (kind === "phase") {
+        const p = document.createElement("div"); p.className = "phase"; p.textContent = text; log.appendChild(p); continue;
+      }
+      const d = document.createElement("div");
+      if (kind === "sys") { d.className = "msg sys"; d.textContent = text; }
+      else if (kind === "me") { d.className = "msg me"; d.textContent = text; }
+      else {
+        d.className = "msg " + CLS[kind];
+        const who = document.createElement("span"); who.className = "who"; who.textContent = kind;
+        d.append(who, document.createTextNode(text));
+      }
+      log.appendChild(d);
+    }
+    const dl = document.getElementById("debrief");
+    const dd = document.createElement("div"); dd.className = "msg debrief"; dd.textContent = debrief; dl.appendChild(dd);
+
+    // ---- Fallliste direkt aus scenarios.js, damit die Doku nicht veraltet ----
+    const byGroup = {};
+    for (const s of window.SCENARIOS) (byGroup[s.group || "Grundlagen"] ||= []).push(s);
+    const ul = document.getElementById("groups");
+    for (const [group, items] of Object.entries(byGroup)) {
+      const li = document.createElement("li");
+      const strong = document.createElement("strong"); strong.textContent = group;
+      const small = document.createElement("small");
+      small.textContent = items.map((s) => `${s.letter}: ${s.title}`).join(" · ");
+      li.append(strong, small); ul.appendChild(li);
+    }
+  </script>
+</body>
+</html>

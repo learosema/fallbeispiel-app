@@ -1,0 +1,6 @@
+.env
+.netlify/
+node_modules/
+.DS_Store
+# DRK-SANmemo (© DRK) nicht ins Repo
+Onlineversion_SAN-Memo_2024.pdf

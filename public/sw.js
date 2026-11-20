@@ -1,5 +1,5 @@
-const CACHE = "xabcde-v3";
-const ASSETS = ["./", "index.html", "style.css", "app.js", "scenarios.js", "algorithm.js", "manifest.webmanifest", "icon.svg", "icon-192.png", "icon-512.png", "apple-touch-icon.png"];
+const CACHE = "xabcde-v9";
+const ASSETS = ["./", "index.html", "info.html", "style.css", "app.js", "scenarios.js", "algorithm.js", "manifest.webmanifest", "icon.svg", "icon-192.png", "icon-512.png", "apple-touch-icon.png"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));

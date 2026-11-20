@@ -24,7 +24,11 @@
   <main>
     <!-- Startseite -->
     <section id="home">
-      <p class="lead">Wähle ein Schema-Problem. Du sprichst, die App antwortet als Patient:in bzw. Umstehende.</p>
+      <p class="lead">Wähle einen Fall. Du sprichst, die App antwortet als Patient:in, Kollege, Umstehende und Leitstelle. <a href="info.html">So funktioniert's</a></p>
+      <div class="mode" role="radiogroup" aria-label="Modus">
+        <label><input type="radio" name="mode" value="minute"><span>1. Minute</span></label>
+        <label><input type="radio" name="mode" value="full"><span>Ganzer Fall</span></label>
+      </div>
       <div id="scenarioList" class="scenario-list"></div>
     </section>
 
@@ -39,6 +43,7 @@
       </form>
       <div class="actions">
         <label class="toggle"><input type="checkbox" id="handsfree"> Freisprechen</label>
+        <span id="timer" class="timer" aria-label="Zeit">⏱ 0:00</span>
         <button type="button" id="debriefBtn" class="secondary">Auswertung</button>
       </div>
     </section>
@@ -47,20 +52,20 @@
   <dialog id="settings">
     <form method="dialog" id="settingsForm">
       <h2>Einstellungen</h2>
-      <label>API-Basis-URL
-        <input id="baseUrl" type="url" placeholder="https://api.openai.com/v1" autocapitalize="off" spellcheck="false">
+      <label>Zugangscode
+        <input id="accessCode" type="password" autocomplete="off" autocapitalize="off" spellcheck="false">
       </label>
-      <label>API-Key
-        <input id="apiKey" type="password" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <label>Funkrufname (dein Team)
+        <input id="callsign" type="text" placeholder="EVT1" autocapitalize="off" spellcheck="false">
       </label>
-      <label>Modell
-        <input id="model" type="text" placeholder="z. B. gpt-4o-mini" autocapitalize="off" spellcheck="false">
+      <label>Leitstelle
+        <input id="dispatcher" type="text" placeholder="RotkreuzHamburg" autocapitalize="off" spellcheck="false">
       </label>
       <label>Sprechtempo <output id="rateOut">1.0</output>
         <input id="rate" type="range" min="0.7" max="1.5" step="0.05" value="1">
       </label>
       <label class="toggle"><input type="checkbox" id="speak"> Antworten vorlesen</label>
-      <p class="hint">Der Key bleibt nur in diesem Browser (localStorage) und geht direkt an den Endpunkt. Der Endpunkt muss CORS erlauben.</p>
+      <p class="hint">Der Zugangscode wird nur auf diesem Gerät gespeichert. Den LLM-Key kennt allein der Server.</p>
       <menu>
         <button value="cancel" class="secondary">Abbrechen</button>
         <button value="save" id="saveSettings">Speichern</button>
