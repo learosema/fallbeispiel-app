@@ -162,6 +162,11 @@ def is_vague(clause: str, embedder=None) -> bool:
     text = normalize(clause)
     if not _VAGUE_TOPICS.search(text):
         return False
+    # Fragen und bloße Stichworte („Puls?“, „Rekap“) sind Untersuchungen, keine mitgeteilten Befunde
+    if "?" in text or not re.sub(r"\b(der|die|das|den|und|mal|bitte|jetzt)\b|\W", "", _mask(text)).replace("wert", ""):
+        return False
+    if re.match(r"^\W*(wie|was|welche\w*|ist|sind|hat|haben|gibt)\b", text):
+        return False
     if _VAGUE.search(text):
         return True
     if embedder is None:
@@ -181,7 +186,8 @@ def vague_findings(run: Run, embedder=None) -> list[str]:
     for t in run.turns:
         if t.funk:
             continue
-        clauses = [c for c in re.split(r"[.,;!?]|\bund\b", t.text.lower()) if c.strip()]
+        # „?“ bleibt am Teilsatz, damit Fragen als Fragen erkannt werden
+        clauses = [c for c in re.split(r"(?<=\?)|[.,;!]|\bund\b", t.text.lower()) if c.strip()]
         if any(is_vague(c, embedder) for c in clauses):
             out.append(t.text.strip())
     return out

@@ -409,3 +409,14 @@ def test_sampler(clf):
     res = evaluate.evaluate(play(clf, "basis-sturz", lines, mode="full"))
     sampler = next(it for it in res["sections"][1]["items"] if it["id"] == "sample")
     assert sampler["status"] == evaluate.OK and sampler["label"].startswith("SAMPLER")
+
+
+@pytest.mark.parametrize("text", ["Puls?", "Rekap?", "puls", "Puls und Rekap?", "wie ist der puls", "ist die haut blass?", "blutdruck bitte"])
+def test_questions_and_examinations_are_not_vague(clf, text):
+    run = play(clf, "basis-sturz", [text])
+    assert evaluate.vague_findings(run) == [], text
+
+
+def test_stated_vague_finding_still_flagged(clf):
+    run = play(clf, "basis-sturz", ["Puls?", "kurze teambesprechung: puls normal, kreislauf ok"])
+    assert evaluate.vague_findings(run) == ["kurze teambesprechung: puls normal, kreislauf ok"]
