@@ -760,7 +760,7 @@ kuehlen:
   examples:
     - Ich kühle den Arm mit lauwarmem Wasser
   default:
-    - Kollege: (reicht eine Wasserflasche zum Kühlen)
+    - Kollege: (holt ein Kühlpack aus dem Rucksack)
 
 auge:
   label: Auge versorgt (nicht reiben, spülen/abdecken)
