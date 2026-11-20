@@ -1,4 +1,4 @@
-const CACHE = "xabcde-v15";
+const CACHE = "xabcde-v17";
 const ASSETS = ["./", "index.html", "info.html", "style.css", "app.js", "manifest.webmanifest", "icon.svg", "icon-192.png", "icon-512.png", "apple-touch-icon.png"];
 
 self.addEventListener("install", (e) => {
@@ -10,10 +10,11 @@ self.addEventListener("activate", (e) => {
       .then(() => self.clients.claim())
   );
 });
-// Nur eigene GET-Requests cachen; API-Aufrufe gehen immer direkt ans Netz.
+// Nur eigene GET-Requests cachen; API-Aufrufe und Login (oauth2-proxy) gehen immer direkt ans Netz.
 self.addEventListener("fetch", (e) => {
   const req = e.request;
-  if (req.method !== "GET" || new URL(req.url).origin !== location.origin) return;
+  const url = new URL(req.url);
+  if (req.method !== "GET" || url.origin !== location.origin || /^\/(api|oauth2)\//.test(url.pathname)) return;
   e.respondWith(
     fetch(req).then((res) => {
       const copy = res.clone();

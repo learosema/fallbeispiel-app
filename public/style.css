@@ -135,3 +135,7 @@ dialog .field label { display: inline; margin: 0; }
 .hint { font-size: .8rem; color: var(--muted); }
 .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin: 12px 0 0; }
 button.primary { background: var(--accent); color: var(--accent-fg); border: 0; border-radius: 10px; padding: 8px 16px; font: inherit; }
+
+/* Schaltfläche, die wie ein Link aussieht (Anmelden) */
+button.link { background: none; border: 0; padding: 0; margin: 0; color: var(--accent); text-decoration: underline; font: inherit; cursor: pointer; min-height: 0; }
+button.link:disabled { color: var(--muted); cursor: default; }

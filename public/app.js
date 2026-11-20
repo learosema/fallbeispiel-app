@@ -4,12 +4,12 @@
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
   // ---------- Einstellungen ----------
-  const DEFAULTS = { accessCode: "", rate: 1, speak: true, handsfree: false, mode: "minute", callsign: "EVT1", dispatcher: "RotkreuzHamburg" };
+  const DEFAULTS = { rate: 1, speak: true, handsfree: false, mode: "minute", callsign: "EVT1", dispatcher: "RotkreuzHamburg" };
   let settings = { ...DEFAULTS };
   try {
     settings = { ...DEFAULTS, ...JSON.parse(localStorage.getItem("settings") || "{}") };
-    // Altlast aus der Version mit Browser-Key entfernen
-    for (const k of ["apiKey", "baseUrl", "model"]) delete settings[k];
+    // Altlasten entfernen (Browser-Key, Zugangscode – jetzt Login über den Proxy)
+    for (const k of ["apiKey", "baseUrl", "model", "accessCode"]) delete settings[k];
     localStorage.setItem("settings", JSON.stringify(settings));
   } catch {}
   const saveSettings = () => { try { localStorage.setItem("settings", JSON.stringify(settings)); } catch {} };
@@ -280,14 +280,65 @@
   async function api(path, body = payload()) {
     const res = await fetch(path, {
       method: "POST",
-      headers: { "Content-Type": "application/json", ...(settings.accessCode ? { "x-access-code": settings.accessCode } : {}) },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
     let data = {};
     try { data = await res.json(); } catch { /* keine JSON-Antwort */ }
-    if (res.status === 401) { openSettings(); throw new Error(data.error || "Zugangscode fehlt oder ist falsch."); }
-    if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+    if (!res.ok) throw Object.assign(new Error(data.error || `HTTP ${res.status}`), { status: res.status });
     return data;
+  }
+
+  // ---------- Login (nur für die KI-Bewertung) ----------
+  // Den Login macht ein Proxy vor dem Server (oauth2-proxy); die Sitzung steckt in dessen HttpOnly-Cookie.
+  // Die App speichert davon nichts. state: "none" = kein Login-Proxy (lokal), "in" = angemeldet, "out" = nicht angemeldet
+  let login = { state: "none", email: "" };
+  async function checkLogin() {
+    try {
+      const res = await fetch("/oauth2/userinfo", { headers: { Accept: "application/json" }, cache: "no-store" });
+      if (res.ok) {
+        const d = await res.json().catch(() => ({}));
+        login = { state: "in", email: d.email || d.user || "" };
+      } else login = { state: res.status === 401 || res.status === 403 ? "out" : "none", email: "" };
+    } catch {
+      login = { state: "none", email: "" };  // offline o. Ä. – die KI-Bewertung meldet dann selbst den Fehler
+    }
+    renderLogin();
+    return login;
+  }
+  function renderLogin() {
+    const el = $("loginInfo");
+    el.hidden = login.state === "none";
+    el.replaceChildren();
+    if (login.state === "in") {
+      const out = document.createElement("a");
+      out.href = "/oauth2/sign_out?rd=%2F";
+      out.textContent = "Abmelden";
+      el.append(`Angemeldet${login.email ? " als " + login.email : ""} – die KI bewertet am Ende mit. `, out);
+    } else if (login.state === "out") {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "link";
+      btn.textContent = "Anmelden";
+      btn.addEventListener("click", () => loginWindow());
+      el.append("Ohne Anmeldung gibt es nur die regelbasierte Auswertung. ", btn);
+    }
+  }
+  // Anmeldung im eigenen Fenster: Der laufende Einsatz bleibt auf dieser Seite erhalten.
+  // Ob es geklappt hat, fragt die Seite regelmäßig nach (window.closed/opener sind nach dem Umweg über den Login-Anbieter unzuverlässig).
+  function loginWindow() {
+    const w = window.open("/oauth2/start?rd=%2Flogin-done.html", "login", "popup,width=480,height=640");
+    if (!w) {
+      setStatus("Das Anmeldefenster wurde blockiert – bitte Pop-ups für diese Seite erlauben.", true);
+      return Promise.resolve(false);
+    }
+    return new Promise((resolve) => {
+      const until = Date.now() + 5 * 60_000;
+      const timer = setInterval(async () => {
+        const { state } = await checkLogin();
+        if (state === "in" || Date.now() > until) { clearInterval(timer); resolve(state === "in"); }
+      }, 2000);
+    });
   }
 
   function beginBusy(text) { busy = true; busySince = Date.now(); setStatus(text); }
@@ -338,21 +389,48 @@
       endBusy();  // das KI-Feedback kann dauern – die App bleibt währenddessen bedienbar
     }
     addMsg(text, "debrief");
-    setStatus("Die KI bewertet den Einsatz …");
     speak("Algorithmus " + result.verdict + ".");
+    if (login.state === "out") await checkLogin();  // vielleicht inzwischen in einem anderen Tab angemeldet
+    if (login.state === "out") offerLogin(body, current);
+    else await aiFeedback(body, current);
+  }
+
+  async function aiFeedback(body, current) {
+    setStatus("Die KI bewertet den Einsatz …");
     try {
       const fb = await api("/api/feedback", body);
       if (scenario !== current) return;
       addMsg(fb.text, "debrief");
       setStatus(fb.ai ? "" : "Keine KI-Bewertung konfiguriert, nur die regelbasierte Auswertung.");
     } catch (err) {
-      if (scenario === current) setStatus(err.message, true);
+      if (scenario !== current) return;
+      if (err.status === 401) { await checkLogin(); offerLogin(body, current); }  // Sitzung abgelaufen
+      else setStatus(err.message, true);
     }
+  }
+
+  // Nicht angemeldet: Checkliste ist da, die KI-Bewertung gibt es nach dem Anmelden.
+  function offerLogin(body, current) {
+    setStatus("");
+    const li = addMsg("Die KI-Bewertung (Algorithmus und Patientensicht) gibt es nach dem Anmelden. ", "sys");
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "link";
+    btn.textContent = "Anmelden und KI-Bewertung holen";
+    btn.addEventListener("click", async () => {
+      btn.disabled = true;
+      setStatus("Warte auf die Anmeldung im neuen Fenster …");
+      const ok = await loginWindow();
+      if (scenario !== current) return;
+      if (ok) { li.remove(); await aiFeedback(body, current); }
+      else { btn.disabled = false; setStatus("Nicht angemeldet.", true); }
+    });
+    li.append(btn);
   }
 
   // ---------- Einstellungen-Dialog ----------
   function openSettings() {
-    $("accessCode").value = settings.accessCode;
+    checkLogin();
     $("rate").value = settings.rate;
     $("rateOut").textContent = Number(settings.rate).toFixed(2);
     $("speak").checked = settings.speak;
@@ -366,7 +444,6 @@
   $("rate").addEventListener("input", (e) => { $("rateOut").textContent = Number(e.target.value).toFixed(2); });
   $("settingsForm").addEventListener("submit", (e) => {
     if (e.submitter && e.submitter.value === "save") {
-      settings.accessCode = $("accessCode").value.trim();
       settings.rate = $("rate").value;
       settings.speak = $("speak").checked;
       settings.callsign = $("callsign").value.trim() || DEFAULTS.callsign;
@@ -395,5 +472,6 @@
   $("debriefBtn").addEventListener("click", debrief);
 
   loadScenarios();
+  checkLogin();
   if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 })();

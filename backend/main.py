@@ -3,19 +3,21 @@
   GET  /api/scenarios   Liste der Fälle (ohne verborgene Fakten)
   POST /api/turn        Protokoll → Antwort der Simulation auf die letzte Äußerung
   POST /api/debrief     Protokoll → regelbasierte Checkliste
-  POST /api/feedback    Protokoll → KI-Bewertung (Algorithmus + Patientensicht)
+  POST /api/feedback    Protokoll → KI-Bewertung (Algorithmus + Patientensicht) – nur mit Login, falls AUTH_HEADER gesetzt
 
-Umgebungsvariablen: siehe README.md (ACCESS_CODE, INTENT_*, JUDGE_*, LLM_*).
+Umgebungsvariablen: siehe README.md (AUTH_HEADER, FEEDBACK_LIMIT, INTENT_*, JUDGE_*, LLM_*).
 """
 from __future__ import annotations
 
-import hmac
 import os
+import threading
+import time
+from collections import defaultdict, deque
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Literal
 
-from fastapi import Depends, FastAPI, Header, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.concurrency import run_in_threadpool
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse
@@ -26,6 +28,7 @@ from . import classifier, content, engine, evaluate, judge
 
 PUBLIC_DIR = Path(__file__).resolve().parent.parent / "public"
 NO_STORE = {"Cache-Control": "no-store"}
+MAX_LOG_CHARS = 30_000  # ganzer Fall ≈ 15 000 Zeichen; begrenzt die Tokens pro KI-Bewertung
 
 
 class Utterance(BaseModel):
@@ -47,15 +50,59 @@ class RunRequest(BaseModel):
     dispatcher: str = Field(default="RotkreuzHamburg", min_length=1, max_length=60)
     log: list[Utterance] = Field(min_length=1, max_length=300)
 
+    @model_validator(mode="after")
+    def _log_size(self):
+        if sum(len(u.text) for u in self.log) > MAX_LOG_CHARS:
+            raise ValueError("Protokoll zu lang")
+        return self
+
 
 def error(msg: str, status: int) -> JSONResponse:
     return JSONResponse({"error": msg}, status_code=status, headers=NO_STORE)
 
 
-def check_access(x_access_code: str = Header(default="")) -> None:
-    code = os.environ.get("ACCESS_CODE", "")
-    if code and not hmac.compare_digest(x_access_code.encode(), code.encode()):
-        raise HTTPException(401, "Zugangscode fehlt oder ist falsch.")
+def current_user(request: Request) -> str:
+    """Angemeldete Person laut Login-Proxy (Header aus AUTH_HEADER), lokal ohne Proxy „local“.
+
+    Nur die KI-Bewertung kostet Geld und braucht deshalb eine Anmeldung; Simulation und Checkliste sind offen.
+    Ist AUTH_HEADER gesetzt, muss der Header da sein – sonst ist niemand angemeldet.
+    Der Header ist nur vertrauenswürdig, wenn die App ausschließlich über den Proxy erreichbar ist.
+    """
+    header = os.environ.get("AUTH_HEADER", "").strip()
+    if not header:
+        return "local"
+    user = request.headers.get(header, "").strip().lower()
+    if not user:
+        raise HTTPException(401, "Nicht angemeldet – bitte die Seite neu laden.")
+    return user
+
+
+class RateLimit:
+    """Höchstens `limit` Aufrufe pro Person in `window` Sekunden (im Speicher, ein Prozess)."""
+
+    def __init__(self, limit: int, window: float):
+        self.limit, self.window = limit, window
+        self._calls: dict[str, deque[float]] = defaultdict(deque)
+        self._lock = threading.Lock()
+
+    def hit(self, user: str) -> bool:
+        now = time.monotonic()
+        with self._lock:
+            calls = self._calls[user]
+            while calls and calls[0] <= now - self.window:
+                calls.popleft()
+            if len(calls) >= self.limit:
+                return False
+            calls.append(now)
+            return True
+
+
+feedback_limit = RateLimit(int(os.environ.get("FEEDBACK_LIMIT", "20")), 3600)
+
+
+def limit_feedback(user: str = Depends(current_user)) -> None:
+    if not feedback_limit.hit(user):
+        raise HTTPException(429, "Zu viele KI-Bewertungen in der letzten Stunde – bitte später erneut versuchen.")
 
 
 @asynccontextmanager
@@ -105,7 +152,7 @@ async def list_scenarios():
     return JSONResponse([s.meta for s in content.scenarios().values()], headers={"Cache-Control": "no-cache"})
 
 
-@app.post("/api/turn", dependencies=[Depends(check_access)])
+@app.post("/api/turn")
 async def turn(req: RunRequest):
     run = await run_in_threadpool(_run, req)
     last = run.turns[-1]
@@ -117,14 +164,14 @@ async def turn(req: RunRequest):
     }, headers=NO_STORE)
 
 
-@app.post("/api/debrief", dependencies=[Depends(check_access)])
+@app.post("/api/debrief")
 async def debrief(req: RunRequest):
     run = await run_in_threadpool(_run, req)
     result = evaluate.evaluate(run, classifier.get().embedder)
     return JSONResponse({"result": result, "text": evaluate.as_text(result)}, headers=NO_STORE)
 
 
-@app.post("/api/feedback", dependencies=[Depends(check_access)])
+@app.post("/api/feedback", dependencies=[Depends(limit_feedback)])
 async def feedback(req: RunRequest):
     run = await run_in_threadpool(_run, req)
     result = evaluate.evaluate(run, classifier.get().embedder)
