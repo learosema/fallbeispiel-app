@@ -107,3 +107,16 @@
   not: [platz_schaffen]
 - text: ich bin gleich wieder da
   not: [platz_schaffen, spo2, lage_pruefen]
+
+# ---- Aufklärung („Ich will eigentlich nur nach Hause.“)
+- text: nach Hause lasse ich Sie so nicht gehen
+  expect: [aufklaeren]
+- text: ich verstehe das, aber bitte lassen Sie sich untersuchen
+  expect: [aufklaeren]
+- text: Sie haben sich den Kopf gestoßen und nehmen einen Blutverdünner, das muss sich ein Arzt ansehen
+  expect: [aufklaeren]
+  not: [teambesprechung, sample_medikamente]
+- text: mit dem Blutverdünner kann es noch Stunden später in den Kopf bluten
+  expect: [aufklaeren]
+  not: [sample_medikamente, blutung_pruefen]
+  no_reply: Apixaban

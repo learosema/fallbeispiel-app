@@ -114,6 +114,9 @@ responses:
     - when: {sample_medikamente: true}
       say:
         - Patient: Na gut, wenn das mit dem Blutverdünner wirklich gefährlich ist … dann lass ich mich mitnehmen.
+    - when: {aufklaeren: true}
+      say:
+        - Patient: (seufzt) Na gut … wenn Sie meinen, dass das sein muss.
     - say:
         - Patient: Ach, ins Krankenhaus? Ich will eigentlich nur nach Hause.
   immobilisieren:

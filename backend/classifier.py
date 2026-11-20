@@ -160,7 +160,8 @@ class IntentClassifier:
 
 def resolve(hits: list[Hit], catalogue: dict[str, Intent]) -> list[Hit]:
     """overrides/implies anwenden und nach Position sortieren."""
-    exclusive = [h for h in hits if catalogue[h.intent].exclusive]
+    # nur sichere (Regex-)Treffer dürfen alle anderen verdrängen – geratene Embedding-Treffer nicht
+    exclusive = [h for h in hits if catalogue[h.intent].exclusive and h.source == "regex"]
     if exclusive:
         hits = exclusive
     present = {h.intent for h in hits}

@@ -467,3 +467,13 @@ def test_no_false_hits(clf, text, wrong):
 
 def test_colleague_dresses_the_wound(clf):
     assert said(play(clf, "dom-krampf", ["Kollege, versorge die Wunde"])) == ["(versorgt die Platzwunde am Hinterkopf mit Kompresse und Verband)"]
+
+
+def test_patient_can_be_persuaded(clf):
+    # ohne Wissen um den Blutverdünner: erst Ablehnung, beim zweiten Anlauf Zustimmung
+    run = play(clf, "basis-sturz", ["das sollte ein arzt abklären", "bitte lassen sie sich untersuchen"])
+    assert "nur nach Hause" in said(run, "Patient")[0]
+    assert "wenn Sie meinen" in said(run, "Patient")[-1]
+    # mit Blutverdünner: sofort einsichtig
+    run = play(clf, "basis-sturz", ["nehmen sie medikamente", "wegen des blutverdünners sollten sie ins krankenhaus"])
+    assert "lass ich mich mitnehmen" in said(run, "Patient")[-1]

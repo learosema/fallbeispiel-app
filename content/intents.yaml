@@ -1092,15 +1092,23 @@ reevaluation:
 
 aufklaeren:
   label: Aufklärung / Transport besprochen
+  # Wer aufklärt, erklärt – erwähnte Befunde („wegen des Blutverdünners …“) lösen keine eigenen Antworten aus
+  exclusive: true
   patterns:
-    - ins krankenhaus|in die klinik|in die notaufnahme
+    - ins krankenhaus|in die klinik|in die notaufnahme|im krankenhaus
     - abklären|abklärung
     - (mitfahren|mitkommen|mitnehmen)
     - ablehn|verweiger|unterschreib|einwillig
-    - (wir empfehlen|ich empfehle|ich rate)
+    - (wir empfehlen|ich empfehle|ich rate|ich würde (ihnen|dir) raten)
     - risiko
+    - nach hause
+    - lass\w* (sie |du )?(sich |dich )?(\w+ ){0,2}(untersuchen|anschauen|ansehen|checken|durchchecken)
+    - (arzt|ärztin|klinik|krankenhaus|notarzt)\w* (\w+ ){0,4}(ansehen|anschauen|abklären|untersuchen|angucken)
+    - muss sich (ein|eine|der|die) (arzt|ärztin)
+    - (stunden|später) (\w+ ){0,4}(bluten|blutung)|nachblut|hirnblutung|im kopf bluten|blutung im kopf
   examples:
     - Ich würde Ihnen dringend raten, das im Krankenhaus abklären zu lassen
+    - Bitte lassen Sie sich untersuchen, das ist sicherer
   default:
     - Patient: Hm … wenn Sie meinen.
 
