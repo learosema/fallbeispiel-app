@@ -120,3 +120,13 @@
   expect: [aufklaeren]
   not: [sample_medikamente, blutung_pruefen]
   no_reply: Apixaban
+
+# ---- Wunde verbinden (auch als Anweisung)
+- text: wir verbinden die wunde
+  expect: [wunde_versorgen]
+- text: kollege, verbinde die wunde
+  expect: [wunde_versorgen]
+  reply: Handfläche
+  no_reply: Was genau
+- text: verbind bitte die platzwunde
+  expect: [wunde_versorgen]

@@ -804,7 +804,7 @@ temperatur:
 wunde_versorgen:
   label: Wunde versorgt (steriler Verband)
   patterns:
-    - verband|verbinden
+    - verband|verbind\w*        # „verbinden“, „verbinde die Wunde“
     - wundauflage|kompresse|pflaster
     - steril
     - wunde (abdecken|versorgen)
