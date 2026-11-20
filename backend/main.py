@@ -69,6 +69,19 @@ async def lifespan(_app: FastAPI):
 app = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None)
 
 
+@app.middleware("http")
+async def revalidate_static(request, call_next):
+    """Statische Dateien immer beim Server nachfragen (ETag macht das billig).
+
+    Ohne Cache-Control speichert der Browser sie nach eigenem Ermessen – und der Service Worker
+    lädt über diesen HTTP-Cache, sodass nach Änderungen alte CSS/JS-Dateien ausgeliefert wurden.
+    """
+    response = await call_next(request)
+    if request.method in ("GET", "HEAD") and not request.url.path.startswith("/api/"):
+        response.headers.setdefault("Cache-Control", "no-cache")
+    return response
+
+
 @app.exception_handler(RequestValidationError)
 async def _invalid(_req, _exc):
     return error("Ungültige Anfrage.", 400)
