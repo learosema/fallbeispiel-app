@@ -84,21 +84,91 @@ Browser ──HTTPS──▶ Caddy                                              
                   └─ alles andere ─────────────────────────────▶ App   offen
 ```
 
-1. Domain auf den Server zeigen lassen, Ports 80 und 443 freigeben.
-2. OAuth-App anlegen – Google: Cloud Console → APIs & Dienste → Anmeldedaten → OAuth-Client-ID (Webanwendung);
-   GitHub: Settings → Developer settings → OAuth Apps (dann `LOGIN_PROVIDER=github`).
-   Weiterleitungs-URL: `https://<DOMAIN>/oauth2/callback`.
-3. In `.env` setzen: `AUTH_HEADER=X-Forwarded-Email`, `DOMAIN`, `OAUTH2_PROXY_CLIENT_ID`, `OAUTH2_PROXY_CLIENT_SECRET`,
-   `OAUTH2_PROXY_COOKIE_SECRET` und die KI-Einstellungen (siehe `.env.example`).
-4. `cp deploy/emails.txt.example deploy/emails.txt` und die erlaubten Adressen eintragen.
-5. `docker compose --profile public up -d --build`
+### Voraussetzungen
+
+- Linux-Server mit Docker und Compose-Plugin ab 2.24 (`docker compose version`)
+- eine (Sub-)Domain, deren A/AAAA-Eintrag auf den Server zeigt
+- Ports 80 und 443 offen und frei (kein anderer Webserver darauf)
+- mindestens 2–3 GB RAM (PyTorch und Embedding-Modell); der erste Build dauert einige Minuten
+
+### 1. Code holen
+
+```sh
+git clone git@github.com:learosema/fallbeispiel-app.git
+cd fallbeispiel-app
+```
+
+### 2. OAuth-App anlegen (einmalig)
+
+Weiterleitungs- bzw. Callback-URL ist jeweils `https://<DOMAIN>/oauth2/callback`.
+
+- **GitHub** (am schnellsten, wenn alle ein GitHub-Konto haben): Settings → Developer settings → OAuth Apps →
+  *New OAuth App*. Homepage-URL `https://<DOMAIN>`, Client-ID notieren, Client-Secret erzeugen.
+  Für den Login zählt die primäre, verifizierte E-Mail-Adresse des Kontos.
+- **Google:** In der Cloud Console den OAuth-Zustimmungsbildschirm einrichten (*Extern*, Status *Testing*,
+  Testende als Testnutzer eintragen – im Testing-Status kommen nur sie hinein), dann unter
+  *APIs & Dienste → Anmeldedaten* eine OAuth-Client-ID vom Typ *Webanwendung* anlegen.
+
+### 3. `.env` anlegen
+
+```sh
+cp .env.example .env
+chmod 600 .env                                 # enthält Secrets
+openssl rand -base64 32 | tr -- '+/' '-_'      # → OAUTH2_PROXY_COOKIE_SECRET
+```
+
+```sh
+AUTH_HEADER=X-Forwarded-Email
+DOMAIN=fallbeispiel.example.org
+LOGIN_PROVIDER=github                # oder google
+OAUTH2_PROXY_CLIENT_ID=…
+OAUTH2_PROXY_CLIENT_SECRET=…
+OAUTH2_PROXY_COOKIE_SECRET=…
+
+# KI-Bewertung – zum Ausprobieren ohne Kosten:
+JUDGE_PROVIDER=none
+# später z. B. JUDGE_PROVIDER=anthropic und ANTHROPIC_API_KEY=… (vorher ein Ausgabenlimit in der Console setzen)
+```
+
+### 4. Erlaubte Personen eintragen
+
+```sh
+cp deploy/emails.txt.example deploy/emails.txt
+```
+
+Eine E-Mail-Adresse pro Zeile, Beispiel- und Kommentarzeilen löschen.
+
+### 5. Starten und prüfen
+
+```sh
+docker compose --profile public up -d --build
+docker compose --profile public logs -f        # Caddy holt das Zertifikat, oauth2-proxy startet ohne Fehler
+```
+
+Dann `https://<DOMAIN>` öffnen: Ein Fall ist ohne Login spielbar, nach der Auswertung erscheinen die Checkliste und
+„Anmelden und KI-Bewertung holen“. Nach dem Login schließt sich das Fenster, die Bewertung kommt nach, und in den
+Einstellungen steht „Angemeldet als …“.
+
+### Aktualisieren
+
+```sh
+git pull && docker compose --profile public up -d --build
+```
+
+Neue Einträge in `deploy/emails.txt` gelten nach `docker compose --profile public restart oauth2-proxy`.
+Die oauth2-proxy-Version in `docker-compose.yml` ab und zu auf das
+[aktuelle Release](https://github.com/oauth2-proxy/oauth2-proxy/releases) heben.
+
+### Sicherheit
 
 Mit gesetztem `AUTH_HEADER` lehnt die App KI-Bewertungen ohne diesen Header ab (401). Der Header ist nur vertrauenswürdig,
 solange die App ausschließlich über Caddy erreichbar ist (Caddy entfernt ihn, nur oauth2-proxy setzt ihn) – Port 8000
 deshalb nie nach außen freigeben.
 Bei der Anthropic- oder OpenAI-API zusätzlich ein monatliches Ausgabenlimit in deren Konsole setzen.
 
-**Alternative Cloudflare Access:** Liegt die Domain bei Cloudflare, kann statt oauth2-proxy und Caddy ein Cloudflare-Tunnel
+### Alternative: Cloudflare Access
+
+Liegt die Domain bei Cloudflare, kann statt oauth2-proxy und Caddy ein Cloudflare-Tunnel
 mit Access-Regel (Login per E-Mail-Code, bis 50 Personen kostenlos) vor der App stehen. Dann
 `AUTH_HEADER=Cf-Access-Authenticated-User-Email` setzen und nur `docker compose up` starten. Die Anmeldung im Frontend
 (`/oauth2/…`) ist auf oauth2-proxy zugeschnitten; mit Cloudflare Access am einfachsten die ganze Seite schützen.
