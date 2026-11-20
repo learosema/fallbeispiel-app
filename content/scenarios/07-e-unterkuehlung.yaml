@@ -45,13 +45,13 @@ responses:
   hautfarbe:
     - Befund: Haut kalt, Hände und Füße blass-livide.
   puls:
-    - Befund: Puls langsam und schwach, ca. 52. Man muss lange tasten.
+    - Befund: Puls langsam, schwach tastbar, ca. 52. Man muss lange tasten.
   rekap:
-    - Befund: Rekap-Zeit 4 Sekunden.
+    - Befund: Rekap verzögert, ca. 4 Sekunden.
   rr:
     - Befund: RR 105/70.
   trauma_check:
-    - Befund: Bauch weich, Becken links druckschmerzhaft (Prellung), Oberschenkel unauffällig.
+    - Befund: Bauch weich, Becken links druckschmerzhaft (Prellung), Oberschenkel ohne Schwellung.
   gcs:
     - Befund: GCS 14, verlangsamt, verwaschene Sprache.
   orientierung:

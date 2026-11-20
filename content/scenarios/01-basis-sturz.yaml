@@ -64,7 +64,7 @@ responses:
   rr:
     - Befund: RR 145/85.
   trauma_check:
-    - Befund: Bauch weich und schmerzfrei, Becken stabil und schmerzfrei, Oberschenkel unauffällig.
+    - Befund: Bauch weich und schmerzfrei, Becken stabil und schmerzfrei, Oberschenkel ohne Schwellung und schmerzfrei.
   gcs:
     - Befund: Wach, GCS 15, reagiert angemessen, etwas aufgeregt.
   orientierung:

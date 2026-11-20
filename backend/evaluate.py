@@ -7,6 +7,8 @@ from __future__ import annotations
 
 from typing import Any
 
+import re
+
 from .content import algorithm, intents
 from .engine import Run, compact
 
@@ -124,6 +126,25 @@ def check_funk(run: Run) -> dict[str, Any]:
     }
 
 
+# „Puls normal“ sagt nichts aus – besser: „Puls regelmäßig, gut tastbar, schnell“, „Rekap unter 2 s / verzögert“.
+# „Normale Atmung“ bei der Atemkontrolle ist dagegen der Begriff des Algorithmus und wird nicht beanstandet.
+_VAGUE = re.compile(r"\b(normal|unauffällig|ok|okay|in ordnung|passt)\b")
+_VAGUE_TOPICS = re.compile(r"\bpuls|rekap|kapillar|nagelbett|kreislauf|\bhaut|hautfarbe|blutdruck|\brr\b|herzfrequenz|sättigung|spo2|atemfrequenz")
+
+
+def vague_findings(run: Run) -> list[str]:
+    """Äußerungen, in denen ein Befund nur als „normal“/„unauffällig“ benannt wird."""
+    out = []
+    for t in run.turns:
+        if t.funk:
+            continue
+        for clause in re.split(r"[.,;!?]|\bund\b", t.text.lower()):
+            if _VAGUE.search(clause) and _VAGUE_TOPICS.search(clause):
+                out.append(t.text.strip())
+                break
+    return out
+
+
 REEVAL_INTENTS = ["puls", "spo2", "rr", "af_zaehlen", "atemkontrolle", "gcs", "orientierung", "bz", "rekap", "temperatur"]
 
 
@@ -215,6 +236,10 @@ def evaluate(run: Run) -> dict[str, Any]:
     time = f"Gesamtzeit {fmt(total)}" + (f", Funkspruch abgeschlossen nach {fmt(funk_end)}" if funk_end is not None else "")
 
     issues = sorted((it for it in relevant if it["status"] != OK), key=lambda it: (not it.get("critical"), it["status"] != MISSING))
+    vague = vague_findings(run)
+    improve = [it["label"] + (f" ({it['note']})" if it["note"] else "") for it in issues][:4]
+    if vague:
+        improve.append("Befunde konkret benennen statt „normal“ (z. B. „Puls regelmäßig, gut tastbar“, „Rekap unter 2 s“)")
     return {
         "verdict": verdict,
         "sections": sections,
@@ -222,7 +247,8 @@ def evaluate(run: Run) -> dict[str, Any]:
         "deviations": deviations,
         "time": time,
         "praise": [it["label"] for it in relevant if it["status"] == OK][:3],
-        "improve": [it["label"] + (f" ({it['note']})" if it["note"] else "") for it in issues][:4],
+        "improve": improve,
+        "vague": vague,
     }
 
 
@@ -244,6 +270,9 @@ def as_text(result: dict[str, Any]) -> str:
         lines.append("")
     lines.append("TATSÄCHLICHE REIHENFOLGE: " + (" → ".join(result["order"]) or "–"))
     lines.append("ABWEICHUNGEN: " + ("; ".join(result["deviations"]) or "keine"))
+    if result.get("vague"):
+        quotes = "; ".join(f"„{q}“" for q in result["vague"][:3])
+        lines.append("BEFUNDSPRACHE: ungenau – " + quotes + ". Besser konkret: „Puls regelmäßig, gut/schlecht/nicht tastbar“, „Puls schnell“, „Rekap unter 2 s“ oder „Rekap verzögert“.")
     lines.append("ZEIT (nachrangig): " + result["time"])
     return "\n".join(lines)
 

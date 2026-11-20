@@ -103,13 +103,13 @@ responses:
   hautfarbe:
     - Befund: Haut warm und schweißig.
   puls:
-    - Befund: Puls 112.
+    - Befund: Puls schnell, regelmäßig, gut tastbar, ca. 112.
   rekap:
-    - Befund: Rekap-Zeit 2 Sekunden.
+    - Befund: Rekap unter 2 Sekunden.
   rr:
     - Befund: RR 140/85.
   trauma_check:
-    - Befund: Bauch, Becken und Oberschenkel unauffällig.
+    - Befund: Bauch weich und schmerzfrei, Becken stabil, Oberschenkel ohne Schwellung.
   gcs:
     - Befund: GCS 12 (Augen 3, verbal 4, motorisch 5).
   orientierung:

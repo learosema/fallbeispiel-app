@@ -114,9 +114,9 @@ responses:
     - say:
         - Befund: Haut leicht gerötet, warm.
   puls:
-    - Befund: Puls 110, kräftig.
+    - Befund: Puls schnell, regelmäßig, kräftig tastbar, ca. 110.
   rekap:
-    - Befund: Rekap-Zeit 2 Sekunden.
+    - Befund: Rekap unter 2 Sekunden.
   rr:
     - Befund: RR 150/90.
   gcs:
@@ -146,7 +146,7 @@ responses:
   temperatur:
     - Befund: Temperatur 36,8 °C.
   bodycheck:
-    - Befund: Sonst unauffällig. Druckschmerz im Oberbauch, wenn Oberbauchkompressionen erfolgt sind.
+    - Befund: Sonst keine Verletzungen. Druckschmerz im Oberbauch, wenn Oberbauchkompressionen erfolgt sind.
   sample_allergie:
     - Patient: Keine.
   sample_medikamente:

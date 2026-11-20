@@ -45,9 +45,9 @@ responses:
   hautfarbe:
     - Befund: Haut kalt, blass, feucht.
   puls:
-    - Befund: Puls flach und schnell, ca. 116.
+    - Befund: Puls schnell, flach, schlecht tastbar, ca. 116.
   rekap:
-    - Befund: Rekap-Zeit 4 Sekunden.
+    - Befund: Rekap verzögert, ca. 4 Sekunden.
   rr:
     - when: {schocklage: false}
       say:
@@ -55,7 +55,7 @@ responses:
     - say:
         - Befund: RR 100/60.
   trauma_check:
-    - Befund: Bauch weich, leichter Druckschmerz im Oberbauch. Becken und Oberschenkel unauffällig.
+    - Befund: Bauch weich, leichter Druckschmerz im Oberbauch. Becken stabil, Oberschenkel ohne Schwellung.
   gcs:
     - Befund: Wach, GCS 15, etwas matt und verlangsamt.
   orientierung:

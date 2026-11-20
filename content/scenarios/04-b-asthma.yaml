@@ -59,9 +59,9 @@ responses:
   hautfarbe:
     - Befund: Haut warm, leicht gerötet, kein Ausschlag.
   puls:
-    - Befund: Puls 125, regelmäßig.
+    - Befund: Puls schnell, regelmäßig, gut tastbar, ca. 125.
   rekap:
-    - Befund: Rekap-Zeit 2 Sekunden.
+    - Befund: Rekap unter 2 Sekunden.
   rr:
     - Befund: RR 130/80.
   gcs:

@@ -62,9 +62,9 @@ responses:
   hautfarbe:
     - Befund: Haut blass, kaltschweißig.
   puls:
-    - Befund: Puls schnell und schwach, ca. 126.
+    - Befund: Puls schnell, regelmäßig, schwach tastbar, ca. 126.
   rekap:
-    - Befund: Rekap-Zeit 4 Sekunden.
+    - Befund: Rekap verzögert, ca. 4 Sekunden.
   rr:
     - when: {gestaut: false}
       say:

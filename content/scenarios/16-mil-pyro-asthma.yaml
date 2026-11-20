@@ -59,9 +59,9 @@ responses:
   hautfarbe:
     - Befund: Haut warm, feucht.
   puls:
-    - Befund: Puls 122.
+    - Befund: Puls schnell, regelmäßig, gut tastbar, ca. 122.
   rekap:
-    - Befund: Rekap-Zeit 2 Sekunden.
+    - Befund: Rekap unter 2 Sekunden.
   rr:
     - Befund: RR 135/85.
   gcs:
@@ -81,7 +81,7 @@ responses:
   bodycheck:
     - Befund: Augen tränen und sind gerötet, keine Verbrennungen.
   auge:
-    - Befund: Augen gerötet und tränend, Sehen normal.
+    - Befund: Augen gerötet und tränend, sie sieht auf beiden Augen scharf.
   sample_allergie:
     - Patient: Keine.
   sample_medikamente:

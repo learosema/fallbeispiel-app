@@ -61,13 +61,13 @@ responses:
   hautfarbe:
     - Befund: Haut warm.
   puls:
-    - Befund: Puls 108.
+    - Befund: Puls schnell, regelmäßig, gut tastbar, ca. 108.
   rekap:
-    - Befund: Rekap-Zeit 2 Sekunden.
+    - Befund: Rekap unter 2 Sekunden.
   rr:
     - Befund: RR 140/85.
   trauma_check:
-    - Befund: Bauch, Becken, Oberschenkel unauffällig.
+    - Befund: Bauch weich und schmerzfrei, Becken stabil, Oberschenkel ohne Schwellung.
   gcs:
     - Befund: Wach, GCS 15, Schmerz 8 von 10.
   orientierung:
@@ -101,7 +101,7 @@ responses:
   aufklaeren:
     - Patient: Wegen dem Auge muss ich ins Krankenhaus? Okay.
   reevaluation:
-    - Befund: Heiserkeit unverändert, Atmung unauffällig, Schmerzen etwas weniger.
+    - Befund: Heiserkeit unverändert, Atemfrequenz 20, keine Atemnot, Schmerzen etwas weniger.
 
 events:
   - at: 120

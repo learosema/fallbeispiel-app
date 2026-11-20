@@ -52,9 +52,9 @@ responses:
   hautfarbe:
     - Befund: Haut feucht, kaltschweißig, blass.
   puls:
-    - Befund: Puls 108, regelmäßig.
+    - Befund: Puls schnell, regelmäßig, gut tastbar, ca. 108.
   rekap:
-    - Befund: Rekap-Zeit 2 Sekunden.
+    - Befund: Rekap unter 2 Sekunden.
   rr:
     - Befund: RR 140/85.
   gcs:

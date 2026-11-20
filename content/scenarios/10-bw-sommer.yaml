@@ -40,7 +40,7 @@ responses:
   hlw:
     - Kollege: Er atmet doch normal.
   puls:
-    - Befund: Puls kräftig, ca. 70.
+    - Befund: Puls regelmäßig, kräftig tastbar, ca. 70.
   spo2:
     - Befund: SpO2 94 %.
   af_zaehlen:
@@ -48,7 +48,7 @@ responses:
   rr:
     - Befund: RR 120/75.
   rekap:
-    - Befund: Rekap-Zeit 2 Sekunden.
+    - Befund: Rekap unter 2 Sekunden.
   hautfarbe:
     - when: {decke: false}
       say:

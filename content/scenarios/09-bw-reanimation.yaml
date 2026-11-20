@@ -40,7 +40,7 @@ responses:
   puls:
     - when: {rosc: true}
       say:
-        - Befund: Puls tastbar, ca. 110.
+        - Befund: Puls schnell, regelmäßig, schwach tastbar, ca. 110.
     - say:
         - Befund: Kein Puls tastbar.
   nachforderung:

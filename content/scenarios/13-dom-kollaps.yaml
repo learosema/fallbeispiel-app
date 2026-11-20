@@ -50,15 +50,15 @@ responses:
   puls:
     - when: {schocklage: false}
       say:
-        - Befund: Puls 58, regelmäßig.
+        - Befund: Puls langsam, regelmäßig, schwach tastbar, ca. 58.
     - say:
-        - Befund: Puls 76, regelmäßig.
+        - Befund: Puls regelmäßig, gut tastbar, ca. 76.
   rekap:
     - when: {schocklage: false}
       say:
-        - Befund: Rekap-Zeit 3 Sekunden.
+        - Befund: Rekap verzögert, ca. 3 Sekunden.
     - say:
-        - Befund: Rekap-Zeit 2 Sekunden.
+        - Befund: Rekap unter 2 Sekunden.
   rr:
     - when: {schocklage: false}
       say:
@@ -108,7 +108,7 @@ responses:
   reevaluation:
     - when: {schocklage: true}
       say:
-        - Befund: Puls 76, RR 110/70, Rekap 2 Sekunden, sie fühlt sich besser.
+        - Befund: Puls 76, RR 110/70, Rekap unter 2 Sekunden, sie fühlt sich besser.
     - say:
         - Befund: Puls 58, RR 95/55, weiter schwindelig.
 

@@ -51,7 +51,7 @@ responses:
   spo2:
     - Befund: SpO2 97 %.
   auskultation:
-    - Befund: Atemgeräusch beidseits normal.
+    - Befund: Atemgeräusch beidseits gleich, keine Nebengeräusche.
   halsvenen:
     - Befund: Halsvenen flach.
   hautfarbe:
@@ -59,11 +59,11 @@ responses:
   puls:
     - when: {blutung_stillen: false}
       say:
-        - Befund: Radialispuls schnell und schwach, ca. 124.
+        - Befund: Radialispuls schnell, regelmäßig, schwach tastbar, ca. 124.
     - say:
-        - Befund: Radialispuls schnell, ca. 112, etwas kräftiger.
+        - Befund: Radialispuls schnell, regelmäßig, besser tastbar, ca. 112.
   rekap:
-    - Befund: Rekap-Zeit 4 Sekunden.
+    - Befund: Rekap verzögert, ca. 4 Sekunden.
   rr:
     - when: {blutung_stillen: false}
       say:
@@ -71,7 +71,7 @@ responses:
     - say:
         - Befund: RR 105/65.
   trauma_check:
-    - Befund: Bauch weich, Becken stabil, rechter Oberschenkel unauffällig. Links die große Schnittwunde.
+    - Befund: Bauch weich, Becken stabil, rechter Oberschenkel ohne Schwellung. Links die große Schnittwunde.
   gcs:
     - Befund: Wach, GCS 15, ängstlich, zunehmend unruhig.
   orientierung:

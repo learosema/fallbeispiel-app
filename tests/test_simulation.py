@@ -201,3 +201,16 @@ def test_transcript_contains_both_sides(clf):
     run = play(clf, "basis-sturz", ["hallo"])
     text = evaluate.transcript(run)
     assert "Sanitäter:in: hallo" in text and "Patient:" in text
+
+
+def test_vague_finding_language_is_flagged(clf):
+    run = play(clf, "basis-sturz", ["puls normal", "rekap unter zwei sekunden puls regelmäßig gut tastbar", "atmet er normal"])
+    res = evaluate.evaluate(run)
+    assert res["vague"] == ["puls normal"]
+    assert "BEFUNDSPRACHE" in evaluate.as_text(res)
+    assert any("konkret" in x for x in res["improve"])
+
+
+def test_unconscious_normal_breathing_is_not_flagged(clf):
+    res = evaluate.evaluate(play(clf, "bw-seitenlage", ["atemkontrolle er atmet normal"]))
+    assert res["vague"] == []

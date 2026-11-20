@@ -48,7 +48,7 @@ responses:
   hlw:
     - Kollege: Er atmet doch normal.
   puls:
-    - Befund: Puls kräftig tastbar, ca. 76.
+    - Befund: Puls regelmäßig, kräftig tastbar, ca. 76.
   spo2:
     - Befund: SpO2 95 %.
   af_zaehlen:
@@ -56,7 +56,7 @@ responses:
   rr:
     - Befund: RR 145/90.
   rekap:
-    - Befund: Rekap-Zeit 2 Sekunden.
+    - Befund: Rekap unter 2 Sekunden.
   hautfarbe:
     - Befund: Haut kühl und nass.
   zyanose:
