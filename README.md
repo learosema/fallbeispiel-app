@@ -54,17 +54,18 @@ Die App läuft auf <http://localhost:8000> (nur von diesem Rechner aus erreichba
 ## Öffentlich betreiben
 
 Die App ist ohne Anmeldung nutzbar: Simulation und Auswertung laufen komplett auf dem eigenen Server, ohne KI und
-ohne kostenpflichtige Dienste. Davor steht nur Caddy für HTTPS (Zertifikat von Let's Encrypt, automatisch erneuert).
+ohne kostenpflichtige Dienste. Davor gehört ein Reverse Proxy für HTTPS – entweder einer, der auf dem Server ohnehin
+läuft (nginx, Traefik, Caddy …), oder der mitgelieferte Caddy (Zertifikat von Let's Encrypt, automatisch erneuert).
 
 ```
-Browser ──HTTPS──▶ Caddy (Ports 80/443) ──▶ App (Port 8000, nur für Caddy und den Server selbst erreichbar)
+Browser ──HTTPS──▶ Reverse Proxy ──▶ App (127.0.0.1:8000, von außen nicht erreichbar)
 ```
 
 ### Voraussetzungen
 
 - Linux-Server mit Docker und Compose-Plugin ab 2.24 (`docker compose version`)
 - eine (Sub-)Domain, deren A/AAAA-Eintrag auf den Server zeigt (`dig +short fallbeispiel.example.org`)
-- Ports 80 und 443 von außen erreichbar und frei (kein anderer Webserver darauf)
+- Ports 80 und 443 von außen erreichbar – beim mitgelieferten Caddy außerdem frei (kein anderer Webserver darauf)
 - mindestens 2–3 GB RAM (PyTorch und Embedding-Modell) und ca. 5 GB Platz; der erste Build dauert einige Minuten
 
 ### 1. Code holen
@@ -74,34 +75,84 @@ git clone https://github.com/learosema/fallbeispiel-app.git
 cd fallbeispiel-app
 ```
 
-### 2. Domain eintragen
+### 2a. Starten hinter dem eigenen Reverse Proxy
+
+```sh
+docker compose up -d --build
+docker compose logs -f        # Strg+C beendet nur die Anzeige
+```
+
+Den Proxy für die Domain auf `http://127.0.0.1:8000` zeigen lassen. Wichtig für das Rate-Limit: `X-Forwarded-For`
+muss die echte Client-IP enthalten und **überschrieben**, nicht ergänzt werden. Die App nimmt den ersten Eintrag;
+ein angehängter Header ließe Clients eine beliebige IP vorschicken.
+
+nginx (`$remote_addr` statt des üblichen `$proxy_add_x_forwarded_for`):
+
+```nginx
+location / {
+    proxy_pass http://127.0.0.1:8000;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $remote_addr;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+```
+
+Caddy (überschreibt den Header von selbst, solange `trusted_proxies` nicht gesetzt ist):
+
+```
+fallbeispiel.example.org {
+	reverse_proxy 127.0.0.1:8000
+}
+```
+
+Traefik überschreibt den Header ebenfalls, solange `forwardedHeaders.insecure` bzw. `trustedIPs` nicht gesetzt sind.
+Steht vor dem Proxy noch ein weiterer (z. B. Cloudflare), muss der Proxy die IP von dort übernehmen
+(nginx: `real_ip_header`/`set_real_ip_from`) – sonst teilen sich alle die IP des vorderen Proxys.
+
+Läuft der Proxy selbst in einem Docker-Container, erreicht er `127.0.0.1:8000` des Servers nicht. Dann die App in
+das Netzwerk des Proxys hängen und ihn auf `http://fallbeispiel-app:8000` zeigen lassen, z. B. mit einer
+`docker-compose.override.yml` (wird von `docker compose` automatisch gelesen):
+
+```yaml
+services:
+  app:
+    ports: !reset []           # kein Port auf dem Server mehr nötig
+    networks:
+      default:
+      proxy:
+        aliases: [fallbeispiel-app]   # eindeutiger Name im gemeinsamen Netz („app“ gibt es dort oft mehrfach)
+networks:
+  proxy:
+    external: true
+    name: <Netzwerk des Proxys>
+```
+
+### 2b. Oder: Starten mit dem mitgelieferten Caddy
 
 ```sh
 echo "DOMAIN=fallbeispiel.example.org" > .env
+docker compose --profile public up -d --build
+docker compose --profile public logs -f
 ```
 
 Weitere Einstellungen sind optional (siehe `.env.example` und [Weitere Einstellungen](#weitere-einstellungen)).
 
-### 3. Starten
-
-```sh
-docker compose --profile public up -d --build
-docker compose --profile public logs -f        # Strg+C beendet nur die Anzeige
-```
-
 Beim ersten Start lädt die App das Embedding-Modell (~470 MB) ins Volume `hf-cache`. Bis sie bereit ist
-(„Application startup complete“ im Log), antwortet Caddy mit 502. Spätere Starts gehen schnell.
+(„Application startup complete“ im Log), antwortet der Proxy mit 502. Spätere Starts gehen schnell.
 
-### 4. Prüfen
+### 3. Prüfen
 
 - `https://<DOMAIN>` öffnen, einen Fall spielen, die Auswertung starten.
-- Im Log von Caddy steht `certificate obtained successfully`.
+- Im Log der App (`docker compose logs app`) steht bei den Aufrufen deine echte IP – nicht `127.0.0.1` oder `172.…`.
+  Sonst setzt der Proxy `X-Forwarded-For` nicht, und alle teilen sich ein Rate-Limit.
 - Von außen ist Port 8000 **nicht** erreichbar: `curl http://<DOMAIN>:8000` muss scheitern.
+- Nur mit mitgeliefertem Caddy: Im Log von Caddy steht `certificate obtained successfully`.
 
 ### Aktualisieren
 
 ```sh
-git pull && docker compose --profile public up -d --build
+git pull && docker compose up -d --build                     # eigener Proxy
+git pull && docker compose --profile public up -d --build    # mitgelieferter Caddy
 ```
 
 Nach dem Update laden Browser die neue Version beim nächsten Öffnen (der Service Worker fragt immer zuerst beim Server nach).
@@ -113,19 +164,21 @@ Nach dem Update laden Browser die neue Version beim nächsten Öffnen (der Servi
 - **Überlast:** Jede Anfrage spielt den ganzen Einsatz nach und rechnet ggf. Embeddings. Die App begrenzt deshalb die
   API-Aufrufe pro Client-IP (`RATE_LIMIT`, Standard 300 pro Minute, ein zügiger Einsatz braucht ~20). Teilen sich viele
   Leute eine IP (Lehrgang im selben WLAN) und erscheint „Zu viele Anfragen“, den Wert in `.env` erhöhen und
-  `docker compose --profile public up -d` ausführen. Die Grenze gilt pro Prozess und beginnt nach einem Neustart neu.
-- **Client-IP:** Die App übernimmt sie aus `X-Forwarded-For`, das Caddy setzt. Das ist nur sicher, solange Port 8000
-  nicht nach außen offen ist – in `docker-compose.yml` deshalb `127.0.0.1:8000:8000` lassen.
+  die App mit `docker compose up -d` neu starten (mit Caddy: `--profile public`). Die Grenze gilt pro Prozess und beginnt nach einem Neustart neu.
+- **Client-IP:** Die App übernimmt sie aus `X-Forwarded-For` (`FORWARDED_ALLOW_IPS=*`). Das ist nur sicher, solange
+  Port 8000 nicht nach außen offen ist – in `docker-compose.yml` deshalb `127.0.0.1:8000:8000` lassen – und der Proxy
+  den Header überschreibt (siehe 2a).
 - **Daten:** Die App speichert nichts. Das Einsatzprotokoll liegt nur im Browser und wird bei jeder Äußerung mitgeschickt.
-  Im Log der App stehen nur Zugriffszeilen (Client-IP, Pfad, Status), keine Inhalte; Caddy schreibt ohne `log`-Direktive
-  keine Zugriffslogs.
-- **Logs:** `docker compose --profile public logs --tail 100 app` bzw. `caddy`.
+  Im Log der App stehen nur Zugriffszeilen (Client-IP, Pfad, Status), keine Inhalte. Was dein Proxy protokolliert,
+  regelt seine eigene Konfiguration; der mitgelieferte Caddy schreibt keine Zugriffslogs.
+- **Logs:** `docker compose logs --tail 100 app`
 
 ### Fehlersuche
 
 | Symptom                                   | Ursache / Abhilfe                                                                 |
 |-------------------------------------------|-----------------------------------------------------------------------------------|
 | Kein Zertifikat, Browser warnt            | DNS zeigt noch nicht auf den Server oder Port 80/443 ist zu (Firewall, Cloud-Sicherheitsgruppe). Caddy versucht es selbst erneut. |
+| Alle bekommen schnell „Zu viele Anfragen“ | Proxy gibt die Client-IP nicht weiter – im App-Log steht überall dieselbe IP (siehe 3. Prüfen) |
 | 502 Bad Gateway                           | App startet noch (Modell-Download) oder ist abgestürzt: `logs app`                |
 | App wird beendet, `Killed` im Log         | zu wenig RAM – Swap anlegen oder größeren Server nehmen                           |
 | „Zu viele Anfragen – bitte kurz warten.“  | `RATE_LIMIT` erhöhen (siehe Betrieb)                                              |
@@ -140,6 +193,7 @@ Siehe `.env.example`.
 | `INTENT_THRESHOLD`        | `0.72`                                                     | Mindest-Ähnlichkeit für Embedding-Treffer           |
 | `INTENT_EMBEDDINGS`       | `1`                                                        | `0` = nur Regex-Muster (kein Modell nötig)          |
 | `RATE_LIMIT`              | `300`                                                      | API-Aufrufe pro Client-IP und Minute, `0` = aus     |
+| `FORWARDED_ALLOW_IPS`     | `*` (im Docker-Image)                                      | Absender, deren `X-Forwarded-For` gilt (uvicorn)    |
 | `PRELOAD_MODEL`           | `1`                                                        | `0` lädt den Classifier erst bei der ersten Anfrage |
 
 PyTorch wird als CPU-Build installiert. Für eine NVIDIA-GPU den `pytorch-cpu`-Index in `pyproject.toml` entfernen.

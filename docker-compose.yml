@@ -1,11 +1,11 @@
-# Lokal:      docker compose up --build              → http://localhost:8000
-# Öffentlich: docker compose --profile public up -d  → https://$DOMAIN (Caddy holt das Zertifikat)
+# Lokal oder hinter eigenem Reverse Proxy: docker compose up -d --build  → http://127.0.0.1:8000
+# Mit mitgeliefertem Caddy:                docker compose --profile public up -d --build  → https://$DOMAIN
 # Einrichtung siehe README.md, Abschnitt „Öffentlich betreiben“.
 services:
   app:
     build: .
     ports:
-      # Nur von diesem Rechner aus erreichbar; von außen geht es über Caddy (HTTPS).
+      # Nur von diesem Rechner aus erreichbar; von außen geht es über den Reverse Proxy (HTTPS).
       - "127.0.0.1:8000:8000"
     env_file:
       - path: .env
