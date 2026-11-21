@@ -1,6 +1,5 @@
-# Lokal oder hinter eigenem Reverse Proxy: docker compose up -d --build  → http://127.0.0.1:8000
-# Mit mitgeliefertem Caddy:                docker compose --profile public up -d --build  → https://$DOMAIN
-# Einrichtung siehe README.md, Abschnitt „Öffentlich betreiben“.
+# docker compose up -d --build  → http://127.0.0.1:8000
+# Öffentlich: Reverse Proxy (z. B. nginx) davor, siehe README.md „Öffentlich betreiben“.
 services:
   app:
     build: .
@@ -15,20 +14,5 @@ services:
       - hf-cache:/models
     restart: unless-stopped
 
-  caddy:
-    profiles: [public]
-    image: caddy:2.8.4
-    ports:
-      - "80:80"
-      - "443:443"
-    environment:
-      DOMAIN: ${DOMAIN:-localhost}
-    volumes:
-      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy-data:/data
-    depends_on: [app]
-    restart: unless-stopped
-
 volumes:
   hf-cache:
-  caddy-data:

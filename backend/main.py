@@ -85,7 +85,7 @@ class RateLimit:
 
 
 # Jede Äußerung ist ein Aufruf, dazu Takte; ein zügiger Einsatz liegt bei ~20/min. Großzügig, weil sich eine
-# Gruppe im selben WLAN eine IP teilt. Hinter Caddy ist die IP die echte (uvicorn --forwarded-allow-ips, Dockerfile).
+# Gruppe im selben WLAN eine IP teilt. Hinter dem Reverse Proxy ist die IP die echte (FORWARDED_ALLOW_IPS, Dockerfile).
 api_limit = RateLimit(int(os.environ.get("RATE_LIMIT", "300")), 60)
 
 
