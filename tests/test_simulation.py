@@ -865,3 +865,19 @@ def test_team_talk_without_closing_question_is_noted(clf):
     team = next(it for it in evaluate.evaluate(run)["sections"][0]["items"] if it["id"] == "team")
     assert team["status"] == evaluate.PARTIAL and "Abschlussfrage" in team["note"]
     assert not run.turns[-1].team  # „Hallo …“ richtet sich an den Patienten
+
+
+def test_colleague_speaks_after_early_radio_end(clf):
+    run = play(clf, "x-kettensaege", ["starke blutung kollege tourniquet anlegen", "rotkreuzhamburg von evt eins kommen",
+                                      "patient männlich mitte 40 wir brauchen rtw und nef kommen", "evt 1 ende", "evt 1 ende"])
+    assert said(run, "Kollege")[-2] == engine.AFTER_FUNK[0].text
+    assert said(run, "Kollege")[-1] == engine.FUNK_ALREADY_ENDED.text
+    assert not run.ended
+
+
+@pytest.mark.parametrize("text", ["Eva T1 Ende", "E V T 1 Ende", "evt 1 End", "efte eins ende"])
+def test_misheard_callsign_still_ends_the_call(clf, text):
+    run = play(clf, "basis-sturz", ["rotkreuzhamburg von evt eins kommen", "älterer mann gestürzt wir brauchen einen rtw kommen", text])
+    assert "funk_ende" in run.first and run.ended
+    funk = next(it for it in evaluate.evaluate(run)["sections"][0]["items"] if it["id"] == "funk")
+    assert "Ende“ fehlt" not in funk["note"], funk["note"]

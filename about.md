@@ -94,6 +94,9 @@ Eintrübung/Bewusstlosigkeit.
   Bei **offenem Funk** geht alles an die Leitstelle („Verstanden.“), auch ohne „kommen“; eine Meldung in mehreren
   Stücken wird zusammen ausgewertet. „RTW kommt, verstanden“ und die Nachforderung gibt es nur bei einer Anforderung
   („wir brauchen / benötigen / bitte / einmal RTW“), nicht bei einer Erwähnung („RTW ist schon alarmiert“).
+  Nach „… Ende“ ohne Ende der 1. Minute (früher Funk, ganzer Fall) sagt der Kollege „Gut. Dann machen wir mit der
+  Untersuchung weiter.“; ein zweites „Ende“ → „Der Funkspruch ist schon beendet.“ Rufnamen werden unscharf erkannt
+  (ohne Vokale, f = v: „Eva T1“, „Efte eins“ = EVT1), „End“ gilt wie „Ende“.
   **Nachforderung im Verlauf:** Ein zweiter Funkspruch („… zusätzlich einen NEF“) zählt mit. Ereignisse können
   `request: [NEF]` setzen – ab dann wird der NEF erwartet („NEF nach der Verschlechterung nicht nachgefordert“),
   vorher ist er optional. Gesetzt bei Bewusstlosigkeit bzw. ernsten Atemproblemen in Bolus, Hypo, Seitenlage,

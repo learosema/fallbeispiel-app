@@ -129,6 +129,25 @@ def compact(text: str) -> str:
     return re.sub(r"[^a-z0-9äöü]", "", t)
 
 
+def skeleton(text: str) -> str:
+    """Rufname ohne Vokale: Die Spracherkennung macht aus „EVT1“ gern „Eva T1“ oder „Efte eins“."""
+    return re.sub(r"[aeiouäöüy]", "", compact(text)).replace("f", "v")
+
+
+def has_name(name: str, text: str) -> bool:
+    c, n = compact(text), compact(name)
+    if n and n in c:
+        return True
+    sk = skeleton(name)
+    return len(sk) >= 3 and sk in skeleton(text)
+
+
+AFTER_FUNK = [Line("Kollege", "Gut. Dann machen wir mit der Untersuchung weiter."),
+              Line("Kollege", "Okay, weiter mit dem Patienten."),
+              Line("Kollege", "Alles klar, machen wir weiter.")]
+FUNK_ALREADY_ENDED = Line("Kollege", "Der Funkspruch ist schon beendet.")
+
+
 def detect_resources(text: str) -> list[str]:
     t = normalize(text)
     return [name for name, pat in RESOURCES if re.search(pat, t)]
@@ -195,10 +214,11 @@ def funk(text: str, s: Settings, state: dict[str, Any], mode: str,
     """Funkverkehr mit der Leitstelle. `force`: Der Funk ist offen und die Äußerung gehört dazu (Teil der Meldung)."""
     t = normalize(text)
     c = compact(text)
-    has_disp = compact(s.dispatcher) in c
-    has_call = compact(s.callsign) in c
+    has_disp = has_name(s.dispatcher, text)
+    has_call = has_name(s.callsign, text)
     kommen = bool(re.search(r"\bkommen\b", t))
-    ende = bool(re.search(r"\bende\W*$", t)) and (has_call or state.get("funk_offen"))
+    ende = bool(re.search(r"\bende?\W*$", t)) and (has_call or state.get("funk_offen"))
+    was_open = bool(state.get("funk_offen"))
     mentioned = detect_resources(text)
     resources = mentioned if REQUEST.search(t) else []
     in_funk = force or has_disp or (has_call and (kommen or ende)) or (state.get("funk_offen") and (kommen or ende or mentioned))
@@ -241,6 +261,13 @@ def funk(text: str, s: Settings, state: dict[str, Any], mode: str,
         if mode == "minute" and end_minute and not state.get("_beendet"):
             lines.append(Line("Befund", "Die 1. Minute ist beendet. Du kannst die Auswertung starten."))
             state["_beendet"] = True
+        elif not was_open and not anruf and not meldung:
+            lines.append(FUNK_ALREADY_ENDED)  # „EVT1 Ende“ noch einmal – z. B. weil es still blieb
+        elif not state.get("_beendet"):
+            # früher Funk bzw. ganzer Fall: sonst bliebe es nach „… Ende“ still
+            k = state.get("_after_funk", 0)
+            state["_after_funk"] = k + 1
+            lines.append(AFTER_FUNK[k % len(AFTER_FUNK)])
     if not lines and not ende:
         lines.append(Line("Leitstelle", "Verstanden." if state.get("funk_offen") else "Wiederholen."))
     return hits, lines, info
