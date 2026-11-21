@@ -306,9 +306,11 @@ def test_tick_without_due_event_says_nothing(clf):
 
 def test_next_event_at_points_to_deterioration(clf):
     run = play(clf, "basis-sturz", ["hallo"])
-    assert run.next_event_at == 60  # „will nach Hause“ bei 60 s, Frieren bei 75 s
+    assert run.next_event_at == 8 + engine.SILENCE_SECONDS  # erst meldet sich der Patient bei Stille …
+    run = play(clf, "basis-sturz", ["hallo", "puls", "rekap", "hautfarbe", "decke"], step=10)
+    assert run.next_event_at == 60  # … sonst „will nach Hause“ bei 60 s, Frieren bei 75 s
     run = play(clf, "basis-sturz", ["wir decken sie zu", "ich kläre sie auf, sie sollten ins krankenhaus"])
-    assert run.next_event_at is None or run.next_event_at > 150
+    assert run.next_event_at == 16 + engine.SILENCE_SECONDS
 
 
 def test_rescue_service_arrives_and_handover_ends(clf):
@@ -632,3 +634,73 @@ def test_symptom_onset(clf):
     assert [h.intent for h in run.turns[0].hits] == ["symptombeginn"] and "10:42" in said(run)[0]
     res = evaluate.evaluate(play(clf, "dom-krampf", ["seit wann krampft er"], mode="full"))
     assert next(k for k in keys_of(res) if k["label"] == "Anfallsdauer erfasst")["status"] == evaluate.OK
+
+
+# ---------- Eskalation: allein lassen, Stille, Tod ----------
+
+def replay_ticks(clf, sid, script, until=330, mode="minute"):
+    """Wie der Browser: Äußerungen zu festen Zeiten, dazwischen Takte zu next_event_at."""
+    s = content.scenarios()[sid]
+    log, pending = [], sorted(script.items())
+    while True:
+        run = engine.replay(s, mode, engine.Settings(), log, clf) if log else None
+        nxt = run.next_event_at if run else None
+        if pending and (nxt is None or pending[0][0] <= nxt):
+            t, text = pending.pop(0)
+            log.append({"t": t, "text": text})
+        elif nxt is not None and nxt <= until:
+            log.append({"t": nxt, "text": "", "tick": True})
+        else:
+            return run
+
+
+def test_untreated_extreme_bleeding_ends_in_death(clf):
+    run = replay_ticks(clf, "x-kettensaege", {5: "hallo was ist passiert"})
+    assert run.died_at == 270 and run.ended and engine.DIED.text in said(run)
+    res = evaluate.evaluate(run)
+    assert res["verdict"] == "Nicht erfüllt" and "verstorben" in res["improve"][0]
+    after = engine.replay(content.scenarios()["x-kettensaege"], "minute", engine.Settings(),
+                          [{"t": 5, "text": "hallo"}, {"t": 271, "text": "", "tick": True}, {"t": 280, "text": "puls"}], clf)
+    assert said(after)[-1] == engine.AFTER_DEATH.text and not after.turns[-1].hits
+
+
+def test_stopped_bleeding_prevents_death(clf):
+    run = replay_ticks(clf, "x-kettensaege", {5: "starke blutung kollege tourniquet anlegen"})
+    assert run.died_at is None and not run.state.get("bewusstlos")
+
+
+def test_unconscious_during_case_does_not_talk(clf):
+    run = replay_ticks(clf, "x-kettensaege", {5: "hallo", 160: "haben sie allergien"}, until=165)
+    assert not run.state.get("verstorben") and run.state.get("bewusstlos")
+    last = run.turns[-1] if run.turns[-1].text else run.turns[-2]
+    assert all(l.who != "Patient" for l in last.lines), last.lines
+
+
+def test_leaving_the_patient_alone(clf):
+    run = replay_ticks(clf, "basis-sturz", {5: "hallo", 10: "wir holen kurz was aus dem auto", 60: "so wir sind wieder da"}, until=60)
+    assert run.alone == [(10.0, 60.0)]
+    calls = [l.text for t in run.turns[2:] for l in t.lines if l.who == "Patient"]
+    assert any("Hilfe" in c for c in calls)
+    res = evaluate.evaluate(run)
+    assert any("nie allein" in i for i in res["improve"]) and any("allein gelassen" in c for c in res["course"])
+
+
+def test_doing_something_means_you_are_back(clf):
+    run = play(clf, "basis-sturz", ["wir lassen sie kurz allein", "ich fühle den puls"])
+    assert engine.BACK.text in said(run) and not run.state.get("allein") and run.alone[0][1] == 16
+
+
+def test_colleague_stays_when_only_i_leave(clf):
+    run = play(clf, "basis-sturz", ["ich gehe kurz zum auto"])
+    assert "ich bleibe hier" in said(run)[0] and not run.state.get("allein")
+
+
+def test_silence_makes_the_patient_speak_once(clf):
+    run = replay_ticks(clf, "basis-sturz", {5: "hallo"}, until=59)
+    silent = [t for t in run.turns if t.text == "" and any(l.who == "Patient" for l in t.lines)]
+    assert len(silent) == 1 and silent[0].t == 35
+
+
+def test_no_silence_lines_for_unconscious_patients(clf):
+    run = replay_ticks(clf, "bw-seitenlage", {5: "hallo hören sie mich"}, until=59)
+    assert all(l.who != "Patient" for t in run.turns[1:] for l in t.lines)

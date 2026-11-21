@@ -14,6 +14,11 @@ from .classifier import Hit, normalize
 from .content import Line, Scenario, Variant, algorithm, intents, smalltalk
 
 ARRIVAL_SECONDS = 480  # Rettungsdienst trifft ca. 8 Minuten nach der Nachforderung ein
+SILENCE_SECONDS = 30   # so lange ohne Äußerung, dann meldet sich der (wache) Patient
+ALONE_FIRST, ALONE_REPEAT, ALONE_LATER = 10, 15, 45  # allein: erster Hilferuf nach 10 s, dann alle 15 s, ab dem 4. alle 45 s
+DIED = Line("Befund", "Der Patient ist verstorben. Du kannst die Auswertung starten.")
+AFTER_DEATH = Line("Befund", "(Der Patient ist verstorben.)")
+BACK = Line("Befund", "(Ihr seid wieder beim Patienten.)")
 FALLBACK = Line("Kollege", "Was genau machst du?")  # erste Rückfrage; weitere Varianten in content/smalltalk.yaml
 TIP_DONE = Line("Kollege", "Von mir aus haben wir alles. Du entscheidest, wie es weitergeht.")
 # Erkannt, aber der Fall hat keine Antwort: lieber nachfragen als einen Befund erfinden.
@@ -68,6 +73,8 @@ class Run:
     next_event_at: float | None = None      # Nettozeit, zu der das nächste Ereignis fällig wird (für den Takt im Browser)
     fired: list[tuple[int, int]] = field(default_factory=list)  # ausgelöste Ereignisse: (Index in scenario.events, Äußerung)
     ended_at: int | None = None             # Äußerung, mit der der Einsatz endete („1. Minute beendet“, Übergabe)
+    alone: list[tuple[float, float | None]] = field(default_factory=list)  # Zeiträume, in denen der Patient allein war
+    died_at: float | None = None            # Nettozeit, zu der der Patient verstorben ist
 
 
 def compact(text: str) -> str:
@@ -106,14 +113,24 @@ def respond(scenario: Scenario, iid: str, state: dict[str, Any]) -> Variant | No
     3. Antwort des Falls auf einen Ausweich-Intent („Atmung?“ → Atemkontrolle)  4. Standardantwort des Intents."""
     cat = intents()
     it = cat[iid]
-    v = pick(scenario.responses.get(iid, []), state)
-    if v is None and not scenario.conscious:
+    unconscious = not scenario.conscious or bool(state.get("bewusstlos"))
+    own = scenario.responses.get(iid, [])
+    if state.get("bewusstlos"):
+        # im Verlauf bewusstlos geworden: Antworten des Falls für diesen Zustand, sonst „keine Reaktion“ vor den wachen Antworten
+        v = pick([x for x in own if "bewusstlos" in x.when], state) or pick(it.unconscious, state) or pick(own, state)
+    else:
+        v = pick(own, state)
+    if v is None and unconscious:
         v = pick(it.unconscious, state)
     for alt in it.fallback:
         if v is not None:
             break
         v = pick(scenario.responses.get(alt, []), state)
-    return v or pick(it.default, state)
+    v = v or pick(it.default, state)
+    if v is not None and state.get("bewusstlos") and "bewusstlos" not in v.when and any(l.who == "Patient" for l in v.say):
+        # wer im Verlauf bewusstlos geworden ist, antwortet nicht mehr
+        v = Variant([l if l.who != "Patient" else Line("Befund", "(keine Reaktion)") for l in v.say], v.when, v.set)
+    return v
 
 
 # ---------- Funk ----------
@@ -248,6 +265,25 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
     ended_at: int | None = None
     turns: list[Turn] = []
     said: dict[str, int] = {}  # Smalltalk-Regel bzw. Rückfrage → wie oft schon (für die Varianten reihum)
+    alone: list[tuple[float, float | None]] = []
+    alone_next: float | None = None     # nächster Hilferuf, solange allein
+    alone_calls = 0
+    last_said = 0.0                     # Nettozeit der letzten Äußerung (für die Stille)
+    silence_done = False                # in dieser Pause schon gemeldet
+    died_at: float | None = None
+    st = smalltalk()
+    silence_lines = st.silence if scenario.silence is None else scenario.silence
+    alone_lines = st.alone if scenario.alone is None else scenario.alone
+
+    def awake() -> bool:
+        return scenario.conscious and not state.get("bewusstlos") and not state.get("verstorben")
+
+    def speakable(options: list[Variant]) -> list[Line]:
+        """Zeilen der ersten passenden Variante, die gerade jemand sagen kann: der Patient nur, solange er wach ist."""
+        v = pick(options, state)
+        if v is None or state.get("verstorben"):
+            return []
+        return [l for l in v.say if l.who != "Patient" or awake()]
 
     def rotate(key: str, options: list[Line]) -> Line:
         k = said.get(key, 0)
@@ -265,15 +301,23 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
         tick = bool(entry.get("tick"))  # Takt ohne Äußerung: nur die Zeit ist fortgeschritten
         lines: list[Line] = []
         unhandled: list[str] = []
-        f = None if tick else funk(text, settings, state, mode, end_minute=not scenario.funk_early)
+        if not tick:
+            last_said, silence_done = t, False
+        f = None if tick or state.get("verstorben") else funk(text, settings, state, mode, end_minute=not scenario.funk_early)
         if tick:
             hits, info = [], None
+        elif state.get("verstorben"):
+            hits, info = [], None
+            lines.append(AFTER_DEATH)
         elif f:
             # Während eines Funkspruchs zählt nur der Funk – „Verdacht auf …“ ist dann keine Teambesprechung.
             hits, funk_lines, info = f
             lines += funk_lines
         else:
             hits, info = clf.classify(text), None
+            if state.get("allein") and any(h.intent not in ("weggehen", "kurz_weg") and h.source != "implied" for h in hits):
+                state["allein"] = False  # wer etwas am Patienten macht, ist wieder da
+                lines.append(BACK)
             team = next((h for h in hits if h.intent == "teambesprechung"), None)
             if team and REACTION.search(normalize(text)) and "reaktion" not in {h.intent for h in hits}:
                 hits.append(Hit("reaktion", team.pos, 1.0, "implied"))
@@ -293,6 +337,25 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
                 first[h.intent] = (n, h.pos)
                 first_t[h.intent] = t
 
+        # allein gelassen: Zeitraum merken, wache Patient:innen rufen um Hilfe
+        if state.get("allein") and (not alone or alone[-1][1] is not None):
+            alone.append((t, None))
+            alone_next = t + ALONE_FIRST
+            alone_calls = 0
+        elif not state.get("allein") and alone and alone[-1][1] is None:
+            alone[-1] = (alone[-1][0], t)
+            alone_next = None
+        if state.get("allein") and alone_next is not None and t >= alone_next:
+            if speakable(alone_lines):
+                lines.append(rotate("_alone", speakable(alone_lines)))
+            alone_calls += 1
+            alone_next = t + (ALONE_REPEAT if alone_calls < 3 else ALONE_LATER)
+        # lange Stille: Der wache Patient meldet sich (einmal je Pause)
+        if (tick and not silence_done and not state.get("allein") and not state.get("_beendet")
+                and t - last_said >= SILENCE_SECONDS and speakable(silence_lines)):
+            lines.append(rotate("_silence", speakable(silence_lines)))
+            silence_done = True
+
         # zeitgesteuerte Ereignisse (Verschlechterung, Besserung, Eintreffen …)
         for k, ev in enumerate(scenario.events):
             due = _due(ev, fired.get(k, 0), first_t)
@@ -304,6 +367,10 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
         if "nachforderung" in first_t and not state.get("rd_da") and t >= first_t["nachforderung"] + ARRIVAL_SECONDS:
             state["rd_da"] = True
             lines.append(Line("Rettungsdienst", "Hallo, Rettungsdienst. Was habt ihr?"))
+        if state.get("verstorben") and died_at is None:
+            died_at = t
+            state["_beendet"] = True
+            lines.append(DIED)
         if (mode == "minute" and scenario.funk_early and not state.get("_beendet") and "funk_ende" in first
                 and next_open(scenario, mode, set(first)) is None):
             # früher Funk: Die 1. Minute endet erst, wenn alles erledigt ist (Auswertung geht jederzeit)
@@ -339,8 +406,15 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
         lines = [l for l in lines if not (l in seen or seen.add(l))]
         turns.append(Turn(t, text, hits, lines, info, unhandled, tip))
 
+    now = turns[-1].t if turns else 0.0
+    extra: list[float] = []
+    if state.get("allein") and alone_next is not None and speakable(alone_lines):
+        extra.append(alone_next)
+    if not silence_done and not state.get("allein") and not state.get("_beendet") and speakable(silence_lines) and turns:
+        extra.append(last_said + SILENCE_SECONDS)
+    nxt = None if state.get("verstorben") else _next_event_at(scenario, state, fired, first_t, now, extra)
     return Run(scenario, mode, settings, turns, state, first, first_t, bool(state.get("_beendet")),
-               _next_event_at(scenario, state, fired, first_t, turns[-1].t if turns else 0.0), fired_log, ended_at)
+               nxt, fired_log, ended_at, alone, died_at)
 
 
 def _due(ev, count: int, first_t: dict[str, float]) -> float | None:
@@ -352,9 +426,10 @@ def _due(ev, count: int, first_t: dict[str, float]) -> float | None:
     return (first_t[ev.since] if ev.since else 0.0) + ev.at + count * (ev.repeat or 0)
 
 
-def _next_event_at(scenario: Scenario, state: dict[str, Any], fired: dict[int, int], first_t: dict[str, float], now: float) -> float | None:
+def _next_event_at(scenario: Scenario, state: dict[str, Any], fired: dict[int, int], first_t: dict[str, float], now: float,
+                   extra: list[float] | None = None) -> float | None:
     """Wann wäre beim jetzigen Zustand das nächste Ereignis fällig? (None = keines)"""
-    due: list[float] = []
+    due: list[float] = list(extra or [])
     for k, ev in enumerate(scenario.events):
         d = _due(ev, fired.get(k, 0), first_t)
         if d is not None and matches(ev.when, state):

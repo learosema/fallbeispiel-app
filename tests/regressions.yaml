@@ -182,3 +182,19 @@
   reply: (keine Reaktion)
 - text: das tut mir leid, wir kümmern uns jetzt um Sie
   expect: [beruhigen]
+
+# ---- Patient allein lassen
+- text: wir holen kurz noch was aus dem auto
+  expect: [weggehen]
+- text: kollege komm mal mit
+  expect: [weggehen]
+- text: ich gehe kurz zum auto
+  expect: [kurz_weg]
+  not: [weggehen]
+- text: ich hole die decke
+  not: [weggehen, kurz_weg]
+- text: kollege hol bitte den rucksack
+  expect: [rucksack]
+  not: [weggehen, kurz_weg]
+- text: so wir sind wieder da
+  expect: [zurueck]

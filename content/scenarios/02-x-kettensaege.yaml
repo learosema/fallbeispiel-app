@@ -32,7 +32,11 @@ responses:
     - Befund: Nach dem Festziehen hört die Blutung auf. Markus schreit kurz vor Schmerz.
     - Patient: Aaah! … Hört es auf?
   vorstellen:
-    - Patient: Bitte, helft mir, das hört nicht auf!
+    - when: {blutung_stillen: false}
+      say:
+        - Patient: Bitte, helft mir, das hört nicht auf!
+    - say:
+        - Patient: (atmet schwer) Danke … es hat aufgehört, oder?
   was_passiert:
     - Umstehende: Die Säge ist abgerutscht, direkt ins Bein. Vor vier Minuten etwa.
   beschwerden_fragen:
@@ -130,6 +134,42 @@ events:
     when: {blutung_stillen: false}
     say:
       - Befund: Markus trübt ein, reagiert nur noch verlangsamt, die Haut ist grau.
+  # ENTWURF Eskalation – Zeiten fachlich gegenlesen
+  - at: 150
+    when: {blutung_stillen: false}
+    say:
+      - Befund: Markus sackt zusammen und reagiert nicht mehr auf Ansprache. Der Radialispuls ist nicht mehr tastbar.
+      - Umstehende: (Jens) Markus? MARKUS!
+    set: {bewusstlos: true}
+  - at: 210
+    when: {blutung_stillen: false}
+    say:
+      - Befund: Keine normale Atmung mehr, nur noch einzelne schnappende Atemzüge. Kein Puls tastbar.
+    set: {kreislaufstillstand: true}
+    expect: [blutung_stillen, hlw]
+  - at: 270
+    when: {blutung_stillen: false}
+    say:
+      - Befund: Markus ist verblutet.
+    set: {verstorben: true}
+    expect: false
+
+silence:  # bei Stille drängen Patient und Jens
+  - when: {blutung_stillen: false}
+    say:
+      - Patient: Macht doch was! Ich verblute!
+      - Umstehende: (Jens) Was ist denn jetzt? Das blutet immer weiter!
+  - say:
+      - Patient: Und jetzt? Was passiert jetzt mit mir?
+alone:  # Jens drückt weiter auf die Wunde, Markus ruft
+  - when: {blutung_stillen: false}
+    say:
+      - Umstehende: (Jens) Hey! Wo wollt ihr hin? Ich krieg das allein nicht gestoppt!
+      - Patient: Bitte … nicht weggehen …
+      - Umstehende: (Jens, ruft) Hilfe! Kommt zurück!
+  - say:
+      - Patient: Hallo? Wo seid ihr?
+      - Umstehende: (Jens, ruft) Hallo! Kommt ihr wieder?
 
 key_actions:
   - label: Blutstillung (Tourniquet/Druckverband) vor allem anderen

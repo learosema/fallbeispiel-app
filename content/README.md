@@ -78,6 +78,19 @@ events:                      # zeitgesteuert (Nettozeit der Sanitäter:in in Sek
     say:
       - Befund: Er wird zunehmend blau.
     expect: {any: [rueckenschlaege, heimlich], within: 15}   # Warnzeichen: erwartete Reaktion, siehe unten
+  - at: 150
+    when: {blutung_stillen: false}
+    say: [...]
+    set: {bewusstlos: true}  # ab jetzt antwortet der Patient nicht mehr („keine Reaktion“)
+  - at: 270
+    when: {blutung_stillen: false}
+    say: [...]
+    set: {verstorben: true}  # Patient verstorben: Einsatz endet, Urteil „Nicht erfüllt“ – nur wo das realistisch ist
+
+silence:                     # optional: was bei 30 s Stille gesagt wird (Standard: smalltalk.yaml; false = nichts)
+  - when: {blutung_stillen: false}
+    say: [Patient: Macht doch was!, Umstehende: Das blutet immer weiter!]   # erste passende Variante, Zeilen reihum
+alone: [...]                 # optional: Hilferufe, wenn das Team weggeht (Flag `allein`), gleiches Format
 
 key_actions:                 # fallspezifische Schlüsselmaßnahmen für die Auswertung
   - label: Blutstillung vor allem anderen

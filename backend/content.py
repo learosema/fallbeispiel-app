@@ -69,6 +69,8 @@ class Scenario:
     # Funkspruch früh absetzen (Schlaganfall, Reanimation …): sobald einer dieser Intents erledigt ist, schlägt der Kollege
     # den Funk als Nächstes vor; ein früher Funk ist nicht „außer der Reihe“, und „… Ende“ beendet die 1. Minute nicht
     funk_early: list[str] = field(default_factory=list)
+    silence: list[Variant] | None = None  # was bei langer Stille gesagt wird (None = Standard, [] = nichts); Varianten mit when
+    alone: list[Variant] | None = None    # Hilferufe, wenn der Patient allein gelassen wird (None = Standard, [] = nichts)
 
 
 def _lines(raw: Any, where: str) -> list[Line]:
@@ -137,6 +139,8 @@ class SmalltalkRule:
 class Smalltalk:
     rules: list[SmalltalkRule]
     fallback: list[Line]
+    silence: list[Variant] = field(default_factory=list)  # Standard: wacher Patient bei langer Stille
+    alone: list[Variant] = field(default_factory=list)    # Standard: Hilferufe, wenn allein gelassen
 
 
 @cache
@@ -157,7 +161,7 @@ def smalltalk() -> Smalltalk:
     fallback = _lines(data.get("fallback"), "smalltalk.fallback")
     if not fallback:
         raise ValueError("smalltalk.fallback: mindestens eine Rückfrage nötig")
-    return Smalltalk(rules, fallback)
+    return Smalltalk(rules, fallback, _variants(data.get("silence"), "smalltalk.silence"), _variants(data.get("alone"), "smalltalk.alone"))
 
 
 @cache
@@ -262,7 +266,16 @@ def _load_scenario(path: Path) -> Scenario:
         skip=list(d.get("skip") or []),
         notes=str(d.get("debrief_notes") or "").strip(),
         funk_early=funk_early,
+        silence=_optional_lines(d, "silence", path.name),
+        alone=_optional_lines(d, "alone", path.name),
     )
+
+
+def _optional_lines(d: dict[str, Any], key: str, where: str) -> list[Variant] | None:
+    """Zeilen reihum, wahlweise als Varianten mit when (die erste passende gilt, ihre Zeilen reihum)."""
+    if key not in d:
+        return None
+    return [] if d[key] is False else _variants(d[key], f"{where}.{key}")
 
 
 @cache
