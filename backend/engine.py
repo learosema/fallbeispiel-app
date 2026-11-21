@@ -139,6 +139,9 @@ def respond(scenario: Scenario, iid: str, state: dict[str, Any]) -> Variant | No
 # wendet sich an jemanden vor Ort („ich fühle den Puls“, „Kollege …“, „Haben Sie …“) – Berichtsformen wie
 # „Tourniquet angelegt“ gehören dagegen zur Meldung
 ADDRESS = re.compile(r"\b(ich|sie|du|ihr|ihnen|dir|dich|kollege|kollegin|hallo|kannst|können|könnten|bitte)\b")
+# nur eine Anforderung ist eine Nachforderung – „RTW ist schon alarmiert“ erwähnt ihn nur
+REQUEST = re.compile(r"brauch|bräucht|benötig|anforder|nachforder|forder\w* (\w+ ){0,3}an\b|schick|bitte|\beinmal\b|\beinen\b|\bein\b"
+                     r"|kommen lassen|hätten gern|zusätzlich|dazu")
 MELDUNG = re.compile(r"verdacht|patient|männlich|weiblich|\bmann\b|\bfrau\b|jahre|\bjahrig")
 
 
@@ -151,13 +154,14 @@ def funk(text: str, s: Settings, state: dict[str, Any], mode: str,
     has_call = compact(s.callsign) in c
     kommen = bool(re.search(r"\bkommen\b", t))
     ende = bool(re.search(r"\bende\W*$", t)) and (has_call or state.get("funk_offen"))
-    resources = detect_resources(text)
-    in_funk = force or has_disp or (has_call and (kommen or ende)) or (state.get("funk_offen") and (kommen or ende or resources))
+    mentioned = detect_resources(text)
+    resources = mentioned if REQUEST.search(t) else []
+    in_funk = force or has_disp or (has_call and (kommen or ende)) or (state.get("funk_offen") and (kommen or ende or mentioned))
     if not in_funk:
         return None
 
     # bei offenem Funk ist jede Äußerung Teil der Meldung (Spracheingabe zerlegt sie oft in mehrere Stücke)
-    meldung = bool(resources) or bool(MELDUNG.search(t)) or (force and not ende)
+    meldung = bool(mentioned) or bool(MELDUNG.search(t)) or (force and not ende)
     anruf = has_disp and not (meldung and state.get("funk_offen"))
     info = {
         "text": text, "anruf": anruf, "beide_rufnamen": has_disp and has_call, "meldung": meldung,

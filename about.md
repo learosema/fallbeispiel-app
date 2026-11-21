@@ -92,7 +92,8 @@ Eintrübung/Bewusstlosigkeit.
   `funk_early` (zeitkritisch): Dort darf/soll früh gefunkt werden, das ist nicht „außer der Reihe“, die 1. Minute
   endet erst, wenn alle Punkte erledigt sind, und der Kollege schlägt auf Nachfrage früh den Funk vor.
   Bei **offenem Funk** geht alles an die Leitstelle („Verstanden.“), auch ohne „kommen“; eine Meldung in mehreren
-  Stücken wird zusammen ausgewertet. Ein klarer Satz an jemanden vor Ort („ich …“, „Sie …“, „Kollege …“) ohne Funkbegriffe verlässt den
+  Stücken wird zusammen ausgewertet. „RTW kommt, verstanden“ und die Nachforderung gibt es nur bei einer Anforderung
+  („wir brauchen / benötigen / bitte / einmal RTW“), nicht bei einer Erwähnung („RTW ist schon alarmiert“). Ein klarer Satz an jemanden vor Ort („ich …“, „Sie …“, „Kollege …“) ohne Funkbegriffe verlässt den
   Funk wieder (Berichtsformen wie „Tourniquet angelegt“ bleiben Teil der Meldung);
   die Leitstelle mahnt dann „EVT1 von RotkreuzHamburg, bitte Funkdisziplin, beenden Sie das Gespräch.“ (in der
   Auswertung angemerkt, „EVT1 Ende“ danach geht noch).
