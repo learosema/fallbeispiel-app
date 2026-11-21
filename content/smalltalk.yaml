@@ -54,7 +54,7 @@ rules:
 
   bestaetigung:
     patterns:
-      - ^(ok|okay|okey|oke|o k|alles klar|klar|gut|sehr gut|verstanden|passt|in ordnung|jawohl|ja|jo|jep|jup|genau|super|prima|perfekt|alles klar danke|okay danke|gut danke)( kollege| kollegin)?$
+      - ^(ok|okay|okey|oke|o k|alles klar|klar|gut|sehr gut|verstanden|passt|in ordnung|jawohl|ja|jo|jep|jup|genau|super|prima|perfekt|alles klar danke|okay danke|gut danke|gute idee|(ja )?(machen wir|mach das|mach mal|mach ruhig)|einverstanden|ja bitte|ja gerne|ja gern|okay machen wir|gute idee machen wir)( so)?( kollege| kollegin)?$
     say:
       - Kollege: Okay.
       - Kollege: Alles klar.

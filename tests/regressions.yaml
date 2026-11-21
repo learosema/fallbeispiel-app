@@ -198,3 +198,6 @@
   not: [weggehen, kurz_weg]
 - text: so wir sind wieder da
   expect: [zurueck]
+- text: gute Idee
+  reply: Okay
+  no_reply: Wie meinst
