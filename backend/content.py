@@ -127,6 +127,7 @@ class SmalltalkRule:
     repeat: bool = False           # vorige Antworten wiederholen („Wie bitte?“)
     max_words: int | None = None   # für nicht verankerte Muster
     tip: bool = False              # Bitte um Hilfe: Tipp zum nächsten offenen Punkt der Checkliste
+    unconscious: list[Line] = field(default_factory=list)  # statt `say`, wenn die Person bewusstlos ist
 
 
 @dataclass
@@ -148,7 +149,8 @@ def smalltalk() -> Smalltalk:
         pats = [re.compile(p.replace("ß", "ss"), re.I) for p in d.get("patterns", [])]
         if not pats:
             raise ValueError(f"smalltalk.{rid}: keine patterns")
-        rules.append(SmalltalkRule(rid, pats, say, repeat, d.get("max_words"), bool(d.get("tip", False))))
+        unconscious = _lines(d.get("unconscious"), f"smalltalk.{rid}.unconscious")
+        rules.append(SmalltalkRule(rid, pats, say, repeat, d.get("max_words"), bool(d.get("tip", False)), unconscious))
     fallback = _lines(data.get("fallback"), "smalltalk.fallback")
     if not fallback:
         raise ValueError("smalltalk.fallback: mindestens eine Rückfrage nötig")

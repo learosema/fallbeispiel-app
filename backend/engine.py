@@ -309,6 +309,8 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
             elif rule.repeat:
                 prev = next((tt.lines for tt in reversed(turns) if tt.lines), [])
                 lines = list(prev or [Line("Kollege", "Es hat noch niemand etwas gesagt.")]) + lines
+            elif rule.unconscious and not scenario.conscious:
+                lines = [rotate(rule.id, rule.unconscious)] + lines
             else:
                 lines = [rotate(rule.id, rule.say)] + lines
         if not hits and not lines and not tick:

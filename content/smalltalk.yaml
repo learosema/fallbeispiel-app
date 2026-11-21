@@ -9,6 +9,7 @@
 #   patterns  Regex (ein Treffer reicht)
 #   say       Antwortvarianten, reihum (erste beim ersten Mal, dann die nächste …)
 #   repeat    true: wiederholt stattdessen die Antworten der vorigen Äußerung („Wie bitte?“)
+#   unconscious  Antwort statt `say`, wenn die Person bewusstlos ist (für Sätze an den Patienten)
 #   tip       true: Bitte um Hilfe – Tipp zum nächsten offenen Punkt der Checkliste (abschaltbar)
 #
 # Leitlinien: Fachliche Tipps nur über `tip` (auf Nachfrage); nichts über verborgene Befunde des Falls.
@@ -73,9 +74,23 @@ rules:
       - Kollege: Ich bin bei dir. Geh in Ruhe dein Schema durch.
       - Kollege: Was brauchst du von mir?
 
+  mitgefuehl:  # an den Patienten gerichtet: „Oh, das ist ja unglücklich“ – menschlich, aber noch kein Beruhigen
+               # (das zählt erst mit Ausblick: „Das tut mir leid, wir kümmern uns jetzt um Sie“ → Intent beruhigen)
+    patterns:
+      - ^(oh |ach |na )?(je |jeh |weh )?((das|des) ist|ist das|das war)( ja| aber| wirklich| echt| natürlich| jetzt)* (sehr |total |richtig |ganz schön )?(unglücklich|blöd|bloed|doof|ärgerlich|aergerlich|dumm|übel|uebel|mist|schade|pech|kacke|unschön|unschoen|schlimm)( gelaufen| passiert)?$
+      - ^(oh |ach |na )?(je |jeh )?((das|des) ist|das war)( ja| aber| wirklich| echt)* (eine |ne |n )?(blöde|doofe|dumme|unglückliche|ärgerliche|üble) (sache|geschichte|situation)$
+      - ^(oh |ach )?(je |jeh )?(das|des) tut mir( aber| wirklich| echt| sehr| so)* leid( für sie| für dich)?$
+      - ^(oh je|ohje|oje|oh jeh|ach je|ach herrje|herrje|oh weh|ach du armer|ach du arme|sie armer|sie arme|du armer|du arme|sie ärmster|sie ärmste|so ein pech|was für ein pech)( mann| frau| kerl| ding)?$
+    say:
+      - Patient: (seufzt) Ja, das kann man wohl sagen.
+      - Patient: Ja … ausgerechnet heute.
+      - Patient: (nickt) Hm.
+    unconscious:
+      - Befund: (keine Reaktion)
+
   fluchen:
     patterns:
-      - ^((oh |ach |ach du )?(scheisse|mist|verdammt|verdammte scheisse|shit|fuck|kacke)|oh (gott|nein|mann|je)|ohje|oje|mann|alter)$
+      - ^((oh |ach |ach du )?(scheisse|mist|verdammt|verdammte scheisse|shit|fuck|kacke)|oh (gott|nein|mann)|mann|alter)$
     say:
       - Kollege: Ruhig. Wir machen das Schritt für Schritt.
       - Kollege: Alles gut, ich bin da.
