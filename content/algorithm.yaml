@@ -137,6 +137,9 @@ handover:
     patterns: [angelegt, gegeben, gelagert, zugedeckt, stabilisiert, versorgt, verbunden, gekühlt, abgesaugt, beatmet, gedrückt, reanimiert, tourniquet, sauerstoff, decke, seitenlage, schocklage, '\bhlw\b', '\baed\b', geschockt, maßnahme, haben wir, wurde]
   - label: Einschätzung / Verdacht
     patterns: [verdacht, vermutlich, wahrscheinlich, einschätzung, '\bv ?a\b', gehe von .* aus, denke]
+  - label: Uhrzeit des Tourniquets
+    if_intent: tourniquet      # nur, wenn eines angelegt wurde
+    patterns: ['\d{1,2} ?[:.] ?\d{2}', '\d{1,2} uhr', 'um \d', 'seit \d', 'vor \d+ minuten', 'seit \w+ minuten']
   - label: Rückfragen / Übergabe der Verantwortung
     patterns: [fragen, rückfrage, übernehm, übernehmt, übergeben, '\bdas wars\b', das wäre alles, das war alles]
 

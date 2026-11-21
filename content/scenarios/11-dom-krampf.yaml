@@ -200,7 +200,7 @@ key_actions:
     any: [kopf_schuetzen]
     critical: true
   - label: Anfallsdauer erfasst
-    any: [krampf_dauer, symptombeginn]
+    any: [krampf_dauer, symptombeginn, uhrzeit_notieren]
   - label: Nach dem Anfall Atemweg sichern (Seitenlage)
     any: [seitenlage]
     critical: true

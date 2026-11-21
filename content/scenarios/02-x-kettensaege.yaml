@@ -4,8 +4,8 @@ title: Kettensägen-Unfall
 teaser: Extreme Blutung am Bein
 dispatch: "Einsatzmeldung: Forstarbeiten, Person mit Schnittverletzung am Bein, stark blutend. Ein Kollege ist vor Ort."
 debrief_notes: >
-  Markus (45) hat eine spritzende Blutung am linken Oberschenkel innen. x zuerst: Tourniquet oder Druckverband/Abdrücken,
-  bevor irgendetwas anderes passiert. Ohne Blutstillung entwickelt sich rasch ein Schock. Danach Schocklage, Wärmeerhalt, RTW + NEF.
+  Markus (45) hat eine spritzende Blutung am linken Oberschenkel innen. x zuerst: abdrücken und Druckverband;
+  blutet der durch, Tourniquet – bevor irgendetwas anderes passiert. Ohne Blutstillung entwickelt sich rasch ein Schock. Danach Schocklage, Wärmeerhalt, RTW + NEF.
 
 conscious: true
 trauma: true
@@ -21,18 +21,60 @@ responses:
   lage_pruefen:
     - Befund: "Waldstück, nasskalt, Hanglage, rutschiger Boden mit Ästen. Die Kettensäge ist aus. Ein Betroffener, sein Kollege Jens drückt auf die Wunde. Große Blutlache. Der Betroffene ist ein Mann mittleren Alters, etwa Mitte vierzig."
   blutung_pruefen:
-    - when: {blutung_stillen: false}
+    - when: {blutung_steht: false}
       say:
         - Befund: Tiefe Schnittwunde am linken Oberschenkel innen, hellrotes Blut spritzt pulsierend, die Hose ist durchtränkt.
         - Umstehende: Ich krieg das nicht gestoppt!
     - say:
         - Befund: Die Blutung steht.
-  blutung_stillen:
-    - Kollege: (legt das Tourniquet oberhalb der Wunde an und zieht es fest)
-    - Befund: Nach dem Festziehen hört die Blutung auf. Markus schreit kurz vor Schmerz.
-    - Patient: Aaah! … Hört es auf?
+  # ENTWURF: erst abdrücken/Druckverband, Tourniquet erst wenn der Verband nicht reicht (Oberschenkel innen, arteriell)
+  abdruecken:
+    - when: {blutung_steht: false}
+      say:
+        - Kollege: (drückt mit beiden Händen fest auf die Wunde)
+        - Befund: Solange fest gedrückt wird, lässt die Blutung nach. Loslassen geht nicht.
+    - say:
+        - Befund: Die Blutung steht bereits.
+  druckverband:
+    - when: {blutung_steht: false, durchgeblutet: true}
+      say:
+        - Kollege: (legt einen zweiten Druckverband über den ersten)
+        - Befund: Auch der zweite Verband ist sofort durchgeblutet. Das Blut spritzt weiter.
+    - when: {blutung_steht: false}
+      say:
+        - Kollege: (legt einen Druckverband an – Wundauflage, Druckpolster, fest gewickelt)
+        - Befund: Die Blutung wird weniger.
+      set: {druckverband_an: true}
+    - say:
+        - Befund: Die Blutung steht bereits.
+  tourniquet:
+    - when: {blutung_steht: false}
+      say:
+        - Kollege: (legt das Tourniquet oberhalb der Wunde an und zieht es fest)
+        - Befund: Nach dem Festziehen hört die Blutung auf. Markus schreit kurz vor Schmerz.
+        - Patient: Aaah! … Hört es auf?
+      set: {blutung_steht: true}
+    - say:
+        - Befund: Das Tourniquet sitzt, keine Nachblutung.
+  uhrzeit_notieren:  # gehört auf das Tourniquet – und in die Übergabe
+    - when: {tourniquet: true}
+      say:
+        - Kollege: (schreibt die Uhrzeit auf das Tourniquet) 10:47.
+    - say:
+        - Kollege: (notiert die Uhrzeit)
+  blutung_stillen:  # „Kümmer dich um die Blutung“: der Kollege macht das Übliche
+    - when: {blutung_steht: false, durchgeblutet: true}
+      say:
+        - Kollege: Der Druckverband hält nicht. Tourniquet?
+    - when: {blutung_steht: false}
+      say:
+        - Kollege: (legt einen Druckverband an – Wundauflage, Druckpolster, fest gewickelt)
+        - Befund: Die Blutung wird weniger.
+      set: {druckverband_an: true}
+    - say:
+        - Befund: Die Blutung steht bereits.
   vorstellen:
-    - when: {blutung_stillen: false}
+    - when: {blutung_steht: false}
       say:
         - Patient: Bitte, helft mir, das hört nicht auf!
     - say:
@@ -42,7 +84,7 @@ responses:
   beschwerden_fragen:
     - Patient: Das Bein! Und mir ist so schwindlig.
   beruhigen:
-    - when: {blutung_stillen: false}
+    - when: {blutung_steht: false}
       say:
         - Patient: Wie soll ich ruhig bleiben, ich verblute!
     - say:
@@ -66,7 +108,7 @@ responses:
   hautfarbe:
     - Befund: Haut blass, kühl und schweißig.
   puls:
-    - when: {blutung_stillen: false}
+    - when: {blutung_steht: false}
       say:
         - Befund: Radialispuls schnell, regelmäßig, schwach tastbar, ca. 124.
     - say:
@@ -74,7 +116,7 @@ responses:
   rekap:
     - Befund: Rekap verzögert, ca. 4 Sekunden.
   rr:
-    - when: {blutung_stillen: false}
+    - when: {blutung_steht: false}
       say:
         - Befund: RR 100/60.
     - say:
@@ -114,7 +156,7 @@ responses:
   wunde_versorgen:
     - Kollege: (deckt die Wunde unterhalb des Tourniquets steril ab)
   reevaluation:
-    - when: {blutung_stillen: true}
+    - when: {blutung_steht: true}
       say:
         - Befund: Tourniquet sitzt, keine Nachblutung. Puls 110, RR 105/65.
     - say:
@@ -122,47 +164,58 @@ responses:
 
 events:
   - at: 20
-    when: {blutung_stillen: false}
+    since: druckverband_an
+    when: {blutung_steht: false}
+    say:
+      - Befund: Der Druckverband ist durchgeblutet, es blutet weiter pulsierend.
+    set: {durchgeblutet: true}
+    expect: {any: [tourniquet], within: 30, label: Durchgebluteten Druckverband erkannt (Tourniquet)}
+  - at: 20
+    when: {blutung_steht: false, druckverband_an: false}
     say:
       - Befund: Das Blut läuft weiter in Strömen, die Lache wird größer.
+    expect: [blutung_stillen]
   - at: 45
-    when: {blutung_stillen: false}
+    when: {blutung_steht: false}
     say:
       - Patient: Mir wird schwarz vor Augen …
+    expect: [blutung_stillen]
     set: {schock: true}
   - at: 90
-    when: {blutung_stillen: false}
+    when: {blutung_steht: false}
     say:
       - Befund: Markus trübt ein, reagiert nur noch verlangsamt, die Haut ist grau.
+    expect: [blutung_stillen]
   # ENTWURF Eskalation – Zeiten fachlich gegenlesen
   - at: 150
-    when: {blutung_stillen: false}
+    when: {blutung_steht: false}
     say:
       - Befund: Markus sackt zusammen und reagiert nicht mehr auf Ansprache. Der Radialispuls ist nicht mehr tastbar.
       - Umstehende: (Jens) Markus? MARKUS!
+    expect: [blutung_stillen]
     set: {bewusstlos: true}
   - at: 210
-    when: {blutung_stillen: false}
+    when: {blutung_steht: false}
     say:
       - Befund: Keine normale Atmung mehr, nur noch einzelne schnappende Atemzüge. Kein Puls tastbar.
     set: {kreislaufstillstand: true}
-    expect: [blutung_stillen, hlw]
+    expect: [tourniquet, hlw]
   - at: 270
-    when: {blutung_stillen: false}
+    when: {blutung_steht: false}
     say:
       - Befund: Markus ist verblutet.
     set: {verstorben: true}
     expect: false
 
 silence:  # bei Stille drängen Patient und Jens
-  - when: {blutung_stillen: false}
+  - when: {blutung_steht: false}
     say:
       - Patient: Macht doch was! Ich verblute!
       - Umstehende: (Jens) Was ist denn jetzt? Das blutet immer weiter!
   - say:
       - Patient: Und jetzt? Was passiert jetzt mit mir?
 alone:  # Jens drückt weiter auf die Wunde, Markus ruft
-  - when: {blutung_stillen: false}
+  - when: {blutung_steht: false}
     say:
       - Umstehende: (Jens) Hey! Wo wollt ihr hin? Ich krieg das allein nicht gestoppt!
       - Patient: Bitte … nicht weggehen …
@@ -172,16 +225,26 @@ alone:  # Jens drückt weiter auf die Wunde, Markus ruft
       - Umstehende: (Jens, ruft) Hallo! Kommt ihr wieder?
 
 patient_smalltalk:
-  - when: {blutung_stillen: false}
+  - when: {blutung_steht: false}
     say:
       - Patient: Ja, verdammt! Macht doch was!
 
 key_actions:
-  - label: Blutstillung (Tourniquet/Druckverband) vor allem anderen
+  - label: Blutstillung (Abdrücken/Druckverband) vor allem anderen
     any: [blutung_stillen]
     critical: true
     within: 45
     before: [atmung_fragen, atmung_beurteilen, zyanose, hautfarbe, puls, rekap, orientierung, sample_allergie, sample_medikamente, trauma_check]
+  - label: Erst Druckverband, Tourniquet erst wenn er nicht reicht
+    any: [druckverband]
+    before: [tourniquet]
+  - label: Blutung steht (Tourniquet, als der Druckverband durchgeblutet war)
+    any: [tourniquet]
+    critical: true
+    within: 120
+  - label: Uhrzeit auf das Tourniquet geschrieben
+    any: [uhrzeit_notieren]
+    after: tourniquet
   - label: Schocklage
     any: [schocklage]
   - label: Wärmeerhalt
