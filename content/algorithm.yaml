@@ -7,6 +7,7 @@
 #   only: trauma | bleeding | conscious | unconscious | breathing_normal | breathing_abnormal
 #   extra: {trauma: [...]} zusätzliche Elemente, wenn die Bedingung für den Fall gilt
 #   special: funk | reevaluation
+#   unordered: true  zählt nicht für die Reihenfolge („außer der Reihe“)
 #   tip: was der Kollege auf Nachfrage sagt, solange der Punkt offen ist („Hast du einen Tipp?“).
 #        Keine verborgenen Befunde verraten.
 # Fälle können einzelne Punkte per `skip: [id]` ausblenden („–“).
@@ -23,7 +24,12 @@ minute_conscious:
     label: Kreislauf (Hautfarbe, Puls, Rekap-Zeit, bei Trauma Bauch/Becken/Oberschenkel)
     all: [hautfarbe, puls, rekap]
     extra: {trauma: [trauma_check]}
-  - {id: neuro, short: Neurologie, label: "Neurologie (Reaktion angemessen, Orientierung)", any: [orientierung, gcs], tip: "Wie ist es mit der Neurologie? Reaktion, Orientierung?"}
+  - id: neuro
+    short: Reaktion
+    label: "Neurologie: Reaktion angemessen? (fällt beim Ansprechen auf; in Teambesprechung und Funkspruch nennen)"
+    any: [reaktion, gcs]
+    unordered: true   # kein eigener Schritt: gilt auch, wenn die Reaktion in Teambesprechung oder Funkspruch genannt wird
+    tip: "Wie reagiert die Person – angemessen? Das gehört auch in Teambesprechung und Funkspruch."
   - {id: umfeld, short: Umfeld, label: "Umfeld (Verletzungsmechanismus, Frieren)", any: [frieren_fragen, decke], tip: "Und das Umfeld? Friert die Person?"}
   - {id: waerme, short: Wärme, label: "Wärmeerhalt (Decke, Isolation vom Boden)", any: [decke], tip: "Denk an den Wärmeerhalt."}
   - {id: team, short: Team, label: "Teambesprechung (Lage, Verdachtsdiagnose, Notarzt)", any: [teambesprechung], tip: "Lass uns kurz besprechen: Lage, dein Verdacht, brauchen wir den Notarzt?"}
@@ -45,7 +51,12 @@ full:
   - {id: a, short: A, label: "A – Airway (Atemwege beurteilt)", any: [atemwege_freimachen, atemkontrolle, atmung_fragen, atmung_beurteilen], tip: "Sind die Atemwege beurteilt?"}
   - {id: b, short: B, label: "B – Breathing (Atemfrequenz, SpO2, Auskultation)", all: [af_zaehlen, spo2, auskultation], tip: "Machen wir B: Atemfrequenz, Sättigung, abhören?"}
   - {id: c, short: C, label: "C – Circulation (Puls, Blutdruck, Rekap-Zeit)", all: [puls, rr, rekap], tip: "Weiter mit C: Puls, Blutdruck, Rekap?"}
-  - {id: d, short: D, label: "D – Disability (Bewusstsein/Orientierung, Pupillen, Blutzucker)", all: [[gcs, orientierung], pupillen, bz], tip: "Dann D: Bewusstsein, Pupillen, Blutzucker?"}
+  - id: d
+    short: D
+    label: "D – Disability (Bewusstsein, Pupillen, Blutzucker; wenn wach: Orientierung, BE-FAST)"
+    all: [gcs, pupillen, bz]
+    extra: {conscious: [orientierung, fast]}
+    tip: "Dann D: Bewusstsein, Pupillen, Blutzucker – und wenn ansprechbar: Orientierung und BE-FAST?"
   - id: e
     tip: "Fehlt noch E: SAMPLER, Bodycheck, Wärmeerhalt?"
     short: E

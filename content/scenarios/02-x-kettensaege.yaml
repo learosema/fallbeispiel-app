@@ -11,6 +11,7 @@ conscious: true
 trauma: true
 bleeding: true
 request: {required: [RTW, NEF]}
+funk_early: [blutung_stillen]   # erst die Blutung stillen, dann sofort nachfordern
 
 responses:
   atmung_beurteilen:

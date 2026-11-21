@@ -13,6 +13,7 @@ debrief_notes: >
 conscious: true
 trauma: true
 request: {required: [RTW, NEF]}
+funk_early: [lage_pruefen]   # Polytrauma, du bist zuerst da: früh nachfordern
 state: {gestaut: false}
 
 responses:

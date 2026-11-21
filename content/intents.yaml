@@ -589,6 +589,20 @@ alter_fragen:
   unconscious:
     - Umstehende: Keine Ahnung, wie alt er ist.
 
+reaktion:  # 1. Minute: nur „Reaktion angemessen?“ – Orientierung, GCS, BE-FAST kommen im D
+  label: Reaktion beurteilt (angemessen?)
+  fallback: [gcs]
+  unconscious:
+    - Befund: (keine Reaktion)
+  patterns:
+    - reaktion (ist |wirkt |scheint )?(angemessen|adäquat|adaequat|passend|unangemessen|verzögert|verlangsamt|ok|okay|in ordnung)
+    - (angemessene|adäquate|adaequate|unangemessene|verzögerte|verlangsamte) reaktion
+    - reagiert (er|sie|der patient|die patientin)? ?(angemessen|adäquat|adaequat|passend|unangemessen|verzögert|verlangsamt|normal|komisch|seltsam)
+    - wie reagiert (er|sie)
+  examples:
+    - Reagiert er angemessen?
+    - Die Reaktion ist angemessen
+
 gcs:
   label: Bewusstseinslage (GCS / AVPU)
   patterns:
@@ -620,7 +634,7 @@ bz:
     - Ich messe den Blutzucker
 
 fast:
-  label: FAST / neurologische Schnelltests
+  label: BE-FAST (Balance, Augen, Gesicht, Arme, Sprache, Zeit)
   default:
     - Befund: Gesicht symmetrisch, beide Arme werden gleich gehalten, Sprache klar.
   unconscious:
@@ -633,6 +647,11 @@ fast:
     - sprechen sie (mir )?nach|nachsprechen
     - halbseit
     - gesicht\w* (symmetr|hängt|schief)
+    - mundwinkel
+    - zähne zeigen|backen aufblasen
+    - gleichgewicht|schwindel\w* beim (stehen|gehen)|gangunsicher|balance
+    - sehstörung|sehstoerung|doppelbilder|gesichtsfeld|verschwommen|(können|kannst) (sie|du) (gut|normal|alles|richtig) sehen|(sehen sie|siehst du) (gut|normal|alles|doppelt|richtig)
+    - finger ?folgen|meinem finger
   examples:
     - Können Sie einmal lächeln und beide Arme nach vorne strecken?
 
@@ -656,15 +675,30 @@ krampf_dauer:
   label: Dauer des Anfalls erfasst
   default:
     - Umstehende: Seit ein paar Minuten.
-  fallback: [was_passiert]   # „Seit wann …?“ ohne Krampf = Frage nach dem Hergang
+  fallback: [was_passiert]
   patterns:
-    - uhrzeit
     - zeit (stoppen|merken|notieren|nehmen|festhalten)
-    - wie lange (krampft|dauert|geht|schon|läuft)
+    - wie lange (krampft|dauert|zuckt) (er|sie|es|der anfall|das)
+    - seit wann (krampft|zuckt)
     - (anfalls|krampf)dauer
-    - seit wann
   examples:
     - Seit wann krampft er? Ich merke mir die Uhrzeit
+
+symptombeginn:  # das „T“ in BE-FAST: Zeitfenster für die Behandlung (Schlaganfall), Krampfdauer, Beginn der Beschwerden
+  label: Symptombeginn erfragt (Uhrzeit)
+  fallback: [krampf_dauer, was_passiert]   # ohne eigene Antwort: Krampfdauer bzw. Hergang
+  patterns:
+    - seit wann
+    - uhrzeit
+    - symptombeginn|beginn der (symptome|beschwerden)|zeitfenster
+    - wann (genau )?(hat|haben|ist|fing|war) .{0,30}(angefangen|begonnen|aufgetreten|passiert|los|bemerkt)
+    - wann (genau )?(hat|haben) (das|es|die beschwerden|die symptome)
+    - wie lange (ist das|geht das|hat er das|hat sie das|haben sie das) schon
+    - wann (haben sie|hast du) (ihn|sie|es) (zuletzt )?(normal|gesund) gesehen|zuletzt (normal|gesund) gesehen
+  examples:
+    - Seit wann ist das so?
+    - Wann genau hat das angefangen?
+    - Wann haben Sie ihn zuletzt gesund gesehen?
 
 kopf_schuetzen:
   label: Während des Anfalls schützen (Kopf polstern, nichts in den Mund)

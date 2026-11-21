@@ -55,7 +55,7 @@
     <ol class="steps">
       <li><span>Fall wählen, zum Beispiel „Sturz auf nasser Treppe" oder einen Fall vom DOM oder vom Millerntor.</span></li>
       <li><span>Die 1. Minute durchsprechen: Lage, bedrohliche Blutung, Ansprechen, Schnellcheck (A bis E), Teambesprechung.</span></li>
-      <li><span>Mit dem Funkspruch an die Leitstelle abschließen („EVT1 Ende").</span></li>
+      <li><span>Mit dem Funkspruch an die Leitstelle abschließen („EVT1 Ende"). Bei zeitkritischen Fällen (Schlaganfall, Reanimation, schwere Atemnot, starke Blutung, Polytrauma) gehört der Funkspruch so früh wie möglich abgesetzt.</span></li>
       <li><span>Auf <em>Auswertung</em> tippen: sofort eine Checkliste Schritt für Schritt mit Reihenfolge, Schlüsselmaßnahmen, Funkspruch und ob du auf Warnzeichen reagiert hast. Am Ende steht, worauf es im Fall ankommt.</span></li>
     </ol>
     <p class="note">Die App ersetzt weder Ausbildung noch Praxis. Die Technik (Seitenlage, Herzdruckmassage, HWS-Griff) übst du weiter an Puppe und Kollegen. Hier trainierst du Ablauf, Fragen, Ansagen und Funk.</p>
@@ -82,7 +82,7 @@
 
     <h3>Modi</h3>
     <ul>
-      <li><strong>1. Minute:</strong> endet nach Teambesprechung und Funkspruch.</li>
+      <li><strong>1. Minute:</strong> endet nach Teambesprechung und Funkspruch. Wurde früh gefunkt, endet sie, wenn alle Punkte erledigt sind. Die Auswertung kannst du jederzeit starten.</li>
       <li><strong>Ganzer Fall:</strong> danach geht es weiter mit vollständigem ABCDE, Maßnahmen, Reevaluation und Übergabe.</li>
     </ul>
 
@@ -120,15 +120,13 @@
       ["me", "Wie ist der Unfallhergang? Frieren Sie?"],
       ["Patient", "Ich bin die letzten Stufen runtergefallen, mit der Stirn ans Geländer. Und ja, mir ist kalt, ich sitze ja in der Nässe."],
       ["Umstehende", "Bewusstlos war er nicht, ich habe alles gesehen."],
-      ["me", "Wissen Sie, wie Sie heißen, wo Sie sind und was passiert ist?"],
-      ["Patient", "Petersen. Landungsbrücken. Ich bin gestürzt."],
       ["phase", "Teambesprechung"],
-      ["me", "Lage: Sturz auf nasser Treppe mit Kopfanprall und leichten Nackenschmerzen. Verdacht auf Trauma. Wir fordern den Rettungsdienst nach."],
+      ["me", "Lage: Sturz auf nasser Treppe mit Kopfanprall und leichten Nackenschmerzen. Patient wach, reagiert angemessen. Verdacht auf Trauma. Wir fordern den Rettungsdienst nach."],
       ["Kollege", "Verstanden."],
       ["phase", "Funkspruch"],
       ["me", "RotkreuzHamburg von EVT1, kommen."],
       ["Leitstelle", "Hier RotkreuzHamburg."],
-      ["me", "Wir haben hier einen Patienten, männlich, Ende sechzig, gestürzt, Kopfanprall und Nackenschmerzen, Verdacht auf HWS-Verletzung, wir brauchen einmal RTW, kommen."],
+      ["me", "Wir haben hier einen Patienten, männlich, Ende sechzig, gestürzt, Kopfanprall und Nackenschmerzen, wach und ansprechbar, Verdacht auf HWS-Verletzung, wir brauchen einmal RTW, kommen."],
       ["Leitstelle", "RTW kommt, verstanden."],
       ["me", "EVT1 Ende."],
       ["Befund", "Die 1. Minute ist beendet. Du kannst die Auswertung starten."]
@@ -142,7 +140,7 @@
 ✅ HWS bei Trauma (manuelle Stabilisierung)
 ⚠️ Atmung (Luft? Schmerzen beim Atmen? Zyanose?): Fehlt: Zyanose (Lippenfarbe)
 ⚠️ Kreislauf: Fehlt: Hautfarbe / Hautzustand
-✅ Neurologie (Reaktion angemessen, Orientierung)
+✅ Neurologie: Reaktion angemessen? (fällt beim Ansprechen auf; in Teambesprechung und Funkspruch nennen)
 ✅ Umfeld (Verletzungsmechanismus, Frieren)
 ❌ Wärmeerhalt (Decke, Isolation vom Boden)
 ✅ Teambesprechung (Lage, Verdachtsdiagnose, Notarzt)
@@ -155,8 +153,8 @@ SCHLÜSSELMASSNAHMEN
 WARNZEICHEN
 ❌ Reaktion auf „Mir wird richtig kalt …“: keine Reaktion – erwartet: Wärmeerhalt
 
-TATSÄCHLICHE REIHENFOLGE: Lage → Blutung → Ansprache → HWS → Atmung → Kreislauf → Umfeld → Neurologie → Team → Funk
-ABWEICHUNGEN: Neurologie kam außer der Reihe; Wärme fehlt
+TATSÄCHLICHE REIHENFOLGE: Lage → Blutung → Ansprache → HWS → Atmung → Kreislauf → Umfeld → Reaktion → Team → Funk
+ABWEICHUNGEN: Wärme fehlt
 
 WORAUF ES IN DIESEM FALL ANKOMMT: … Er friert (5 °C, nass) – Wärmeerhalt ist entscheidend. …`;
     const log = document.getElementById("demo");

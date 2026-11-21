@@ -74,8 +74,10 @@ der Nachforderung übernimmt die Engine selbst. Rufnamen sind in den Einstellung
   Reevaluation, Übergabe. Status ✅ / ⚠️ / ❌ / – (nicht relevant, z. B. `skip: [waerme]`).
 - **Reihenfolge:** tatsächliche Abfolge; was nicht in die längste korrekt geordnete Folge passt, kam „außer der Reihe“.
 - **Schlüsselmaßnahmen je Fall** mit `critical`, `within`, `before`, `after` und `phase` (`full` = nur im ganzen Fall).
-- **Funkspruch:** beide Rufnamen, auf „Hier …“ gewartet, Patient (Geschlecht, ungefähres Alter), Verdacht,
-  passende Nachforderung, „kommen“, „… Ende“.
+- **Funkspruch:** beide Rufnamen, auf „Hier …“ gewartet, Patient (Geschlecht, ungefähres Alter), Reaktion/Bewusstsein,
+  Verdacht, passende Nachforderung, „kommen“, „… Ende“. „… Ende“ beendet die 1. Minute – außer in Fällen mit
+  `funk_early` (zeitkritisch): Dort darf/soll früh gefunkt werden, das ist nicht „außer der Reihe“, die 1. Minute
+  endet erst, wenn alle Punkte erledigt sind, und der Kollege schlägt auf Nachfrage früh den Funk vor.
 - **Warnzeichen:** Wurde auf ein Ereignis (z. B. „Mir wird kalt“) rechtzeitig reagiert? Zählt nicht ins Urteil,
   steht aber oben bei „Verbessern“.
 - **Befundsprache:** Mitgeteilte Befunde nur als „normal/ok/passt“ werden angemerkt (Regex + Embeddings mit
@@ -95,6 +97,11 @@ Bitte nicht „wegoptimieren“ – im Zweifel nachfragen.
   „Normale Atmung“ bei der Atemkontrolle Bewusstloser ist der Begriff des Algorithmus und auch in Ordnung.
 - **Atmung beurteilen ≠ Patienten fragen:** „Atmung?“ liefert einen Befund (Frequenz, Atemarbeit, Geräusche);
   „Bekommen Sie gut Luft?“ beantwortet der Patient.
+- **Neurologie in der 1. Minute = nur „Reaktion angemessen?“.** Fällt schon beim ersten „Hallo“ auf, muss aber in
+  **Teambesprechung und Funkspruch** genannt werden (sonst ⚠️ dort). Kein eigener Schritt für die Reihenfolge.
+  **Orientierung** (Name, Ort, Tag) und **BE-FAST** gehören ins **D** des ABCDE (nur bei Ansprechbaren).
+- **Zeitkritische Fälle** (Schlaganfall, Reanimation, Asthma/Pyro-Asthma, Kettensäge, Polytrauma): Funkspruch so früh
+  wie möglich, mit den kritischen Problemen.
 - **Alter:** ungefähr reicht („älterer Mann“, „Mitte vierzig“); die Lagebeschreibung gibt es her.
 - **SAMPLER** (Symptome, Allergien, Medikamente, Patientenvorgeschichte, Letzte Mahlzeit/Stuhlgang, Ereignis,
   Risikofaktoren) gehört ins **E** des ABCDE, **nicht** in die 1. Minute – z. B. „Blutverdünner erfragt“ ist `phase: full`.
@@ -120,6 +127,8 @@ Bitte nicht „wegoptimieren“ – im Zweifel nachfragen.
 
 **Einzelne Fälle**
 
+- **Schlaganfall (Entwurf, gegenlesen):** Herr Krüger (72), Supermarkt, Symptombeginn 10:42 (Ehefrau weiß es genau).
+  Früher Funk mit Verdacht Schlaganfall als kritische Schlüsselmaßnahme `within: 90`; BZ als Hypo-Ausschluss.
 - **Sturz auf nasser Treppe:** Herr Petersen will nach Hause → Aufklärung (Kopfanprall unter Blutverdünner). Kennt
   man den Blutverdünner, willigt er sofort ein, sonst beim zweiten Anlauf.
 - **Bolus:** Husten kann im Einzelfall noch möglich sein – „zum Husten auffordern“ bleibt eine (nicht kritische)
@@ -171,6 +180,7 @@ INTENT_EMBEDDINGS=0 uv run pytest    # schnell, nur Regex
   falsch erkannte Sätze in `regressions.yaml` übernehmen.
 - **Bekannte Grenzfälle** (als `xfail` markiert): „Puls fühlt sich gut an“ (Befundsprache), „Können Sie das bitte
   halten“ (landet bei „nicht aufstehen“).
-- **Fachlich gegenlesen:** Atembefunde (`atmung_beurteilen`) aller Fälle; Phase von Sauerstoffgabe und Kühlen
+- **Fachlich gegenlesen:** Schlaganfall-Fall (Befunde, Zeitziel 90 s, ob Symptombeginn in die 1. Minute gehört);
+  ab wann der Kollege in den `funk_early`-Fällen den Funk vorschlägt; Atembefunde (`atmung_beurteilen`) aller Fälle; Phase von Sauerstoffgabe und Kühlen
   (derzeit „ganzer Fall“); Decke bei „Verwirrte Person“ und „Pyro-Rauch“ (derzeit gefordert).
 - Erzählte Handlungen sagen immer „Patient …“, auch bei Patientinnen.

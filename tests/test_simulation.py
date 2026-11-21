@@ -36,7 +36,7 @@ def said(run, who=None):
 
 def test_all_scenarios_load():
     sc = content.scenarios()
-    assert len(sc) == 17
+    assert len(sc) == 18
     for s in sc.values():
         assert s.meta["title"] and s.meta["dispatch"]
         assert "debrief_notes" not in s.meta and "responses" not in s.meta, "verborgene Fakten dürfen nicht in meta landen"
@@ -323,10 +323,10 @@ def test_rescue_service_arrives_and_handover_ends(clf):
 GOOD_MINUTE = [
     "ist die lage sicher", "keine bedrohliche blutung", "hallo wir sind vom drk was ist passiert",
     "kollege bitte hws stabilisieren", "bekommen sie gut luft tut das atmen weh", "ich schaue auf die lippen",
-    "hautfarbe puls rekap", "bauch becken oberschenkel", "wie heißen sie", "ist ihnen kalt", "wir decken sie zu",
-    "kurze teambesprechung verdacht auf sht notarzt nötig",
+    "hautfarbe puls rekap", "bauch becken oberschenkel", "ist ihnen kalt", "wir decken sie zu",
+    "kurze teambesprechung patient wach reagiert angemessen verdacht auf sht notarzt nötig",
     "rotkreuzhamburg von evt eins kommen",
-    "männlicher patient ende sechzig gestürzt verdacht auf sht wir brauchen rtw und nef kommen",
+    "männlicher patient ende sechzig gestürzt wach und ansprechbar verdacht auf sht wir brauchen rtw und nef kommen",
     "evt eins ende",
 ]
 
@@ -560,3 +560,75 @@ def test_patient_can_be_persuaded(clf):
     # mit Blutverdünner: sofort einsichtig
     run = play(clf, "basis-sturz", ["nehmen sie medikamente", "wegen des blutverdünners sollten sie ins krankenhaus"])
     assert "lass ich mich mitnehmen" in said(run, "Patient")[-1]
+
+
+# ---------- Früher Funkspruch, Reaktion, Schlaganfall ----------
+
+STROKE_FAST = [
+    "ist die einsatzstelle sicher", "keine bedrohliche blutung", "hallo wir sind vom drk was ist passiert",
+    "seit wann ist das so",
+    "rotkreuzhamburg von evt eins kommen",
+    "männlicher patient anfang siebzig wach reagiert verlangsamt sprache verwaschen symptombeginn 10:42 "
+    "verdacht auf schlaganfall wir brauchen einen rtw kommen",
+    "evt eins ende",
+]
+STROKE_REST = [
+    "bekommen sie gut luft tut das atmen weh", "ich schaue auf die lippen", "hautfarbe puls rekap",
+    "ist ihnen kalt", "kurze teambesprechung patient wach reagiert verlangsamt verdacht auf schlaganfall rtw ist alarmiert",
+]
+
+
+def test_early_radio_is_not_out_of_order_and_does_not_end_the_minute(clf):
+    run = play(clf, "d-schlaganfall", STROKE_FAST)
+    assert "1. Minute ist beendet" not in " ".join(said(run))
+    res = evaluate.evaluate(play(clf, "d-schlaganfall", STROKE_FAST + STROKE_REST))
+    assert not [d for d in res["deviations"] if "Reihe" in d], res["deviations"]
+    key = next(k for k in keys_of(res) if "Früher Funkspruch" in k["label"])
+    assert key["status"] == evaluate.OK
+
+
+def test_early_radio_case_ends_minute_when_everything_is_done(clf):
+    run = play(clf, "d-schlaganfall", STROKE_FAST + STROKE_REST)
+    assert run.ended and "1. Minute ist beendet" in said(run)[-1]
+
+
+def test_late_radio_still_ends_the_minute_in_normal_cases(clf):
+    run = play(clf, "basis-sturz", ["rotkreuzhamburg von evt eins kommen", "älterer mann gestürzt rtw kommen", "evt eins ende"])
+    assert run.ended
+
+
+def test_tip_suggests_early_radio_once_the_problem_is_known(clf):
+    run = play(clf, "d-schlaganfall", ["ist die einsatzstelle sicher", "hallo wir sind vom drk", "hast du einen tipp"])
+    assert run.turns[-1].tip == "funk"
+    run = play(clf, "basis-sturz", ["ist die einsatzstelle sicher", "hallo wir sind vom drk", "hast du einen tipp"])
+    assert run.turns[-1].tip != "funk"
+
+
+def test_reaction_counts_when_named_in_team_talk_or_radio(clf):
+    res = evaluate.evaluate(play(clf, "basis-sturz", GOOD_MINUTE))
+    items = {it["id"]: it for it in res["sections"][0]["items"]}
+    assert items["neuro"]["status"] == evaluate.OK
+
+
+def test_reaction_missing_in_team_talk_and_radio_is_noted(clf):
+    lines = [l.replace(" wach reagiert angemessen", "").replace(" wach und ansprechbar", "") for l in GOOD_MINUTE]
+    res = evaluate.evaluate(play(clf, "basis-sturz", lines))
+    items = {it["id"]: it for it in res["sections"][0]["items"]}
+    assert items["team"]["status"] == evaluate.PARTIAL and "Reaktion" in items["team"]["note"]
+    assert "Reaktion" in items["funk"]["note"]
+    assert items["neuro"]["status"] == evaluate.MISSING
+
+
+def test_orientation_is_not_part_of_the_first_minute():
+    alg = content.algorithm()
+    minute = [i for it in alg["minute_conscious"] for i in content._item_refs(it)]
+    assert "orientierung" not in minute and "fast" not in minute
+    d = next(it for it in alg["full"] if it["id"] == "d")
+    assert d["extra"]["conscious"] == ["orientierung", "fast"]
+
+
+def test_symptom_onset(clf):
+    run = play(clf, "d-schlaganfall", ["seit wann ist das so"])
+    assert [h.intent for h in run.turns[0].hits] == ["symptombeginn"] and "10:42" in said(run)[0]
+    res = evaluate.evaluate(play(clf, "dom-krampf", ["seit wann krampft er"], mode="full"))
+    assert next(k for k in keys_of(res) if k["label"] == "Anfallsdauer erfasst")["status"] == evaluate.OK
