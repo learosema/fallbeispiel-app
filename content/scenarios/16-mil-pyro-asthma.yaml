@@ -12,6 +12,7 @@ debrief_notes: >
 conscious: true
 trauma: false
 request: {required: [RTW], optional: [NEF]}
+funk_early: [atmung_fragen, atmung_beurteilen]   # schwere Atemnot: Notarzt früh
 skip: [hws]
 
 responses:

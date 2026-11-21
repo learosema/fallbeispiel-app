@@ -10,7 +10,8 @@ from typing import Any
 import re
 
 from .content import algorithm, intents
-from .engine import Run, applies, compact
+from .classifier import normalize
+from .engine import REACTION, Run, applies, compact
 
 OK, PARTIAL, MISSING, NA = "✅", "⚠️", "❌", "–"
 
@@ -97,6 +98,8 @@ def check_funk(run: Run) -> dict[str, Any]:
             problems.append("Patient (Geschlecht, ungefähres Alter) fehlt")
         if not meldung["verdacht"]:
             problems.append("Verdachtsdiagnose fehlt")
+        if not meldung["reaktion"]:
+            problems.append("Reaktion/Bewusstsein nicht genannt (z. B. „wach, reagiert angemessen“)")
         if not meldung["kommen"]:
             problems.append("Meldung nicht mit „kommen“ abgeschlossen")
     requested = {r.upper() for f in infos for r in f["resources"]}
@@ -322,6 +325,10 @@ def evaluate(run: Run, embedder=None) -> dict[str, Any]:
     alg = algorithm()
     minute_def = alg["minute_conscious"] if run.scenario.conscious else alg["minute_unconscious"]
     minute = [check_item(it, run) for it in minute_def]
+    for it in minute:
+        if it["id"] == "team" and it["status"] == OK and it["at"] and not REACTION.search(normalize(run.turns[it["at"][0]].text)):
+            it["status"] = PARTIAL
+            it["note"] = "Reaktion (angemessen?) nicht genannt"
     sections = [{"title": "1. MINUTE", "items": minute}]
     full: list[dict[str, Any]] = []
     if run.mode == "full":
@@ -351,7 +358,9 @@ def evaluate(run: Run, embedder=None) -> dict[str, Any]:
                 after_tip.append(f"{it['short']} erst nach Tipp vom Kollegen")
 
     ordered = sorted((it for it in minute if it["at"] is not None and it["status"] != NA), key=lambda it: it["at"])
-    wrong = _out_of_order(minute)
+    # nicht für die Reihenfolge: „unordered“ (Reaktion fällt beim Ansprechen auf) und der frühe Funk, wo er gewollt ist
+    free = {it["id"] for it in minute_def if it.get("unordered") or (it.get("special") == "funk" and run.scenario.funk_early)}
+    wrong = _out_of_order([it if it["id"] not in free else it | {"at": None} for it in minute])
     deviations = [f"{it['short']} kam außer der Reihe" for it in wrong]
     deviations += [f"{it['short']} fehlt" for it in minute if it["status"] == MISSING]
 

@@ -1,0 +1,140 @@
+# ENTWURF – fachlich gegenlesen (Befunde, Zeitziel, Schlüsselmaßnahmen)
+id: d-schlaganfall
+letter: D
+title: Plötzlich undeutliche Sprache
+teaser: "Neurologie: Schlaganfall – jede Minute zählt"
+dispatch: "Einsatzmeldung: Supermarkt, Mann (72) kann plötzlich nicht mehr richtig sprechen."
+debrief_notes: >
+  Herr Krüger (72) an der Supermarktkasse: seit 10:42 Uhr hängender rechter Mundwinkel, Schwäche im rechten Arm,
+  verwaschene Sprache. Vorhofflimmern, den Blutverdünner hat er vor einer Woche selbst abgesetzt. Verdacht auf Schlaganfall:
+  Hier zählt jede Minute. Der Funkspruch mit Verdacht auf Schlaganfall und Symptombeginn gehört so früh wie möglich abgesetzt,
+  nicht erst am Ende der 1. Minute. Im D: BE-FAST und Blutzucker (Unterzucker kann einen Schlaganfall vortäuschen),
+  Oberkörper etwa 30° hoch, nichts essen und trinken (Schluckstörung). Ohne Nachforderung verschlechtert er sich.
+
+conscious: true
+trauma: false
+request: {required: [RTW], optional: [NEF]}
+funk_early: [vorstellen, was_passiert, fast, reaktion]   # die Sprachstörung fällt schon beim „Hallo“ auf
+skip: [hws, waerme]   # wach und im Warmen: Decke nicht nötig
+state: {}
+
+responses:
+  lage_pruefen:
+    - Befund: "Supermarkt, Kassenbereich, warm und trocken, keine Gefahren. Ein Mann, etwa Anfang siebzig, sitzt auf einem Stuhl, den die Kassiererin gebracht hat. Seine Frau steht daneben, einige Kund:innen schauen zu."
+  platz_schaffen:
+    - Umstehende: (die Kund:innen gehen weiter, die Kassiererin sperrt die Kasse)
+  blutung_pruefen:
+    - Befund: Keine Blutung.
+  vorstellen:
+    - Patient: (spricht verwaschen, schwer verständlich) Hallo … ich … das ist … komisch.
+  was_passiert:
+    - Umstehende: "(Ehefrau) Wir standen an der Kasse, und auf einmal hat er so undeutlich geredet und das Portemonnaie fallen lassen. Der Mund hängt so schief!"
+  symptombeginn:
+    - Umstehende: "(Ehefrau) Um 10:42, ich hab auf die Uhr über der Kasse geschaut. Vorher war alles ganz normal, beim Frühstück auch."
+  beschwerden_fragen:
+    - Patient: (verwaschen) Der Arm … so schwer. Und reden … geht nicht richtig.
+  beruhigen:
+    - Patient: (nickt langsam)
+  reaktion:
+    - Befund: Wach, schaut dich an, versteht offenbar, was du sagst, antwortet aber verwaschen und stockend.
+  gcs:
+    - Befund: Wach, GCS 14 (Augen 4, verbal 4, motorisch 6), Sprache verwaschen, versteht Aufforderungen.
+  orientierung:
+    - Patient: (verwaschen) Krü… Krüger. Im … Laden. (nickt bei der Frage nach dem Wochentag, kann ihn aber nicht aussprechen)
+  alter_fragen:
+    - Patient: (hält zwei Finger hoch, dann setzt er an) Sieb… siebzig … zwei.
+  fast:
+    - Befund: "Rechter Mundwinkel hängt beim Lächeln. Beim Armvorhalteversuch sinkt der rechte Arm ab. Sprache verwaschen, Wörter teils falsch. Sieht nach eigener Angabe nichts doppelt, Sitzen geht nur mit Anlehnen."
+  pupillen:
+    - Befund: Pupillen isokor, reagieren prompt auf Licht.
+  bz:
+    - Befund: BZ 118 mg/dl.
+  glukose_geben:
+    - Befund: Beim ersten Schluck verschluckt sich Herr Krüger und hustet. (Schluckstörung)
+  atemwege_freimachen:
+    - Befund: Atemwege frei.
+  atmung_fragen:
+    - Patient: (verwaschen) Luft … ja.
+  atmung_beurteilen:
+    - Befund: Atmung ruhig und regelmäßig, ca. 16/min, keine Atemnot.
+  schmerz_atmen:
+    - Patient: (schüttelt den Kopf)
+  zyanose:
+    - Befund: Keine Zyanose.
+  af_zaehlen:
+    - Befund: Atemfrequenz 16.
+  spo2:
+    - Befund: SpO2 96 %.
+  auskultation:
+    - Befund: Lunge beidseits belüftet, keine Nebengeräusche.
+  hautfarbe:
+    - Befund: Haut rosig, warm und trocken.
+  puls:
+    - Befund: Puls unregelmäßig, gut tastbar, ca. 92.
+  rekap:
+    - Befund: Rekap unter 2 Sekunden.
+  rr:
+    - Befund: RR 190/100.
+  oberkoerper_hoch:
+    - Befund: Oberkörper etwa 30° erhöht, Herr Krüger sitzt angelehnt und stabil.
+  nicht_aufstehen:
+    - Patient: (nickt)
+  frieren_fragen:
+    - Patient: (schüttelt den Kopf)
+  decke:
+    - Patient: (lässt es geschehen)
+  temperatur:
+    - Befund: Temperatur 36,8 °C.
+  bodycheck:
+    - Befund: Keine Verletzungen, kein Sturz. Rechte Hand greift schwächer als die linke.
+  dms:
+    - Befund: Rechts Kraft in Arm und Hand deutlich vermindert, Gefühl laut Herrn Krüger „taub“. Links unauffällig.
+  sample_allergie:
+    - Umstehende: (Ehefrau) Allergien hat er keine.
+  sample_medikamente:
+    - Umstehende: "(Ehefrau) Eigentlich einen Blutverdünner, Apixaban. Den hat er aber letzte Woche abgesetzt, wegen der blauen Flecken. Und was für den Blutdruck."
+  sample_vorerkrankung:
+    - Umstehende: (Ehefrau) Vorhofflimmern und hoher Blutdruck.
+  sample_mahlzeit:
+    - Umstehende: (Ehefrau) Frühstück um acht, ganz normal.
+  sample_risiko:
+    - Umstehende: (Ehefrau) Er hat lange geraucht, bis vor zehn Jahren.
+  sample:
+    - Umstehende: "(Ehefrau) Vorhofflimmern und Bluthochdruck. Den Blutverdünner hat er letzte Woche abgesetzt. Allergien keine, Frühstück um acht."
+  aufklaeren:
+    - Patient: (nickt) Ja … Krankenhaus.
+  reevaluation:
+    - when: {nachforderung: true}
+      say:
+        - Befund: Unverändert wach, Sprache verwaschen, rechter Arm schwach. RR 185/100, SpO2 96 %.
+    - say:
+        - Befund: Die Sprache ist undeutlicher geworden, der rechte Arm hängt schlaffer. RR 195/105.
+
+events:
+  - at: 120
+    when: {nachforderung: false}
+    say:
+      - Befund: Herr Krüger versucht etwas zu sagen, es kommen nur noch Wortfetzen. Der rechte Arm hängt jetzt schlaff herunter.
+      - Umstehende: (Ehefrau) Es wird schlimmer! Kommt denn niemand?
+
+key_actions:
+  - label: Früher Funkspruch / Nachforderung mit Verdacht auf Schlaganfall
+    any: [nachforderung]
+    critical: true
+    within: 90
+  - label: Symptombeginn erfragt (Uhrzeit, für den Funkspruch und die Stroke Unit)
+    any: [symptombeginn]
+  - label: BE-FAST
+    phase: full
+    any: [fast]
+    critical: true
+  - label: Blutzucker gemessen (Unterzucker ausgeschlossen)
+    phase: full
+    any: [bz]
+    critical: true
+  - label: Oberkörper etwa 30° hoch
+    phase: full
+    any: [oberkoerper_hoch]
+  - label: Blutverdünner erfragt
+    phase: full
+    any: [sample_medikamente, sample]

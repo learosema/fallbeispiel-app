@@ -10,6 +10,7 @@ debrief_notes: >
 conscious: true
 trauma: false
 request: {required: [RTW, NEF]}
+funk_early: [atmung_fragen, atmung_beurteilen]   # schwere Atemnot: Notarzt früh
 skip: [hws, waerme]   # wach und im Warmen: Decke nicht nötig
 
 responses:

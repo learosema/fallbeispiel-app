@@ -66,6 +66,9 @@ class Scenario:
     key_actions: list[dict[str, Any]]
     skip: list[str]
     notes: str = ""            # Lösungshinweise der Autor:innen, nicht für den Browser
+    # Funkspruch früh absetzen (Schlaganfall, Reanimation …): sobald einer dieser Intents erledigt ist, schlägt der Kollege
+    # den Funk als Nächstes vor; ein früher Funk ist nicht „außer der Reihe“, und „… Ende“ beendet die 1. Minute nicht
+    funk_early: list[str] = field(default_factory=list)
 
 
 def _lines(raw: Any, where: str) -> list[Line]:
@@ -238,6 +241,10 @@ def _load_scenario(path: Path) -> Scenario:
         for ref in _item_refs(ka) + list(ka.get("before", [])):
             if ref not in known:
                 raise ValueError(f"{path.name}: key_actions {ka.get('label')!r}: unbekannter Intent {ref!r}")
+    funk_early = list(d.get("funk_early") or [])
+    for ref in funk_early:
+        if ref not in known:
+            raise ValueError(f"{path.name}: funk_early: unbekannter Intent {ref!r}")
     req = d.get("request") or {}
     return Scenario(
         id=sid,
@@ -254,6 +261,7 @@ def _load_scenario(path: Path) -> Scenario:
         key_actions=list(d.get("key_actions") or []),
         skip=list(d.get("skip") or []),
         notes=str(d.get("debrief_notes") or "").strip(),
+        funk_early=funk_early,
     )
 
 

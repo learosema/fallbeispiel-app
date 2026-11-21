@@ -41,6 +41,8 @@ trauma: true                 # HWS und Trauma-Check werden erwartet
 bleeding: false              # bedrohliche Blutung → Blutstillung wird erwartet
 request: {required: [RTW], optional: [NEF]}   # passende Nachforderung im Funkspruch
 skip: [hws]                  # Checklistenpunkte, die hier nicht gelten („–“)
+funk_early: [was_passiert]   # zeitkritisch: Funk früh absetzen – sobald einer dieser Intents erledigt ist, schlägt der
+                             # Kollege den Funk vor; früher Funk ist nicht „außer der Reihe“, „… Ende“ beendet die 1. Minute nicht
 state: {geloest: false}      # Anfangszustand eigener Flags
 
 responses:                   # Intent → Antwort

@@ -26,6 +26,9 @@ RESOURCES = [  # (Kürzel, Muster) in der Reihenfolge, in der die Leitstelle sie
     ("Polizei", r"polizei|streife"),
     ("Feuerwehr", r"feuerwehr|\bhlf\b"),
 ]
+# Reaktion/Bewusstsein in Teambesprechung oder Funkspruch genannt („wach, reagiert angemessen“, „bewusstlos“)
+REACTION = re.compile(r"reagiert|reaktion|ansprechbar|\bwach\b|bewusstlos|bewusstsein|orientiert|verwirrt|somnolent"
+                      r"|eingetrübt|eingetruebt|\bgcs\b|avpu|adäquat|adaequat|angemessen")
 _NUMBERS = {"null": "0", "eins": "1", "zwei": "2", "drei": "3", "vier": "4", "fünf": "5", "fuenf": "5",
             "sechs": "6", "sieben": "7", "acht": "8", "neun": "9"}
 
@@ -115,7 +118,8 @@ def respond(scenario: Scenario, iid: str, state: dict[str, Any]) -> Variant | No
 
 # ---------- Funk ----------
 
-def funk(text: str, s: Settings, state: dict[str, Any], mode: str) -> tuple[list[Hit], list[Line], dict[str, Any]] | None:
+def funk(text: str, s: Settings, state: dict[str, Any], mode: str,
+         end_minute: bool = True) -> tuple[list[Hit], list[Line], dict[str, Any]] | None:
     t = normalize(text)
     c = compact(text)
     has_disp = compact(s.dispatcher) in c
@@ -138,6 +142,7 @@ def funk(text: str, s: Settings, state: dict[str, Any], mode: str) -> tuple[list
         "alter": bool(re.search(r"\d+|jahre|\bjahrig|mitte|anfang|ende (zwanzig|dreißig|dreissig|vierzig|fünfzig|fuenfzig|sechzig|siebzig|achtzig)"
                                 r"|\bält|\balt\b|\bjung|jugendlich|mittleren alters|senior|kind|säugling|erwachsen", t)),
         "verdacht": bool(re.search(r"verdacht|vermutlich|wahrscheinlich|\bv\s?a\b", t)),
+        "reaktion": bool(REACTION.search(t)),
     }
     hits: list[Hit] = []
     lines: list[Line] = []
@@ -146,6 +151,8 @@ def funk(text: str, s: Settings, state: dict[str, Any], mode: str) -> tuple[list
         state["funk_offen"] = True
     if meldung:
         hits.append(Hit("funk_meldung", 1, 1.0, "funk"))
+        if info["reaktion"]:
+            hits.append(Hit("reaktion", 1, 1.0, "implied"))
         if resources:
             hits.append(Hit("nachforderung", 2, 1.0, "funk"))
             lines.append(Line("Leitstelle", " ".join(resources) + " kommt, verstanden."))
@@ -156,7 +163,7 @@ def funk(text: str, s: Settings, state: dict[str, Any], mode: str) -> tuple[list
     if ende:
         hits.append(Hit("funk_ende", 3, 1.0, "funk"))
         state["funk_offen"] = False
-        if mode == "minute" and not state.get("_beendet"):
+        if mode == "minute" and end_minute and not state.get("_beendet"):
             lines.append(Line("Befund", "Die 1. Minute ist beendet. Du kannst die Auswertung starten."))
             state["_beendet"] = True
     if not lines and not ende:
@@ -222,7 +229,11 @@ def item_done(item: dict[str, Any], scenario: Scenario, done: set[str]) -> bool:
 
 
 def next_open(scenario: Scenario, mode: str, done: set[str]) -> dict[str, Any] | None:
-    return next((it for it in checklist(scenario, mode) if not item_done(it, scenario, done)), None)
+    items = [it for it in checklist(scenario, mode) if not item_done(it, scenario, done)]
+    if scenario.funk_early and any(i in done for i in scenario.funk_early):
+        # kritisches Problem erkannt: jetzt zuerst funken
+        items.sort(key=lambda it: it.get("special") != "funk")
+    return items[0] if items else None
 
 
 # ---------- Wiederholung des Einsatzes ----------
@@ -254,7 +265,7 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
         tick = bool(entry.get("tick"))  # Takt ohne Äußerung: nur die Zeit ist fortgeschritten
         lines: list[Line] = []
         unhandled: list[str] = []
-        f = None if tick else funk(text, settings, state, mode)
+        f = None if tick else funk(text, settings, state, mode, end_minute=not scenario.funk_early)
         if tick:
             hits, info = [], None
         elif f:
@@ -263,6 +274,9 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
             lines += funk_lines
         else:
             hits, info = clf.classify(text), None
+            team = next((h for h in hits if h.intent == "teambesprechung"), None)
+            if team and REACTION.search(normalize(text)) and "reaktion" not in {h.intent for h in hits}:
+                hits.append(Hit("reaktion", team.pos, 1.0, "implied"))
             for h in hits:
                 if h.source == "implied":
                     continue
@@ -290,6 +304,11 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
         if "nachforderung" in first_t and not state.get("rd_da") and t >= first_t["nachforderung"] + ARRIVAL_SECONDS:
             state["rd_da"] = True
             lines.append(Line("Rettungsdienst", "Hallo, Rettungsdienst. Was habt ihr?"))
+        if (mode == "minute" and scenario.funk_early and not state.get("_beendet") and "funk_ende" in first
+                and next_open(scenario, mode, set(first)) is None):
+            # früher Funk: Die 1. Minute endet erst, wenn alles erledigt ist (Auswertung geht jederzeit)
+            state["_beendet"] = True
+            lines.append(Line("Befund", "Die 1. Minute ist beendet. Du kannst die Auswertung starten."))
         if state.get("uebergeben") and not state.get("_beendet"):
             state["_beendet"] = True
             lines.append(Line("Befund", "Der Patient ist übergeben. Du kannst die Auswertung starten."))

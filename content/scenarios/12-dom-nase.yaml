@@ -125,7 +125,7 @@ key_actions:
   - label: Absaugbereitschaft
     any: [absaugen]
   - label: Bewusstsein/Orientierung geprüft (SHT?)
-    any: [gcs, orientierung]
+    any: [gcs, orientierung, reaktion]
   - label: Aufklärung / Ablehnung sauber geklärt
     phase: full
     any: [aufklaeren]
