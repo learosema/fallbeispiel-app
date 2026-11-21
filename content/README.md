@@ -92,6 +92,9 @@ silence:                     # optional: was bei 30 s Stille gesagt wird (Standa
   - when: {blutung_stillen: false}
     say: [Patient: Macht doch was!, Umstehende: Das blutet immer weiter!]   # erste passende Variante, Zeilen reihum
 alone: [...]                 # optional: Hilferufe, wenn das Team weggeht (Flag `allein`), gleiches Format
+patient_smalltalk:           # optional: Antwort des Patienten auf Smalltalk („Oh, das ist ja doof“), wenn er nicht
+  - when: {geloest: false}   # normal sprechen kann (Bolus, Atemnot, Schlaganfall …), gleiches Format
+    say: [Befund: (Herr Weber würgt und kann nicht antworten)]
 
 key_actions:                 # fallspezifische Schlüsselmaßnahmen für die Auswertung
   - label: Blutstillung vor allem anderen

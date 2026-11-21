@@ -882,3 +882,14 @@ def test_misheard_callsign_still_ends_the_call(clf, text):
     assert "funk_ende" in run.first and run.ended
     funk = next(it for it in evaluate.evaluate(run)["sections"][0]["items"] if it["id"] == "funk")
     assert "Ende“ fehlt" not in funk["note"], funk["note"]
+
+
+def test_sympathy_once_the_bolus_is_out_gets_a_spoken_answer(clf):
+    run = play(clf, "a-bolus", ["fünf rückenschläge", "fünf oberbauchkompressionen", "das ist ja doof"])
+    assert run.state.get("geloest") and said(run)[-1] == "(seufzt) Ja, das kann man wohl sagen."
+
+
+def test_smalltalk_after_losing_consciousness_gets_no_reaction(clf):
+    run = replay_ticks(clf, "a-bolus", {5: "hallo", 100: "oh das ist ja unglücklich"}, until=100)
+    last = next(t for t in reversed(run.turns) if t.text)
+    assert all(l.who != "Patient" for l in last.lines), last.lines
