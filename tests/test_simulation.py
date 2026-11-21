@@ -258,9 +258,11 @@ def test_reanimation_runs_until_rescue_service(clf):
     assert not any("atmet wieder" in x or "Kein Schock" in x for x in said(run)), "ohne erweiterte Maßnahmen kein ROSC"
 
     # RTW + NEF kommen 8 Minuten nach der Nachforderung, danach keine Analysen mehr
-    log += [{"t": 490, "text": "", "tick": True}, {"t": 500, "text": "übergabe: kollaps um 10 uhr, hlw seit 10:01, vier schocks"}]
+    log += [{"t": 490, "text": "", "tick": True}, {"t": 500, "text": "übergabe: kollaps um 10 uhr, hlw seit 10:01, vier schocks"},
+            {"t": 505, "text": "habt ihr noch fragen"}]
     run = replay_log(clf, "bw-reanimation", log)
-    assert any(l.who == "Rettungsdienst" and "Notarzt" in l.text for l in run.turns[-2].lines)
+    assert any(l.who == "Rettungsdienst" and "Notarzt" in l.text for l in run.turns[-3].lines)
+    assert "weiter" in said(run, "Rettungsdienst")[-1]  # „… ihr drückt bitte weiter, bis wir so weit sind“
     assert run.ended and run.next_event_at is None
 
     res = evaluate.evaluate(run)
@@ -314,7 +316,7 @@ def test_next_event_at_points_to_deterioration(clf):
 
 
 def test_rescue_service_arrives_and_handover_ends(clf):
-    lines = ["evt eins fordere einen rtw nach"] + ["puls"] * 9 + ["übergabe an den rettungsdienst"]
+    lines = ["evt eins fordere einen rtw nach"] + ["puls"] * 9 + ["übergabe an den rettungsdienst", "habt ihr noch fragen"]
     run = play(clf, "basis-sturz", lines, mode="full", step=60)
     assert any(l.who == "Rettungsdienst" for t in run.turns for l in t.lines)
     assert run.ended
@@ -780,3 +782,54 @@ def test_early_nef_is_fine_before_deterioration(clf):
                                "patientin mitte fünfzig verwirrt wach verdacht auf unterzucker wir brauchen rtw und nef kommen", "evt eins ende"])
     funk = next(it for it in evaluate.evaluate(run)["sections"][0]["items"] if it["id"] == "funk")
     assert "NEF" not in funk["note"], funk["note"]
+
+
+
+HANDOVER_SETUP = ["rotkreuzhamburg von evt eins kommen",
+                  "älterer mann gestürzt wach verdacht auf sht wir brauchen einen rtw kommen", "evt eins ende"]
+
+
+def _arrived(clf, extra, sid="basis-sturz"):
+    log = [{"t": 3 * (i + 1), "text": x} for i, x in enumerate(HANDOVER_SETUP)]
+    log.append({"t": 490, "text": "", "tick": True})  # Rettungsdienst ist da
+    log += [{"t": 492 + 3 * i, "text": x} for i, x in enumerate(extra)]
+    return engine.replay(content.scenarios()[sid], "full", engine.Settings(), log, clf)
+
+
+def _handover_item(run):
+    res = evaluate.evaluate(run)
+    return next(it for sec in res["sections"] for it in sec["items"] if it["id"] == "uebergabe")
+
+
+def test_handover_in_several_parts(clf):
+    run = _arrived(clf, [
+        "übergabe: herr petersen, ende sechzig, auf der nassen treppe gestürzt mit kopfanprall",
+        "puls 78 regelmäßig, rr 145 zu 90, gcs 15, bz 112",
+        "nimmt apixaban wegen vorhofflimmern, keine allergien",
+        "wir haben die hws stabilisiert und ihn zugedeckt",
+        "verdacht auf schädel-hirn-trauma unter blutverdünner",
+        "habt ihr noch fragen",
+    ])
+    assert said(run, "Rettungsdienst")[1:5] == ["(nickt)"] * 4
+    assert "übernehmen" in said(run, "Rettungsdienst")[-1] and run.ended
+    assert not [h for t in run.turns if t.handover for h in t.hits if h.intent != "uebergabe"], "keine Maßnahmen während der Übergabe"
+    item = _handover_item(run)
+    assert item["status"] == evaluate.OK, item["note"]
+
+
+def test_handover_missing_parts_are_named(clf):
+    run = _arrived(clf, ["übergabe: älterer mann, gestürzt", "das wars"])
+    item = _handover_item(run)
+    assert item["status"] == evaluate.PARTIAL
+    for part in ("Befunde", "Anamnese", "Maßnahmen", "Verdacht"):
+        assert part in item["note"]
+
+
+def test_rescue_service_takes_over_after_silence(clf):
+    log = [{"t": 3 * (i + 1), "text": x} for i, x in enumerate(HANDOVER_SETUP)]
+    log += [{"t": 490, "text": "", "tick": True}, {"t": 492, "text": "übergabe: älterer mann gestürzt"}]
+    s = content.scenarios()["basis-sturz"]
+    run = engine.replay(s, "full", engine.Settings(), log, clf)
+    assert run.next_event_at == 492 + engine.HANDOVER_SILENCE
+    run = engine.replay(s, "full", engine.Settings(), log + [{"t": run.next_event_at, "text": "", "tick": True}], clf)
+    assert run.ended and "übernehmen" in said(run, "Rettungsdienst")[-1]
