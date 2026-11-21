@@ -102,6 +102,11 @@ Eintrübung/Bewusstlosigkeit.
   Funk wieder (Berichtsformen wie „Tourniquet angelegt“ bleiben Teil der Meldung);
   die Leitstelle mahnt dann „EVT1 von RotkreuzHamburg, bitte Funkdisziplin, beenden Sie das Gespräch.“ (in der
   Auswertung angemerkt, „EVT1 Ende“ danach geht noch).
+- **Übergabe** (ganzer Fall): nach dem Eintreffen des Rettungsdienstes mehrteilig („(nickt)“ je Teil), Abschluss mit
+  „Habt ihr noch Fragen?“ / „Das wär's“ / „Übernehmt ihr?“ oder 15 s Stille → „Danke, wir übernehmen.“ Während der
+  Übergabe werden keine Maßnahmen ausgeführt. Geprüft werden die gemeinsamen Bausteine von **ISOBAR** und
+  **SINNHAFT** (`handover` in `algorithm.yaml`): Patient, Ereignis, Befunde (mind. 2), Anamnese, Maßnahmen,
+  Einschätzung/Verdacht, Rückfragen/Verantwortung. Ob die genannten Werte stimmen, wird (noch) nicht geprüft.
 - **Warnzeichen:** Wurde auf ein Ereignis (z. B. „Mir wird kalt“) rechtzeitig reagiert? Zählt nicht ins Urteil,
   steht aber oben bei „Verbessern“.
 - **Befundsprache:** Mitgeteilte Befunde nur als „normal/ok/passt“ werden angemerkt (Regex + Embeddings mit

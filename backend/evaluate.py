@@ -49,6 +49,8 @@ def check_item(item: dict[str, Any], run: Run) -> dict[str, Any]:
         return out | check_funk(run)
     if item.get("special") == "reevaluation":
         return out | check_reevaluation(run)
+    if item.get("special") == "uebergabe":
+        return out | check_handover(run)
 
     elements: list[Any] = list(item.get("all", [])) or list(item.get("of", []))
     for cond, extra in (item.get("extra") or {}).items():
@@ -198,6 +200,28 @@ def vague_findings(run: Run, embedder=None) -> list[str]:
 
 
 REEVAL_INTENTS = ["puls", "spo2", "rr", "af_zaehlen", "atemkontrolle", "gcs", "orientierung", "bz", "rekap", "temperatur"]
+
+
+def check_handover(run: Run) -> dict[str, Any]:
+    """Übergabe an den Rettungsdienst: Welche Bausteine (ISOBAR/SINNHAFT) kamen im gesamten Übergabetext vor?"""
+    parts = [n for n, t in enumerate(run.turns) if t.handover]
+    if not parts:
+        if "uebergabe" in run.first:  # vor dem Eintreffen angesagt
+            return {"status": PARTIAL, "note": "Übergabe angesagt, bevor der Rettungsdienst da war",
+                    "quote": _quote(run.first["uebergabe"][0], run), "at": run.first["uebergabe"]}
+        return {"status": MISSING, "note": ""}
+    text = normalize(" ".join(run.turns[n].text for n in parts))
+    missing = []
+    for block in algorithm().get("handover", []):
+        found = {p for p in block["patterns"] if re.search(p.replace("ß", "ss"), text)}
+        if len(found) < block.get("min", 1):
+            missing.append(block["label"])
+    return {
+        "status": OK if not missing else PARTIAL,
+        "note": ("Fehlt: " + "; ".join(missing)) if missing else "",
+        "quote": _quote(parts[0], run),
+        "at": (parts[0], 0),
+    }
 
 
 def check_reevaluation(run: Run) -> dict[str, Any]:

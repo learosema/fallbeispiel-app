@@ -69,11 +69,31 @@ full:
     min: 5
     of: [beschwerden_fragen, sample_allergie, sample_medikamente, sample_vorerkrankung, sample_mahlzeit, was_passiert, sample_risiko]
   - {id: reevaluation, short: Reevaluation, label: "Reevaluation (erneut beurteilt bzw. wieder bei A begonnen)", special: reevaluation, tip: "Wollen wir noch mal kontrollieren, ob unsere Maßnahmen wirken?"}
-  - {id: uebergabe, short: Übergabe, label: "Strukturierte Übergabe an den Rettungsdienst", any: [uebergabe], tip: "Wenn der Rettungsdienst da ist, braucht er eine strukturierte Übergabe."}
+  - {id: uebergabe, short: Übergabe, label: "Strukturierte Übergabe an den Rettungsdienst (z. B. ISOBAR oder SINNHAFT)", any: [uebergabe], special: uebergabe, tip: "Wenn der Rettungsdienst da ist, braucht er eine strukturierte Übergabe – wer, was ist passiert, Befunde, Anamnese, Maßnahmen, Verdacht, Fragen?"}
 
 # Befundsprache: Ein Teilsatz über einen Befund gilt als „vage“, wenn er diesen Beispielen per Embedding
 # deutlich ähnlicher ist als den konkreten Befunden und den reinen Handlungen/Fragen.
 # Ergänzen, wenn etwas falsch erkannt wird – je Gruppe kurze, typische Sätze.
+# Übergabe an den Rettungsdienst: Bausteine, die ISOBAR (Identify, Situation, Observations, Background,
+# Assessment/Actions, Responsibility/Read-back) und SINNHAFT gemeinsam haben. Geprüft wird der gesamte Text der
+# (mehrteiligen) Übergabe; je Baustein reicht ein Treffer (bei `min` so viele verschiedene Treffer).
+handover:
+  - label: Patient (Geschlecht, Alter, ggf. Name)
+    patterns: [männlich, weiblich, '\bherr\b', '\bfrau\b', '\bmann\b', patient, '\d+ ?jahr', jährig, '\balt\b', älter, jung, mitte (zwanzig|dreißig|vierzig|fünfzig|sechzig|siebzig|achtzig)]
+  - label: Ereignis / Situation
+    patterns: [passiert, gestürzt, sturz, gefallen, aufgefunden, gefunden, unfall, hergang, verschluckt, zusammengebrochen, kollabiert, gekrampft, seit, plötzlich, ereignis, situation]
+  - label: Befunde (ABCDE, Vitalwerte)
+    min: 2
+    patterns: [atemweg, atmung, atemfrequenz, '\baf\b', spo2, sättigung, puls, '\brr\b', blutdruck, rekap, gcs, bewusst, '\bbz\b', blutzucker, pupille, temperatur, haut, '\bfast\b', orientiert]
+  - label: Anamnese (SAMPLER – Allergien, Medikamente, Vorerkrankungen …)
+    patterns: [allergi, medikament, blutverdünner, vorerkrank, vorgeschichte, bekannt, nimmt, letzte mahlzeit, gegessen, sampler, diabet, asthma]
+  - label: Maßnahmen
+    patterns: [angelegt, gegeben, gelagert, zugedeckt, stabilisiert, versorgt, verbunden, gekühlt, abgesaugt, beatmet, gedrückt, reanimiert, tourniquet, sauerstoff, decke, seitenlage, schocklage, '\bhlw\b', '\baed\b', geschockt, maßnahme, haben wir, wurde]
+  - label: Einschätzung / Verdacht
+    patterns: [verdacht, vermutlich, wahrscheinlich, einschätzung, '\bv ?a\b', gehe von .* aus, denke]
+  - label: Rückfragen / Übergabe der Verantwortung
+    patterns: [fragen, rückfrage, übernehm, übernehmt, übergeben, '\bdas wars\b', das wäre alles, das war alles]
+
 finding_language:
   vague:
     - Puls ist normal

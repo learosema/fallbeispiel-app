@@ -19,6 +19,10 @@ ALONE_FIRST, ALONE_REPEAT, ALONE_LATER = 10, 15, 45  # allein: erster Hilferuf n
 DIED = Line("Befund", "Der Patient ist verstorben. Du kannst die Auswertung starten.")
 AFTER_DEATH = Line("Befund", "(Der Patient ist verstorben.)")
 BACK = Line("Befund", "(Ihr seid wieder beim Patienten.)")
+HANDOVER_ACK = Line("Rettungsdienst", "(nickt)")
+HANDOVER_SILENCE = 15  # so lange Stille während der Übergabe, dann übernimmt der Rettungsdienst
+# Abschluss der Übergabe: Rückfragen, Verantwortung abgeben
+HANDOVER_CLOSE = re.compile(r"fragen|rückfrage|übernehmt|übernehmen|das wars|das wäre alles|das war alles|übergabe (beendet|abgeschlossen|fertig)")
 FUNK_DISCIPLINE = Line("Leitstelle", "{callsign} von {dispatcher}, bitte Funkdisziplin, beenden Sie das Gespräch.")
 FALLBACK = Line("Kollege", "Was genau machst du?")  # erste Rückfrage; weitere Varianten in content/smalltalk.yaml
 TIP_DONE = Line("Kollege", "Von mir aus haben wir alles. Du entscheidest, wie es weitergeht.")
@@ -59,6 +63,7 @@ class Turn:
     funk: dict[str, Any] | None = None
     unhandled: list[str] = field(default_factory=list)
     tip: str | None = None   # Checklisten-Punkt, zu dem der Kollege hier einen Tipp gegeben hat
+    handover: bool = False   # Teil der Übergabe an den Rettungsdienst
 
 
 @dataclass
@@ -315,6 +320,7 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
         lines: list[Line] = []
         unhandled: list[str] = []
         remind = False  # Funk ohne „… Ende“ verlassen: Die Leitstelle mahnt nach der Antwort
+        handover = False
         if not tick:
             last_said, silence_done = t, False
         f = None if tick or state.get("verstorben") else funk(text, settings, state, mode, end_minute=not scenario.funk_early)
@@ -344,8 +350,24 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
             team = next((h for h in hits if h.intent == "teambesprechung"), None)
             if team and REACTION.search(normalize(text)) and "reaktion" not in {h.intent for h in hits}:
                 hits.append(Hit("reaktion", team.pos, 1.0, "implied"))
+            ids = {h.intent for h in hits}
+            if state.get("rd_da") and not state.get("uebergeben") and ("uebergabe" in ids or state.get("uebergabe_offen")):
+                # Übergabe (oft mehrteilig): Der Rettungsdienst hört zu, bis Rückfragen/Abschluss kommen
+                handover = True
+                state["uebergabe_offen"] = True
+                if "uebergabe" not in ids:
+                    hits.append(Hit("uebergabe", 0, 1.0, "implied"))
+                if HANDOVER_CLOSE.search(normalize(text)):
+                    v = respond(scenario, "uebergabe", state)
+                    lines += v.say if v else []
+                    if v:
+                        apply(v, t)
+                    state["uebergabe_offen"] = False
+                else:
+                    lines.append(HANDOVER_ACK)
+                hits = [h for h in hits if h.intent == "uebergabe"]  # während der Übergabe werden keine Maßnahmen ausgeführt
             for h in hits:
-                if h.source == "implied":
+                if h.source == "implied" or handover:
                     continue
                 v = respond(scenario, h.intent, state)
                 if v is None:
@@ -375,6 +397,12 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
                 lines.append(rotate("_alone", speakable(alone_lines)))
             alone_calls += 1
             alone_next = t + (ALONE_REPEAT if alone_calls < 3 else ALONE_LATER)
+        if tick and state.get("uebergabe_offen") and t - last_said >= HANDOVER_SILENCE:
+            v = respond(scenario, "uebergabe", state)
+            if v:
+                lines += v.say
+                apply(v, t)
+            state["uebergabe_offen"] = False
         # lange Stille: Der wache Patient meldet sich (einmal je Pause)
         if (tick and not silence_done and not state.get("allein") and not state.get("_beendet")
                 and t - last_said >= SILENCE_SECONDS and speakable(silence_lines)):
@@ -429,12 +457,14 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
         seen: set[Line] = set()
         lines = [Line(l.who, _fill(l.text, settings)) for l in lines]
         lines = [l for l in lines if not (l in seen or seen.add(l))]
-        turns.append(Turn(t, text, hits, lines, info, unhandled, tip))
+        turns.append(Turn(t, text, hits, lines, info, unhandled, tip, handover))
 
     now = turns[-1].t if turns else 0.0
     extra: list[float] = []
     if state.get("allein") and alone_next is not None and speakable(alone_lines):
         extra.append(alone_next)
+    if state.get("uebergabe_offen") and turns:
+        extra.append(last_said + HANDOVER_SILENCE)
     if not silence_done and not state.get("allein") and not state.get("_beendet") and speakable(silence_lines) and turns:
         extra.append(last_said + SILENCE_SECONDS)
     nxt = None if state.get("verstorben") else _next_event_at(scenario, state, fired, first_t, now, extra)
