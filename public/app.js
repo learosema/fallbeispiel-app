@@ -207,7 +207,12 @@
     Ä: "Ä", Ö: "Ö", Ü: "Ü" };
   const SPELLED = ["RTW", "KTW", "DRK", "AED", "HWS", "SHT", "GCS", "EKG", "AVPU", "BZ", "RR"];
   // Aussprache, wo die Stimme sonst danebenliegt (Ergänzungen einfach hier eintragen)
-  const PRONOUNCE = [[/\bSAN-?memo\b/gi, "San-Memo"]];
+  const PRONOUNCE = [
+    [/\bSAN-?memo\b/gi, "San-Memo"],
+    // „1. Minute“ liest Android als Satzende mit „1“
+    [/\b(der|einer)\s+1\.\s*Minute/g, "$1 ersten Minute"],
+    [/\b1\.\s*Minute/g, "erste Minute"],
+  ];
   const spell = (word) => [...word].map((ch) => LETTERS[ch.toUpperCase()] ?? ch).join(" ");
   function forSpeech(text) {
     let out = PRONOUNCE.reduce((s, [re, say]) => s.replace(re, say), text);
