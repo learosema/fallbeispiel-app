@@ -84,6 +84,10 @@ def check_funk(run: Run) -> dict[str, Any]:
     infos = [t.funk for t in calls]
     anruf = next((f for f in infos if f["anruf"]), None)
     meldung = next((f for f in infos if f["meldung"]), None)
+    if meldung:
+        # eine Meldung in mehreren Stücken zählt zusammen
+        parts = infos[infos.index(meldung):]
+        meldung = dict(meldung) | {k: any(p[k] for p in parts) for k in ("patient", "alter", "verdacht", "reaktion", "kommen")}
     problems: list[str] = []
     if not anruf:
         problems.append("Anruf der Leitstelle fehlt")

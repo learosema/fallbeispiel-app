@@ -704,3 +704,21 @@ def test_silence_makes_the_patient_speak_once(clf):
 def test_no_silence_lines_for_unconscious_patients(clf):
     run = replay_ticks(clf, "bw-seitenlage", {5: "hallo hören sie mich"}, until=59)
     assert all(l.who != "Patient" for t in run.turns[1:] for l in t.lines)
+
+
+def test_open_radio_goes_to_dispatch_even_without_kommen(clf):
+    run = play(clf, "x-kettensaege", [
+        "rotkreuz hamburg von evt eins kommen",
+        "wir haben hier einen patienten männlich und der hat eine kritische blutung",
+        "etwa mitte vierzig wach reagiert angemessen verdacht auf arterielle blutung",
+        "wir brauchen rtw und nef kommen", "evt eins ende",
+    ])
+    assert [t.lines[0].who for t in run.turns[1:4]] == ["Leitstelle"] * 3  # danach ggf. Verschlechterung des Falls
+    assert said(run)[1] == "Verstanden." and "blutung_pruefen" not in run.first
+    funk = next(it for it in evaluate.evaluate(run)["sections"][0]["items"] if it["id"] == "funk")
+    assert funk["status"] == evaluate.OK, funk["note"]
+
+
+def test_patient_sentence_leaves_a_forgotten_radio_call(clf):
+    run = play(clf, "basis-sturz", ["rotkreuzhamburg von evt eins kommen", "älterer mann gestürzt rtw kommen", "ich fühle den puls"])
+    assert run.turns[-1].lines[0].who == "Befund" and not run.state.get("funk_offen")

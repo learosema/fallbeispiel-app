@@ -135,8 +135,12 @@ def respond(scenario: Scenario, iid: str, state: dict[str, Any]) -> Variant | No
 
 # ---------- Funk ----------
 
+MELDUNG = re.compile(r"verdacht|patient|männlich|weiblich|\bmann\b|\bfrau\b|jahre|\bjahrig")
+
+
 def funk(text: str, s: Settings, state: dict[str, Any], mode: str,
-         end_minute: bool = True) -> tuple[list[Hit], list[Line], dict[str, Any]] | None:
+         end_minute: bool = True, force: bool = False) -> tuple[list[Hit], list[Line], dict[str, Any]] | None:
+    """Funkverkehr mit der Leitstelle. `force`: Der Funk ist offen und die Äußerung gehört dazu (Teil der Meldung)."""
     t = normalize(text)
     c = compact(text)
     has_disp = compact(s.dispatcher) in c
@@ -144,11 +148,12 @@ def funk(text: str, s: Settings, state: dict[str, Any], mode: str,
     kommen = bool(re.search(r"\bkommen\b", t))
     ende = bool(re.search(r"\bende\W*$", t)) and (has_call or state.get("funk_offen"))
     resources = detect_resources(text)
-    in_funk = has_disp or (has_call and (kommen or ende)) or (state.get("funk_offen") and (kommen or ende or resources))
+    in_funk = force or has_disp or (has_call and (kommen or ende)) or (state.get("funk_offen") and (kommen or ende or resources))
     if not in_funk:
         return None
 
-    meldung = bool(resources) or bool(re.search(r"verdacht|patient|männlich|weiblich|\bmann\b|\bfrau\b|jahre|\bjahrig", t))
+    # bei offenem Funk ist jede Äußerung Teil der Meldung (Spracheingabe zerlegt sie oft in mehrere Stücke)
+    meldung = bool(resources) or bool(MELDUNG.search(t)) or (force and not ende)
     anruf = has_disp and not (meldung and state.get("funk_offen"))
     info = {
         "text": text, "anruf": anruf, "beide_rufnamen": has_disp and has_call, "meldung": meldung,
@@ -184,7 +189,7 @@ def funk(text: str, s: Settings, state: dict[str, Any], mode: str,
             lines.append(Line("Befund", "Die 1. Minute ist beendet. Du kannst die Auswertung starten."))
             state["_beendet"] = True
     if not lines and not ende:
-        lines.append(Line("Leitstelle", "Wiederholen."))
+        lines.append(Line("Leitstelle", "Verstanden." if state.get("funk_offen") else "Wiederholen."))
     return hits, lines, info
 
 
@@ -304,6 +309,13 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
         if not tick:
             last_said, silence_done = t, False
         f = None if tick or state.get("verstorben") else funk(text, settings, state, mode, end_minute=not scenario.funk_early)
+        if f is None and not tick and state.get("funk_offen") and not state.get("verstorben"):
+            # Funk offen: Alles geht an die Leitstelle – außer einem klaren Satz an den Patienten ohne Funkbegriffe,
+            # dann hat man den Funk (ohne „… Ende“) verlassen
+            if MELDUNG.search(normalize(text)) or not clf.classify(text):
+                f = funk(text, settings, state, mode, end_minute=not scenario.funk_early, force=True)
+            else:
+                state["funk_offen"] = False
         if tick:
             hits, info = [], None
         elif state.get("verstorben"):
