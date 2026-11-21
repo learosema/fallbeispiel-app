@@ -63,7 +63,10 @@ rules:
   unsicher:  # Bitte um Hilfe: mit Tipps (Einstellung, Standard an) nennt der Kollege den nächsten offenen
              # Punkt der Checkliste (`tip` in algorithm.yaml), sonst eine der Antworten unter `say`
     patterns:
-      - ^((kollege|kollegin) )?(ich weiss (nicht|nich|net) (weiter|mehr|was ich machen soll)|was (soll|sollen) (ich|wir) (jetzt |nun |als nächstes )?(machen|tun)|was (machen|tun) wir (jetzt|nun|als nächstes)|was jetzt|und jetzt|hilf mir( mal)?|keine ahnung|ich bin (unsicher|überfordert|ueberfordert)|hast du (eine idee|einen tipp|nen tipp|einen vorschlag)|(gib mir |hast du )?(mal )?(einen|nen) tipp( bitte)?|tipp bitte|was fehlt (noch|mir noch)|fehlt noch was|hab(e)? ich (was|etwas|irgendwas) vergessen|was hab(e)? ich vergessen|was würdest du (jetzt |als nächstes )?(machen|tun)|was kommt (jetzt|als nächstes))( kollege| kollegin)?$
+      - ^((kollege|kollegin) )?(ich weiss (nicht|nich|net) (weiter|mehr|was ich machen soll)|was (soll|sollen) (ich|wir) (jetzt |nun |als nächstes )?(machen|tun)|was (machen|tun) wir (jetzt|nun|als nächstes)|was jetzt|und jetzt|hilf mir( mal)?|keine ahnung|ich bin (unsicher|überfordert|ueberfordert)|was fehlt (noch|mir noch)|fehlt noch was|hab(e)? ich (was|etwas|irgendwas) vergessen|was hab(e)? ich vergessen|was würdest du (jetzt |als nächstes )?(machen|tun)|was kommt (jetzt|als nächstes))( kollege| kollegin)?$
+      # Tipp/Idee/Vorschlag – Spracherkennung schreibt gern „Tip“ oder „Typ“
+      - ^((kollege|kollegin) )?((hast|hättest|weisst) du|gib mir|gibst du mir|kannst du mir)( mal| vielleicht| noch| bitte| kurz)* ((ein|einen|eine|nen|n|en|ne) )?(tipp?s?|typ|idee|vorschlag|rat|ratschlag|hinweis)( für mich| für uns)?( geben)?( bitte| kollege| kollegin)*$
+      - ^((ein|einen|nen|n) )?(tipp?|typ|idee)( bitte)?$
     tip: true
     say:  # ohne Tipps: die Einsatzleitung bleibt bei dir
       - Kollege: Du hast die Leitung. Sag mir, was ich machen soll.

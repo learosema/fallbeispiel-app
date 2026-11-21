@@ -144,6 +144,19 @@
   reply: Einsatzstelle
 - text: hab ich was vergessen
   reply: Einsatzstelle
+# Spracherkennung: „Tip“, „Typ“, Artikel und Zusätze
+- text: Hast du einen Tip?
+  reply: Einsatzstelle
+- text: hast du einen typ
+  reply: Einsatzstelle
+- text: hast du ein tipp für mich
+  reply: Einsatzstelle
+- text: hast du vielleicht eine idee
+  reply: Einsatzstelle
+- text: kannst du mir einen tipp geben
+  reply: Einsatzstelle
+- text: tipp bitte
+  reply: Einsatzstelle
 - text: scheiße
   reply: Schritt für Schritt
 - text: okay ich mache jetzt das dings
