@@ -32,7 +32,12 @@ minute_conscious:
     tip: "Wie reagiert die Person – angemessen? Das gehört auch in Teambesprechung und Funkspruch."
   - {id: umfeld, short: Umfeld, label: "Umfeld (Verletzungsmechanismus, Frieren)", any: [frieren_fragen, decke], tip: "Und das Umfeld? Friert die Person?"}
   - {id: waerme, short: Wärme, label: "Wärmeerhalt (Decke, Isolation vom Boden)", any: [decke], tip: "Denk an den Wärmeerhalt."}
-  - {id: team, short: Team, label: "Teambesprechung (Lage, Verdachtsdiagnose, Notarzt)", any: [teambesprechung], tip: "Lass uns kurz besprechen: Lage, dein Verdacht, brauchen wir den Notarzt?"}
+  - id: team
+    short: Team
+    label: "Teambesprechung (Patient, Reaktion, Verdacht, Nachforderung – „Siehst du das auch so?“)"
+    any: [teambesprechung]
+    special: team
+    tip: "Lass uns kurz besprechen: Patient, Reaktion, dein Verdacht, was brauchen wir? Und frag mich, ob ich das auch so sehe."
   - {id: funk, short: Funk, label: "Funkspruch an die Leitstelle", special: funk, tip: "Sollen wir die Leitstelle anfunken?"}
 
 minute_unconscious:
@@ -74,6 +79,47 @@ full:
 # Befundsprache: Ein Teilsatz über einen Befund gilt als „vage“, wenn er diesen Beispielen per Embedding
 # deutlich ähnlicher ist als den konkreten Befunden und den reinen Handlungen/Fragen.
 # Ergänzen, wenn etwas falsch erkannt wird – je Gruppe kurze, typische Sätze.
+# Teambesprechung (an den Kollegen, oft mehrteilig, Abschluss „Siehst du das auch so?“): Bausteine im gesamten Text
+team_talk:
+  - label: Patient (Geschlecht, ungefähres Alter)
+    patterns: [männlich, weiblich, '\bherr\b', '\bfrau\b', '\bmann\b', patient, '\d+', jahr, jährig, '\balt\b', älter, jung, mitte, anfang, ende]
+  - label: Reaktion (angemessen?)
+    patterns: [reagiert, reaktion, ansprechbar, '\bwach\b', bewusstlos, bewusstsein, orientiert, verwirrt, somnolent, eingetrübt, '\bgcs\b', adäquat, angemessen]
+  - label: Verdacht
+    patterns: [verdacht, vermutlich, wahrscheinlich, '\bv ?a\b', problem, gehe von .* aus]
+  - label: Nachforderung (RTW / Notarzt?)
+    patterns: ['\brtw\b', '\bnef\b', notarzt, rettungsdienst, nachforder, '\bktw\b']
+
+# Abschlussfrage der Teambesprechung an den Kollegen: Regex in der Engine (TEAM_CLOSE) und per Embedding gegen
+# diese Beispiele – der letzte Teilsatz muss ihnen deutlich ähnlicher sein als den Aussagesätzen darunter.
+team_close:
+  questions:
+    - Siehst du das auch so?
+    - Sehe ich das richtig?
+    - Bist du einverstanden?
+    - Was meinst du dazu?
+    - Passt das für dich?
+    - Stimmst du mir zu?
+    - Hast du noch etwas zu ergänzen?
+    - Habe ich etwas vergessen?
+    - Teilst du meine Einschätzung?
+    - Bist du auch der Meinung?
+    - Kannst du das so mittragen?
+    - Wie siehst du das?
+    - Sind wir uns einig?
+    - Kommst du zum selben Ergebnis?
+    - Noch was von deiner Seite?
+    - Würdest du das genauso einschätzen?
+  statements:
+    - Wir haben einen Patienten, männlich, Ende sechzig
+    - Kopfanprall
+    - Schmerzen im Nacken
+    - Verdacht auf ein HWS-Trauma
+    - Wir brauchen RTW und NEF
+    - Puls ist schnell und gut tastbar
+    - Er reagiert angemessen
+    - Sie hat keine Allergien
+
 # Übergabe an den Rettungsdienst: Bausteine, die ISOBAR (Identify, Situation, Observations, Background,
 # Assessment/Actions, Responsibility/Read-back) und SINNHAFT gemeinsam haben. Geprüft wird der gesamte Text der
 # (mehrteiligen) Übergabe; je Baustein reicht ein Treffer (bei `min` so viele verschiedene Treffer).

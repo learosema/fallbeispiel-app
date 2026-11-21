@@ -87,3 +87,19 @@ def test_small_talk_is_not_an_intent(clf, text):
 def test_ambiguous_short_sentences_are_not_guessed(clf, text):
     """Liegen mehrere Intents gleichauf, lieber nachfragen als raten."""
     assert clf.classify(text) == [], [(h.intent, round(h.score, 2)) for h in clf.classify(text)]
+
+
+
+@pytest.mark.parametrize("text,closing", [
+    ("ist das für dich auch so", True),
+    ("okay für dich", True),
+    ("deine meinung", True),
+    ("wir haben einen patienten männlich ende 60", False),
+    ("kopfanprall", False),
+    ("er hat sich den kopf gestoßen", False),
+    ("wir brauchen rtw und nef", False),
+])
+def test_team_talk_closing_question_by_similarity(clf, text, closing):
+    from backend import engine
+    assert engine.TEAM_CLOSE.search(text) is None or closing  # nicht schon per Regex
+    assert engine.is_team_close(text, clf) == closing
