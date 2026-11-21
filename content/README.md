@@ -15,7 +15,7 @@ Jeder Intent ist ein Schritt („Puls“, „Decke“, „Rückenschläge“ …
 
 ## `algorithm.yaml` – wie ausgewertet wird
 
-Checklisten für die 1. Minute (wach / bewusstlos) und den ganzen Fall, plus der Referenztext für die KI.
+Checklisten für die 1. Minute (wach / bewusstlos) und den ganzen Fall, plus Beispielsätze für die Befundsprache.
 
 ## `scenarios/*.yaml` – die Fälle
 
@@ -26,7 +26,7 @@ letter: "1."
 title: Sturz auf nasser Treppe
 teaser: Kurzbeschreibung
 dispatch: "Funkmeldung: …"   # wird vorgelesen
-debrief_notes: >             # nur für die KI-Bewertung (Lösung, worauf es ankommt)
+debrief_notes: >             # Lösungshinweise für Autor:innen (worauf es ankommt), nicht im Browser
   …
 conscious: true              # false → Checkliste „bewusstlos“
 breathing: normal            # bei Bewusstlosigkeit: normal (Seitenlage) | abnormal (HLW)

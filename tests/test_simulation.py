@@ -292,12 +292,6 @@ def test_full_mode_adds_abcde(clf):
     assert b["status"] == evaluate.OK
 
 
-def test_transcript_contains_both_sides(clf):
-    run = play(clf, "basis-sturz", ["hallo"])
-    text = evaluate.transcript(run)
-    assert "Sanitäter:in: hallo" in text and "Patient:" in text
-
-
 def test_vague_finding_language_is_flagged(clf):
     run = play(clf, "basis-sturz", ["puls normal", "rekap unter zwei sekunden puls regelmäßig gut tastbar", "atmet er normal"])
     res = evaluate.evaluate(run)

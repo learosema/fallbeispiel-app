@@ -1,7 +1,6 @@
 """Regelbasierte Auswertung: Checkliste nach SANmemo, Reihenfolge, Schlüsselmaßnahmen, Funkspruch.
 
-Das Ergebnis ist deterministisch und dient als Faktengrundlage für die KI-Bewertung
-(und als Fallback, wenn keine KI konfiguriert ist).
+Das Ergebnis ist deterministisch: gleiches Protokoll, gleiche Auswertung.
 """
 from __future__ import annotations
 
@@ -323,17 +322,6 @@ def evaluate(run: Run, embedder=None) -> dict[str, Any]:
     }
 
 
-def transcript(run: Run) -> str:
-    out = []
-    for t in run.turns:
-        if t.text.strip():
-            out.append(f"[{fmt(t.t)}] Sanitäter:in: {t.text}")
-            out += [f"        {l.who}: {l.text}" for l in t.lines]
-        else:  # Takt: nur die Simulation hat etwas gesagt
-            out += [f"[{fmt(t.t)}]     {l.who}: {l.text}" for l in t.lines]
-    return "\n".join(out)
-
-
 def as_text(result: dict[str, Any]) -> str:
     lines = [f"ALGORITHMUS: {result['verdict']}", ""]
     for sec in result["sections"]:
@@ -351,4 +339,4 @@ def as_text(result: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-__all__ = ["evaluate", "transcript", "as_text", "compact"]
+__all__ = ["evaluate", "as_text", "compact"]

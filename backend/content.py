@@ -64,7 +64,7 @@ class Scenario:
     events: list[Event]
     key_actions: list[dict[str, Any]]
     skip: list[str]
-    notes: str = ""            # Hinweise nur für die KI-Bewertung, nicht für den Browser
+    notes: str = ""            # Lösungshinweise der Autor:innen, nicht für den Browser
 
 
 def _lines(raw: Any, where: str) -> list[Line]:

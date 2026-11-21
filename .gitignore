@@ -6,5 +6,3 @@ node_modules/
 # DRK-SANmemo (© DRK) nicht ins Repo
 Onlineversion_SAN-Memo_2024.pdf
 
-# Liste erlaubter Logins (persönliche Daten)
-deploy/emails.txt

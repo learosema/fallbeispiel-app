@@ -1,20 +1,5 @@
 # HTTPS-Zertifikat holt Caddy automatisch (Let's Encrypt) – DOMAIN muss auf diesen Server zeigen.
-#
-# Nur die KI-Bewertung (kostet Geld) und der Login selbst laufen über oauth2-proxy.
-# Simulation und regelbasierte Checkliste sind ohne Login erreichbar.
+# Alles ist ohne Anmeldung erreichbar; es gibt keine kostenpflichtigen Dienste dahinter.
 {$DOMAIN} {
-	@login path /api/feedback /oauth2/*
-	handle @login {
-		reverse_proxy oauth2-proxy:4180 {
-			# den Nutzer-Header setzt allein oauth2-proxy
-			header_up -X-Forwarded-Email
-			header_up -X-Forwarded-User
-		}
-	}
-	handle {
-		reverse_proxy app:8000 {
-			header_up -X-Forwarded-Email
-			header_up -X-Forwarded-User
-		}
-	}
+	reverse_proxy app:8000
 }

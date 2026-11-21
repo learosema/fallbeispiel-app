@@ -2,33 +2,29 @@
 
   GET  /api/scenarios   Liste der Fälle (ohne verborgene Fakten)
   POST /api/turn        Protokoll → Antwort der Simulation auf die letzte Äußerung
-  POST /api/debrief     Protokoll → regelbasierte Checkliste
-  POST /api/feedback    Protokoll → KI-Bewertung (Algorithmus + Patientensicht) – nur mit Login, falls AUTH_HEADER gesetzt
+  POST /api/debrief     Protokoll → regelbasierte Auswertung
 
-Umgebungsvariablen: siehe README.md (AUTH_HEADER, FEEDBACK_LIMIT, INTENT_*, JUDGE_*, LLM_*).
+Umgebungsvariablen: siehe README.md (INTENT_*, PRELOAD_MODEL).
 """
 from __future__ import annotations
 
 import os
-import threading
-import time
-from collections import defaultdict, deque
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Literal
 
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException
 from fastapi.concurrency import run_in_threadpool
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, model_validator
 
-from . import classifier, content, engine, evaluate, judge
+from . import classifier, content, engine, evaluate
 
 PUBLIC_DIR = Path(__file__).resolve().parent.parent / "public"
 NO_STORE = {"Cache-Control": "no-store"}
-MAX_LOG_CHARS = 30_000  # ganzer Fall ≈ 15 000 Zeichen; begrenzt die Tokens pro KI-Bewertung
+MAX_LOG_CHARS = 30_000  # ganzer Fall ≈ 15 000 Zeichen; begrenzt den Aufwand pro Anfrage
 
 
 class Utterance(BaseModel):
@@ -59,50 +55,6 @@ class RunRequest(BaseModel):
 
 def error(msg: str, status: int) -> JSONResponse:
     return JSONResponse({"error": msg}, status_code=status, headers=NO_STORE)
-
-
-def current_user(request: Request) -> str:
-    """Angemeldete Person laut Login-Proxy (Header aus AUTH_HEADER), lokal ohne Proxy „local“.
-
-    Nur die KI-Bewertung kostet Geld und braucht deshalb eine Anmeldung; Simulation und Checkliste sind offen.
-    Ist AUTH_HEADER gesetzt, muss der Header da sein – sonst ist niemand angemeldet.
-    Der Header ist nur vertrauenswürdig, wenn die App ausschließlich über den Proxy erreichbar ist.
-    """
-    header = os.environ.get("AUTH_HEADER", "").strip()
-    if not header:
-        return "local"
-    user = request.headers.get(header, "").strip().lower()
-    if not user:
-        raise HTTPException(401, "Nicht angemeldet – bitte die Seite neu laden.")
-    return user
-
-
-class RateLimit:
-    """Höchstens `limit` Aufrufe pro Person in `window` Sekunden (im Speicher, ein Prozess)."""
-
-    def __init__(self, limit: int, window: float):
-        self.limit, self.window = limit, window
-        self._calls: dict[str, deque[float]] = defaultdict(deque)
-        self._lock = threading.Lock()
-
-    def hit(self, user: str) -> bool:
-        now = time.monotonic()
-        with self._lock:
-            calls = self._calls[user]
-            while calls and calls[0] <= now - self.window:
-                calls.popleft()
-            if len(calls) >= self.limit:
-                return False
-            calls.append(now)
-            return True
-
-
-feedback_limit = RateLimit(int(os.environ.get("FEEDBACK_LIMIT", "20")), 3600)
-
-
-def limit_feedback(user: str = Depends(current_user)) -> None:
-    if not feedback_limit.hit(user):
-        raise HTTPException(429, "Zu viele KI-Bewertungen in der letzten Stunde – bitte später erneut versuchen.")
 
 
 @asynccontextmanager
@@ -169,17 +121,6 @@ async def debrief(req: RunRequest):
     run = await run_in_threadpool(_run, req)
     result = evaluate.evaluate(run, classifier.get().embedder)
     return JSONResponse({"result": result, "text": evaluate.as_text(result)}, headers=NO_STORE)
-
-
-@app.post("/api/feedback", dependencies=[Depends(limit_feedback)])
-async def feedback(req: RunRequest):
-    run = await run_in_threadpool(_run, req)
-    result = evaluate.evaluate(run, classifier.get().embedder)
-    try:
-        text = await run_in_threadpool(judge.judge, run, result)
-    except judge.JudgeError as exc:
-        return error(f"KI-Bewertung fehlgeschlagen: {exc}", 502)
-    return JSONResponse({"text": text or judge.fallback(result), "ai": text is not None, "provider": judge.provider()}, headers=NO_STORE)
 
 
 @app.get("/sw.js", include_in_schema=False)
