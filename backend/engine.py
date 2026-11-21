@@ -19,6 +19,7 @@ ALONE_FIRST, ALONE_REPEAT, ALONE_LATER = 10, 15, 45  # allein: erster Hilferuf n
 DIED = Line("Befund", "Der Patient ist verstorben. Du kannst die Auswertung starten.")
 AFTER_DEATH = Line("Befund", "(Der Patient ist verstorben.)")
 BACK = Line("Befund", "(Ihr seid wieder beim Patienten.)")
+FUNK_DISCIPLINE = Line("Leitstelle", "{callsign} von {dispatcher}, bitte Funkdisziplin, beenden Sie das Gespräch.")
 FALLBACK = Line("Kollege", "Was genau machst du?")  # erste Rückfrage; weitere Varianten in content/smalltalk.yaml
 TIP_DONE = Line("Kollege", "Von mir aus haben wir alles. Du entscheidest, wie es weitergeht.")
 # Erkannt, aber der Fall hat keine Antwort: lieber nachfragen als einen Befund erfinden.
@@ -306,6 +307,7 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
         tick = bool(entry.get("tick"))  # Takt ohne Äußerung: nur die Zeit ist fortgeschritten
         lines: list[Line] = []
         unhandled: list[str] = []
+        remind = False  # Funk ohne „… Ende“ verlassen: Die Leitstelle mahnt nach der Antwort
         if not tick:
             last_said, silence_done = t, False
         f = None if tick or state.get("verstorben") else funk(text, settings, state, mode, end_minute=not scenario.funk_early)
@@ -316,6 +318,8 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
                 f = funk(text, settings, state, mode, end_minute=not scenario.funk_early, force=True)
             else:
                 state["funk_offen"] = False
+                state["funk_ermahnt"] = True
+                remind = True
         if tick:
             hits, info = [], None
         elif state.get("verstorben"):
@@ -349,6 +353,8 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
                 first[h.intent] = (n, h.pos)
                 first_t[h.intent] = t
 
+        if remind:
+            lines.append(FUNK_DISCIPLINE)
         # allein gelassen: Zeitraum merken, wache Patient:innen rufen um Hilfe
         if state.get("allein") and (not alone or alone[-1][1] is not None):
             alone.append((t, None))

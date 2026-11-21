@@ -90,7 +90,9 @@ der Nachforderung übernimmt die Engine selbst. Rufnamen sind in den Einstellung
   `funk_early` (zeitkritisch): Dort darf/soll früh gefunkt werden, das ist nicht „außer der Reihe“, die 1. Minute
   endet erst, wenn alle Punkte erledigt sind, und der Kollege schlägt auf Nachfrage früh den Funk vor.
   Bei **offenem Funk** geht alles an die Leitstelle („Verstanden.“), auch ohne „kommen“; eine Meldung in mehreren
-  Stücken wird zusammen ausgewertet. Ein klarer Satz an den Patienten ohne Funkbegriffe verlässt den Funk wieder.
+  Stücken wird zusammen ausgewertet. Ein klarer Satz an den Patienten ohne Funkbegriffe verlässt den Funk wieder;
+  die Leitstelle mahnt dann „EVT1 von RotkreuzHamburg, bitte Funkdisziplin, beenden Sie das Gespräch.“ (in der
+  Auswertung angemerkt, „EVT1 Ende“ danach geht noch).
 - **Warnzeichen:** Wurde auf ein Ereignis (z. B. „Mir wird kalt“) rechtzeitig reagiert? Zählt nicht ins Urteil,
   steht aber oben bei „Verbessern“.
 - **Befundsprache:** Mitgeteilte Befunde nur als „normal/ok/passt“ werden angemerkt (Regex + Embeddings mit

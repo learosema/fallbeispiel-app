@@ -114,6 +114,8 @@ def check_funk(run: Run) -> dict[str, Any]:
         problems.append("Nachforderung unpassend: " + ", ".join(lacking) + " fehlt")
     if extra:
         problems.append("nicht nötig nachgefordert: " + ", ".join(sorted(extra)))
+    if run.state.get("funk_ermahnt"):
+        problems.append("Gespräch nicht beendet – die Leitstelle musste auf Funkdisziplin hinweisen")
     if not any(f["ende_mit_rufname"] for f in infos):
         problems.append(f"Abschluss „{run.settings.callsign} Ende“ fehlt")
     return {
