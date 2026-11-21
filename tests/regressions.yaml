@@ -161,3 +161,24 @@
   reply: Schritt für Schritt
 - text: okay ich mache jetzt das dings
   reply: Was genau machst du
+
+# ---- Mitgefühl an den Patienten: Patient antwortet, kein Beruhigen, keine Rückfrage
+- text: oh das ist ja unglücklich
+  not: [beruhigen]
+  reply: (seufzt)
+  no_reply: Was genau
+- text: oh das ist ja unglücklich gelaufen
+  reply: (seufzt)
+- text: das ist ja blöd
+  reply: (seufzt)
+- text: oh je das tut mir leid
+  reply: (seufzt)
+- text: das ist ja eine blöde Sache
+  reply: (seufzt)
+- text: oh je
+  reply: (seufzt)
+- text: oh das ist ja unglücklich
+  scenario: bw-seitenlage
+  reply: (keine Reaktion)
+- text: das tut mir leid, wir kümmern uns jetzt um Sie
+  expect: [beruhigen]
