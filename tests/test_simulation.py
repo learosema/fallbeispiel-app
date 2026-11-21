@@ -744,3 +744,18 @@ def test_radio_message_in_several_parts(clf):
     assert replies == ["Verstanden.", "Verstanden.", "Verstanden.", "RTW NEF kommt, verstanden."], replies
     funk = next(it for it in evaluate.evaluate(run)["sections"][0]["items"] if it["id"] == "funk")
     assert funk["status"] == evaluate.OK, funk["note"]
+
+
+@pytest.mark.parametrize("text,requested", [
+    ("wir brauchen einmal rtw nef kommen", True),
+    ("wir benötigen einen rtw kommen", True),
+    ("bitte rtw und notarzt kommen", True),
+    ("einmal rtw kommen", True),
+    ("rtw ist schon alarmiert kommen", False),
+    ("der rettungsdienst ist informiert kommen", False),
+])
+def test_dispatch_confirms_resources_only_when_requested(clf, text, requested):
+    run = play(clf, "basis-sturz", ["rotkreuzhamburg von evt eins kommen", "älterer mann gestürzt " + text])
+    reply = said(run)[-1]
+    assert ("kommt, verstanden" in reply) == requested, reply
+    assert ("nachforderung" in run.first) == requested
