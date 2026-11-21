@@ -133,6 +133,7 @@ events:
     when: {glukose: false}
     say:
       - Befund: Frau Demir wird schläfriger, reagiert nur noch auf lautes Ansprechen.
+    expect: [bz, glukose_geben, gcs]
 
 key_actions:
   - label: Blutzucker gemessen

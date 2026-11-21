@@ -109,6 +109,7 @@ events:
     when: {schocklage: false}
     say:
       - Patient: Ich will mich mal hinsetzen …
+    expect: [nicht_aufstehen, schocklage]
   - at: 150
     when: {schocklage: false}
     say:

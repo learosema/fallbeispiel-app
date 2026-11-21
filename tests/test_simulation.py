@@ -24,6 +24,10 @@ def play(clf, sid, lines, mode="minute", step=8):
     return engine.replay(s, mode, engine.Settings(), log, clf)
 
 
+def keys_of(res):
+    return next(sec["items"] for sec in res["sections"] if sec["title"] == "SCHLÜSSELMASSNAHMEN")
+
+
 def said(run, who=None):
     return [l.text for t in run.turns for l in t.lines if who is None or l.who == who]
 
@@ -175,7 +179,7 @@ def test_reanimation_runs_until_rescue_service(clf):
     assert run.ended and run.next_event_at is None
 
     res = evaluate.evaluate(run)
-    keys = {it["label"]: it for it in res["sections"][-1]["items"]}
+    keys = {it["label"]: it for it in keys_of(res)}
     assert keys["Sicherheit beim Schock („Schock! Alle weg!“)"]["status"] == evaluate.OK
     assert keys["Sobald beatmet werden kann, laut bis 30 gezählt, dann 2 Beatmungen"]["status"] == evaluate.OK
 
@@ -200,7 +204,7 @@ def test_counting_only_before_ventilation_is_not_enough(clf):
     log = [{"t": 5, "text": "ich beginne mit der herzdruckmassage"}, {"t": 10, "text": COUNT_TO_30},
            {"t": 20, "text": "", "tick": True}, {"t": 30, "text": "", "tick": True}, {"t": 60, "text": "ich drücke weiter"}]
     res = evaluate.evaluate(replay_log(clf, "bw-reanimation", log))
-    key = next(it for it in res["sections"][-1]["items"] if "bis 30 gezählt" in it["label"])
+    key = next(it for it in keys_of(res) if "bis 30 gezählt" in it["label"])
     assert key["status"] == evaluate.MISSING
 
 
@@ -270,7 +274,7 @@ def test_funk_problems_are_reported(clf):
 
 def test_critical_key_action_too_late(clf):
     res = evaluate.evaluate(play(clf, "x-kettensaege", ["ich fühle den puls", "tourniquet anlegen"], step=30))
-    key = next(it for it in res["sections"][-1]["items"] if "Blutstillung" in it["label"])
+    key = next(it for it in keys_of(res) if "Blutstillung" in it["label"])
     assert key["status"] == evaluate.PARTIAL and "zu spät" in key["note"]
 
 
@@ -290,12 +294,6 @@ def test_full_mode_adds_abcde(clf):
     assert "xABCDE" in titles
     b = next(it for it in res["sections"][1]["items"] if it["id"] == "b")
     assert b["status"] == evaluate.OK
-
-
-def test_transcript_contains_both_sides(clf):
-    run = play(clf, "basis-sturz", ["hallo"])
-    text = evaluate.transcript(run)
-    assert "Sanitäter:in: hallo" in text and "Patient:" in text
 
 
 def test_vague_finding_language_is_flagged(clf):
@@ -394,11 +392,11 @@ def test_rough_age_is_enough_for_radio(clf):
 
 
 def test_full_case_key_actions_not_checked_in_first_minute(clf):
-    labels = [it["label"] for it in evaluate.evaluate(play(clf, "basis-sturz", GOOD_MINUTE))["sections"][-1]["items"]]
+    labels = [it["label"] for it in keys_of(evaluate.evaluate(play(clf, "basis-sturz", GOOD_MINUTE)))]
     assert "Blutverdünner erfragt" not in labels
     assert "Aufklärung, warum er nicht nach Hause gehen sollte" not in labels
     assert "Manuelle HWS-Stabilisierung nach Sturz mit Kopfanprall" in labels
-    full = [it["label"] for it in evaluate.evaluate(play(clf, "basis-sturz", GOOD_MINUTE, mode="full"))["sections"][-1]["items"]]
+    full = [it["label"] for it in keys_of(evaluate.evaluate(play(clf, "basis-sturz", GOOD_MINUTE, mode="full")))]
     assert "Blutverdünner erfragt" in full
 
 

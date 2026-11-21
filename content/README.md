@@ -15,7 +15,7 @@ Jeder Intent ist ein Schritt („Puls“, „Decke“, „Rückenschläge“ …
 
 ## `algorithm.yaml` – wie ausgewertet wird
 
-Checklisten für die 1. Minute (wach / bewusstlos) und den ganzen Fall, plus der Referenztext für die KI.
+Checklisten für die 1. Minute (wach / bewusstlos) und den ganzen Fall, plus Beispielsätze für die Befundsprache.
 
 ## `scenarios/*.yaml` – die Fälle
 
@@ -26,7 +26,7 @@ letter: "1."
 title: Sturz auf nasser Treppe
 teaser: Kurzbeschreibung
 dispatch: "Funkmeldung: …"   # wird vorgelesen
-debrief_notes: >             # nur für die KI-Bewertung (Lösung, worauf es ankommt)
+debrief_notes: >             # worauf es ankommt – erscheint erst nach der Auswertung, nie während des Einsatzes
   …
 conscious: true              # false → Checkliste „bewusstlos“
 breathing: normal            # bei Bewusstlosigkeit: normal (Seitenlage) | abnormal (HLW)
@@ -64,6 +64,11 @@ events:                      # zeitgesteuert (Nettozeit der Sanitäter:in in Sek
     repeat: 120              # danach alle 120 s erneut, solange `when` passt (z. B. AED-Analyse)
     when: {rd_da: false}
     say: [...]
+  - at: 40
+    when: {geloest: false}
+    say:
+      - Befund: Er wird zunehmend blau.
+    expect: {any: [rueckenschlaege, heimlich], within: 15}   # Warnzeichen: erwartete Reaktion, siehe unten
 
 key_actions:                 # fallspezifische Schlüsselmaßnahmen für die Auswertung
   - label: Blutstillung vor allem anderen
@@ -84,6 +89,15 @@ Text in Klammern ist eine Handlung oder Regieanweisung. Besteht eine Zeile nur d
 („Kollege: (übernimmt die HWS)“ → „Kollege übernimmt die HWS“); neben gesprochenem Text entfällt sie beim Vorlesen
 („(aufgelöst) Er ist umgefallen!“ → „Er ist umgefallen!“). Handlungen daher als eigene Zeile schreiben.
 Enthält ein Text `: `, muss er in Anführungszeichen stehen: `- Befund: "Lage: sicher"`.
+
+**Warnzeichen:** Die Auswertung prüft, ob auf ein Ereignis rechtzeitig reagiert wurde (Abschnitt „WARNZEICHEN“,
+✅ / ⚠️ zu spät / ❌ keine Reaktion). Ohne `expect` wird die Reaktion aus `when` abgeleitet: Kommt das Ereignis,
+weil ein Intent fehlt (`when: {decke: false}`), ist dieser Intent die erwartete Reaktion, innerhalb von 30 s.
+Ereignisse mit `since` oder `repeat` (Abläufe wie der AED-Rhythmus) werden nicht bewertet, ebenso `expect: false`.
+`expect` angeben, wenn `when` an einem eigenen Flag hängt (`geloest`) oder mehrere Reaktionen passen:
+`expect: [nicht_aufstehen, schocklage]` oder `expect: {any: […], within: 15, label: "…"}`.
+Folgen mehrere Warnzeichen mit derselben Erwartung, erscheint nur das erste, die weiteren als Verlauf.
+Warnzeichen zählen nicht ins Urteil, stehen aber in „Verbessern“ weit oben.
 
 Ereignisse feuern auch, wenn niemand spricht: Der Server meldet dem Browser, wann das nächste fällig ist,
 und der Browser schickt dann einen „Takt“.

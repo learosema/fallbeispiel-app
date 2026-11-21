@@ -8,7 +8,7 @@
   let settings = { ...DEFAULTS };
   try {
     settings = { ...DEFAULTS, ...JSON.parse(localStorage.getItem("settings") || "{}") };
-    // Altlasten entfernen (Browser-Key, Zugangscode – jetzt Login über den Proxy)
+    // Altlasten aus früheren Versionen entfernen (Browser-Key, Zugangscode für die KI-Bewertung)
     for (const k of ["apiKey", "baseUrl", "model", "accessCode"]) delete settings[k];
     localStorage.setItem("settings", JSON.stringify(settings));
   } catch {}
@@ -289,58 +289,6 @@
     return data;
   }
 
-  // ---------- Login (nur für die KI-Bewertung) ----------
-  // Den Login macht ein Proxy vor dem Server (oauth2-proxy); die Sitzung steckt in dessen HttpOnly-Cookie.
-  // Die App speichert davon nichts. state: "none" = kein Login-Proxy (lokal), "in" = angemeldet, "out" = nicht angemeldet
-  let login = { state: "none", email: "" };
-  async function checkLogin() {
-    try {
-      const res = await fetch("/oauth2/userinfo", { headers: { Accept: "application/json" }, cache: "no-store" });
-      if (res.ok) {
-        const d = await res.json().catch(() => ({}));
-        login = { state: "in", email: d.email || d.user || "" };
-      } else login = { state: res.status === 401 || res.status === 403 ? "out" : "none", email: "" };
-    } catch {
-      login = { state: "none", email: "" };  // offline o. Ä. – die KI-Bewertung meldet dann selbst den Fehler
-    }
-    renderLogin();
-    return login;
-  }
-  function renderLogin() {
-    const el = $("loginInfo");
-    el.hidden = login.state === "none";
-    el.replaceChildren();
-    if (login.state === "in") {
-      const out = document.createElement("a");
-      out.href = "/oauth2/sign_out?rd=%2F";
-      out.textContent = "Abmelden";
-      el.append(`Angemeldet${login.email ? " als " + login.email : ""} – die KI bewertet am Ende mit. `, out);
-    } else if (login.state === "out") {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "link";
-      btn.textContent = "Anmelden";
-      btn.addEventListener("click", () => loginWindow());
-      el.append("Ohne Anmeldung gibt es nur die regelbasierte Auswertung. ", btn);
-    }
-  }
-  // Anmeldung im eigenen Fenster: Der laufende Einsatz bleibt auf dieser Seite erhalten.
-  // Ob es geklappt hat, fragt die Seite regelmäßig nach (window.closed/opener sind nach dem Umweg über den Login-Anbieter unzuverlässig).
-  function loginWindow() {
-    const w = window.open("/oauth2/start?rd=%2Flogin-done.html", "login", "popup,width=480,height=640");
-    if (!w) {
-      setStatus("Das Anmeldefenster wurde blockiert – bitte Pop-ups für diese Seite erlauben.", true);
-      return Promise.resolve(false);
-    }
-    return new Promise((resolve) => {
-      const until = Date.now() + 5 * 60_000;
-      const timer = setInterval(async () => {
-        const { state } = await checkLogin();
-        if (state === "in" || Date.now() > until) { clearInterval(timer); resolve(state === "in"); }
-      }, 2000);
-    });
-  }
-
   function beginBusy(text) { busy = true; busySince = Date.now(); setStatus(text); }
   function endBusy() { busyMs += Date.now() - busySince; busySince = null; busy = false; }
 
@@ -375,62 +323,23 @@
     stopAll();
     if (userLog.length === 0) { setStatus("Starte erst den Einsatz, sonst gibt es nichts auszuwerten.", true); return; }
     debriefDone = true;
-    const current = scenario;
-    const body = payload();  // Stand festhalten – das Feedback kommt evtl. erst nach einem Fallwechsel zurück
     beginBusy("Werte aus …");
     let result, text;
     try {
-      ({ result, text } = await api("/api/debrief", body));
+      ({ result, text } = await api("/api/debrief"));
     } catch (err) {
       debriefDone = false;
       setStatus("Fehler: " + err.message, true);
       return;
     } finally {
-      endBusy();  // das KI-Feedback kann dauern – die App bleibt währenddessen bedienbar
+      endBusy();
     }
     addMsg(text, "debrief");
     speak("Algorithmus " + result.verdict + ".");
-    if (login.state === "out") await checkLogin();  // vielleicht inzwischen in einem anderen Tab angemeldet
-    if (login.state === "out") offerLogin(body, current);
-    else await aiFeedback(body, current);
-  }
-
-  async function aiFeedback(body, current) {
-    setStatus("Die KI bewertet den Einsatz …");
-    try {
-      const fb = await api("/api/feedback", body);
-      if (scenario !== current) return;
-      addMsg(fb.text, "debrief");
-      setStatus(fb.ai ? "" : "Keine KI-Bewertung konfiguriert, nur die regelbasierte Auswertung.");
-    } catch (err) {
-      if (scenario !== current) return;
-      if (err.status === 401) { await checkLogin(); offerLogin(body, current); }  // Sitzung abgelaufen
-      else setStatus(err.message, true);
-    }
-  }
-
-  // Nicht angemeldet: Checkliste ist da, die KI-Bewertung gibt es nach dem Anmelden.
-  function offerLogin(body, current) {
-    setStatus("");
-    const li = addMsg("Die KI-Bewertung (Algorithmus und Patientensicht) gibt es nach dem Anmelden. ", "sys");
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "link";
-    btn.textContent = "Anmelden und KI-Bewertung holen";
-    btn.addEventListener("click", async () => {
-      btn.disabled = true;
-      setStatus("Warte auf die Anmeldung im neuen Fenster …");
-      const ok = await loginWindow();
-      if (scenario !== current) return;
-      if (ok) { li.remove(); await aiFeedback(body, current); }
-      else { btn.disabled = false; setStatus("Nicht angemeldet.", true); }
-    });
-    li.append(btn);
   }
 
   // ---------- Einstellungen-Dialog ----------
   function openSettings() {
-    checkLogin();
     $("rate").value = settings.rate;
     $("rateOut").textContent = Number(settings.rate).toFixed(2);
     $("speak").checked = settings.speak;
@@ -472,6 +381,5 @@
   $("debriefBtn").addEventListener("click", debrief);
 
   loadScenarios();
-  checkLogin();
   if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 })();

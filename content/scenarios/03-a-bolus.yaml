@@ -194,10 +194,12 @@ events:
     when: {geloest: false}
     say:
       - Befund: Herr Weber wird zunehmend blau, der Husten wird schwächer.
+    expect: {any: [rueckenschlaege, heimlich], within: 15}
   - at: 90
     when: {geloest: false}
     say:
       - Befund: Er sackt zusammen und reagiert nicht mehr.
+    expect: {any: [laut_ansprechen, atemwege_freimachen, atemkontrolle, hlw], within: 15, label: Bewusstlosigkeit erkannt (Ansprechen, Atemwege, Atemkontrolle bzw. HLW)}
     set: {bewusstlos: true}
 
 key_actions:

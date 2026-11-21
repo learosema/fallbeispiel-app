@@ -1,4 +1,4 @@
-"""Login über den Proxy-Header (nur KI-Bewertung), Begrenzung der KI-Bewertungen, Obergrenze für das Protokoll."""
+"""API-Grenzen: Obergrenze für das Protokoll, alles ohne Anmeldung erreichbar."""
 import pytest
 from fastapi.testclient import TestClient
 
@@ -8,28 +8,9 @@ client = TestClient(main.app)
 TOO_LONG = {"scenario": "x", "log": [{"t": i, "text": "a" * 1000} for i in range(31)]}
 
 
-def test_without_auth_header_everyone_is_local(monkeypatch):
-    monkeypatch.delenv("AUTH_HEADER", raising=False)
-    assert client.post("/api/turn", json=TOO_LONG).status_code == 400  # kein 401: nur die Größe stört
-
-
-def test_feedback_requires_login_when_configured(monkeypatch):
-    monkeypatch.setenv("AUTH_HEADER", "X-Forwarded-Email")
-    res = client.post("/api/feedback", json={"scenario": "x", "log": [{"t": 0, "text": "Hallo"}]})
-    assert res.status_code == 401
-    assert "angemeldet" in res.json()["error"]
-
-
-def test_feedback_accepts_login(monkeypatch):
-    monkeypatch.setenv("AUTH_HEADER", "X-Forwarded-Email")
-    res = client.post("/api/feedback", json=TOO_LONG, headers={"X-Forwarded-Email": "a@example.org"})
-    assert res.status_code == 400  # an der Anmeldung vorbei, scheitert erst an der Größe
-
-
 @pytest.mark.parametrize("path", ["/api/turn", "/api/debrief"])
-def test_simulation_and_checklist_need_no_login(monkeypatch, path):
-    monkeypatch.setenv("AUTH_HEADER", "X-Forwarded-Email")
-    assert client.post(path, json=TOO_LONG).status_code == 400  # kein 401
+def test_oversized_log_is_rejected(path):
+    assert client.post(path, json=TOO_LONG).status_code == 400
 
 
 @pytest.mark.parametrize("n", [29, 30])
@@ -38,19 +19,25 @@ def test_log_size_limit(n):
     main.RunRequest.model_validate(req)  # bis MAX_LOG_CHARS erlaubt
 
 
-def test_rate_limit_per_user(monkeypatch):
+def test_ai_feedback_is_gone():
+    assert client.post("/api/feedback", json={"scenario": "x", "log": [{"t": 0, "text": "Hallo"}]}).status_code in (404, 405)
+
+
+def test_rate_limit_per_client(monkeypatch):
     clock = [0.0]
     monkeypatch.setattr(main.time, "monotonic", lambda: clock[0])
-    limit = main.RateLimit(2, 3600)
+    limit = main.RateLimit(2, 60)
     assert limit.hit("a") and limit.hit("a")
     assert not limit.hit("a")
-    assert limit.hit("b")  # andere Person, eigenes Kontingent
-    clock[0] = 3601
+    assert limit.hit("b")  # andere IP, eigenes Kontingent
+    clock[0] = 61
     assert limit.hit("a")  # Fenster abgelaufen
+    assert main.RateLimit(0, 60).hit("a")  # 0 = aus
 
 
-def test_feedback_rate_limited(monkeypatch):
-    monkeypatch.delenv("AUTH_HEADER", raising=False)
-    monkeypatch.setattr(main, "feedback_limit", main.RateLimit(0, 3600))
-    res = client.post("/api/feedback", json={"scenario": "x", "log": [{"t": 0, "text": "Hallo"}]})
-    assert res.status_code == 429
+def test_api_is_rate_limited(monkeypatch):
+    monkeypatch.setattr(main, "api_limit", main.RateLimit(1, 60))
+    assert client.post("/api/turn", json=TOO_LONG).status_code == 400
+    res = client.post("/api/turn", json=TOO_LONG)
+    assert res.status_code == 429 and res.headers["Retry-After"] == "60"
+    assert client.get("/").status_code == 200  # statische Dateien sind nicht begrenzt

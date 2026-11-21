@@ -1,12 +1,11 @@
-# Lokal:      docker compose up --build              → http://localhost:8000, ohne Login
-# Öffentlich: docker compose --profile public up -d  → https://$DOMAIN, KI-Bewertung nur mit Login (oauth2-proxy)
+# Lokal oder hinter eigenem Reverse Proxy: docker compose up -d --build  → http://127.0.0.1:8000
+# Mit mitgeliefertem Caddy:                docker compose --profile public up -d --build  → https://$DOMAIN
 # Einrichtung siehe README.md, Abschnitt „Öffentlich betreiben“.
 services:
   app:
     build: .
     ports:
-      # Nur von diesem Rechner aus erreichbar. Von außen geht es ausschließlich über Caddy, das den
-      # Nutzer-Header (AUTH_HEADER) entfernt bzw. nur von oauth2-proxy setzen lässt.
+      # Nur von diesem Rechner aus erreichbar; von außen geht es über den Reverse Proxy (HTTPS).
       - "127.0.0.1:8000:8000"
     env_file:
       - path: .env
@@ -14,30 +13,6 @@ services:
     volumes:
       # Heruntergeladene Hugging-Face-Modelle überleben Neustarts
       - hf-cache:/models
-    restart: unless-stopped
-
-  oauth2-proxy:
-    profiles: [public]
-    image: quay.io/oauth2-proxy/oauth2-proxy:v7.7.1
-    environment:
-      OAUTH2_PROXY_PROVIDER: ${LOGIN_PROVIDER:-google}
-      OAUTH2_PROXY_CLIENT_ID: ${OAUTH2_PROXY_CLIENT_ID:-}
-      OAUTH2_PROXY_CLIENT_SECRET: ${OAUTH2_PROXY_CLIENT_SECRET:-}
-      OAUTH2_PROXY_COOKIE_SECRET: ${OAUTH2_PROXY_COOKIE_SECRET:-}
-      OAUTH2_PROXY_REDIRECT_URL: https://${DOMAIN:-localhost}/oauth2/callback
-      OAUTH2_PROXY_HTTP_ADDRESS: 0.0.0.0:4180
-      OAUTH2_PROXY_UPSTREAMS: http://app:8000
-      OAUTH2_PROXY_REVERSE_PROXY: "true"
-      # Nur die E-Mail-Adressen aus deploy/emails.txt dürfen hinein
-      OAUTH2_PROXY_AUTHENTICATED_EMAILS_FILE: /etc/oauth2-proxy/emails.txt
-      # Setzt X-Forwarded-Email für die App (überschreibt, was der Browser schickt)
-      OAUTH2_PROXY_PASS_USER_HEADERS: "true"
-      # API-Aufrufe mit abgelaufener Sitzung bekommen 401 statt einer Weiterleitung zum Login
-      OAUTH2_PROXY_API_ROUTES: ^/api/
-      OAUTH2_PROXY_SKIP_PROVIDER_BUTTON: "true"
-    volumes:
-      - ./deploy/emails.txt:/etc/oauth2-proxy/emails.txt:ro
-    depends_on: [app]
     restart: unless-stopped
 
   caddy:
@@ -51,7 +26,7 @@ services:
     volumes:
       - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy-data:/data
-    depends_on: [app, oauth2-proxy]
+    depends_on: [app]
     restart: unless-stopped
 
 volumes:

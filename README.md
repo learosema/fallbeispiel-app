@@ -1,7 +1,7 @@
 # Fallbeispiel-App
 
 Trainings-App für Fallbeispiele im Sanitätsdienst nach dem xABCDE-Schema (Fokus: die 1. Minute nach DRK-SANmemo).
-Du sprichst (oder tippst), die App antwortet als Patient:in, Kollege, Umstehende und Leitstelle. Am Ende gibt es eine Auswertung.
+Du sprichst (oder tippst), die App antwortet als Patient:in, Kollege, Umstehende und Leitstelle. Am Ende gibt es eine regelbasierte Auswertung – ohne KI und ohne Login.
 
 ## Architektur
 
@@ -13,8 +13,8 @@ FastAPI (backend/)
    ├─ classifier.py        Äußerung → Intents (Regex + Satz-Embeddings über transformers)
    ├─ engine.py            Expertensystem: Intents → hardcodierte Antworten je Fall, Zustände,
    │                       zeitliche Verschlechterung, Funkverkehr mit der Leitstelle
-   ├─ evaluate.py          regelbasierte Checkliste (SANmemo), Reihenfolge, Schlüsselmaßnahmen
-   └─ judge.py             KI-Bewertung am Ende: ganzer Dialog + Checkliste → Algorithmus + Patientensicht
+   └─ evaluate.py          regelbasierte Auswertung: Checkliste (SANmemo), Reihenfolge, Schlüsselmaßnahmen,
+                           Funkspruch, Befundsprache
 content/                   Intents, Checklisten, Fallbeispiele (YAML) – siehe content/README.md
 ```
 
@@ -43,21 +43,6 @@ INTENT_EMBEDDINGS=0 uv run pytest      # schnell, nur Regex
 Sätze, die in der Praxis falsch erkannt oder beantwortet wurden, gehören als Regressionstest in
 `tests/regressions.yaml` – ein Eintrag pro Satz mit erwarteten (und verbotenen) Intents bzw. Antworten.
 
-## KI-Bewertung
-
-Nur die Auswertung am Ende nutzt ein Sprachmodell. Auswahl über `JUDGE_PROVIDER`:
-
-| Provider     | Wofür                                                                 | Konfiguration                                        |
-|--------------|-----------------------------------------------------------------------|------------------------------------------------------|
-| `auto`       | Standard: `claude-cli`, falls `claude` im PATH liegt, sonst `none`     | –                                                    |
-| `claude-cli` | lokaler Test über das eigene Claude-Abo (`claude -p`)                  | `JUDGE_MODEL` (Standard `haiku`)                     |
-| `anthropic`  | Anthropic API                                                          | `ANTHROPIC_API_KEY`, `JUDGE_MODEL` (Standard `claude-haiku-5-5`) |
-| `openai`     | OpenAI oder kompatible APIs (Ollama, vLLM, …)                          | `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `JUDGE_MODEL` (Standard `gpt-5-nano`) |
-| `local`      | lokales Modell über transformers (auf CPU langsam und eher schwach)    | `LLM_MODEL`, `LLM_DEVICE`                            |
-| `none`       | keine KI, nur die regelbasierte Checkliste                             | –                                                    |
-
-Ohne KI bleibt die App voll benutzbar; die Checkliste erscheint immer sofort, das KI-Feedback wird nachgeladen.
-
 ## Mit Docker
 
 ```sh
@@ -65,113 +50,138 @@ docker compose up --build
 ```
 
 Die App läuft auf <http://localhost:8000> (nur von diesem Rechner aus erreichbar), Modelle landen im Volume `hf-cache`.
-Im Container gibt es kein `claude`-CLI – für die KI-Bewertung dort `JUDGE_PROVIDER=anthropic` oder `openai` in `.env` setzen.
 
 ## Öffentlich betreiben
 
-Die Simulation und die regelbasierte Checkliste sind für alle offen. Nur die KI-Bewertung kostet Geld und braucht
-deshalb einen Login: Ohne Anmeldung gibt es nach dem Einsatz die Checkliste und einen Link „Anmelden und KI-Bewertung holen“,
-der den Login in einem eigenen Fenster öffnet. Der laufende Einsatz bleibt dabei erhalten. Lokal gibt es keinen Login.
-
-Den Login übernimmt [oauth2-proxy](https://oauth2-proxy.github.io/oauth2-proxy/), Caddy sorgt für HTTPS und schickt
-nur `/api/feedback` und `/oauth2/*` durch den Proxy. Anmelden kann sich nur, wer in `deploy/emails.txt` steht.
-Die Sitzung liegt im HttpOnly-Cookie von oauth2-proxy, die App selbst speichert nichts davon. Der API-Key für die KI bleibt
-in `.env` auf dem Server.
+Die App ist ohne Anmeldung nutzbar: Simulation und Auswertung laufen komplett auf dem eigenen Server, ohne KI und
+ohne kostenpflichtige Dienste. Davor gehört ein Reverse Proxy für HTTPS – entweder einer, der auf dem Server ohnehin
+läuft (nginx, Traefik, Caddy …), oder der mitgelieferte Caddy (Zertifikat von Let's Encrypt, automatisch erneuert).
 
 ```
-                  ┌─ /api/feedback, /oauth2/* ──▶ oauth2-proxy ──▶ App   Login nötig, setzt X-Forwarded-Email
-Browser ──HTTPS──▶ Caddy                                                  (KI-Bewertungen pro Person begrenzt)
-                  └─ alles andere ─────────────────────────────▶ App   offen
+Browser ──HTTPS──▶ Reverse Proxy ──▶ App (127.0.0.1:8000, von außen nicht erreichbar)
 ```
 
 ### Voraussetzungen
 
 - Linux-Server mit Docker und Compose-Plugin ab 2.24 (`docker compose version`)
-- eine (Sub-)Domain, deren A/AAAA-Eintrag auf den Server zeigt
-- Ports 80 und 443 offen und frei (kein anderer Webserver darauf)
-- mindestens 2–3 GB RAM (PyTorch und Embedding-Modell); der erste Build dauert einige Minuten
+- eine (Sub-)Domain, deren A/AAAA-Eintrag auf den Server zeigt (`dig +short fallbeispiel.example.org`)
+- Ports 80 und 443 von außen erreichbar – beim mitgelieferten Caddy außerdem frei (kein anderer Webserver darauf)
+- mindestens 2–3 GB RAM (PyTorch und Embedding-Modell) und ca. 5 GB Platz; der erste Build dauert einige Minuten
 
 ### 1. Code holen
 
 ```sh
-git clone git@github.com:learosema/fallbeispiel-app.git
+git clone https://github.com/learosema/fallbeispiel-app.git
 cd fallbeispiel-app
 ```
 
-### 2. OAuth-App anlegen (einmalig)
-
-Weiterleitungs- bzw. Callback-URL ist jeweils `https://<DOMAIN>/oauth2/callback`.
-
-- **GitHub** (am schnellsten, wenn alle ein GitHub-Konto haben): Settings → Developer settings → OAuth Apps →
-  *New OAuth App*. Homepage-URL `https://<DOMAIN>`, Client-ID notieren, Client-Secret erzeugen.
-  Für den Login zählt die primäre, verifizierte E-Mail-Adresse des Kontos.
-- **Google:** In der Cloud Console den OAuth-Zustimmungsbildschirm einrichten (*Extern*, Status *Testing*,
-  Testende als Testnutzer eintragen – im Testing-Status kommen nur sie hinein), dann unter
-  *APIs & Dienste → Anmeldedaten* eine OAuth-Client-ID vom Typ *Webanwendung* anlegen.
-
-### 3. `.env` anlegen
+### 2a. Starten hinter dem eigenen Reverse Proxy
 
 ```sh
-cp .env.example .env
-chmod 600 .env                                 # enthält Secrets
-openssl rand -base64 32 | tr -- '+/' '-_'      # → OAUTH2_PROXY_COOKIE_SECRET
+docker compose up -d --build
+docker compose logs -f        # Strg+C beendet nur die Anzeige
 ```
 
-```sh
-AUTH_HEADER=X-Forwarded-Email
-DOMAIN=fallbeispiel.example.org
-LOGIN_PROVIDER=github                # oder google
-OAUTH2_PROXY_CLIENT_ID=…
-OAUTH2_PROXY_CLIENT_SECRET=…
-OAUTH2_PROXY_COOKIE_SECRET=…
+Den Proxy für die Domain auf `http://127.0.0.1:8000` zeigen lassen. Wichtig für das Rate-Limit: `X-Forwarded-For`
+muss die echte Client-IP enthalten und **überschrieben**, nicht ergänzt werden. Die App nimmt den ersten Eintrag;
+ein angehängter Header ließe Clients eine beliebige IP vorschicken.
 
-# KI-Bewertung – zum Ausprobieren ohne Kosten:
-JUDGE_PROVIDER=none
-# später z. B. JUDGE_PROVIDER=anthropic und ANTHROPIC_API_KEY=… (vorher ein Ausgabenlimit in der Console setzen)
+nginx (`$remote_addr` statt des üblichen `$proxy_add_x_forwarded_for`):
+
+```nginx
+location / {
+    proxy_pass http://127.0.0.1:8000;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $remote_addr;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
 ```
 
-### 4. Erlaubte Personen eintragen
+Caddy (überschreibt den Header von selbst, solange `trusted_proxies` nicht gesetzt ist):
 
-```sh
-cp deploy/emails.txt.example deploy/emails.txt
+```
+fallbeispiel.example.org {
+	reverse_proxy 127.0.0.1:8000
+}
 ```
 
-Eine E-Mail-Adresse pro Zeile, Beispiel- und Kommentarzeilen löschen.
+Traefik überschreibt den Header ebenfalls, solange `forwardedHeaders.insecure` bzw. `trustedIPs` nicht gesetzt sind.
+Steht vor dem Proxy noch ein weiterer (z. B. Cloudflare), muss der Proxy die IP von dort übernehmen
+(nginx: `real_ip_header`/`set_real_ip_from`) – sonst teilen sich alle die IP des vorderen Proxys.
 
-### 5. Starten und prüfen
+Läuft der Proxy selbst in einem Docker-Container, erreicht er `127.0.0.1:8000` des Servers nicht. Dann die App in
+das Netzwerk des Proxys hängen und ihn auf `http://fallbeispiel-app:8000` zeigen lassen, z. B. mit einer
+`docker-compose.override.yml` (wird von `docker compose` automatisch gelesen):
+
+```yaml
+services:
+  app:
+    ports: !reset []           # kein Port auf dem Server mehr nötig
+    networks:
+      default:
+      proxy:
+        aliases: [fallbeispiel-app]   # eindeutiger Name im gemeinsamen Netz („app“ gibt es dort oft mehrfach)
+networks:
+  proxy:
+    external: true
+    name: <Netzwerk des Proxys>
+```
+
+### 2b. Oder: Starten mit dem mitgelieferten Caddy
 
 ```sh
+echo "DOMAIN=fallbeispiel.example.org" > .env
 docker compose --profile public up -d --build
-docker compose --profile public logs -f        # Caddy holt das Zertifikat, oauth2-proxy startet ohne Fehler
+docker compose --profile public logs -f
 ```
 
-Dann `https://<DOMAIN>` öffnen: Ein Fall ist ohne Login spielbar, nach der Auswertung erscheinen die Checkliste und
-„Anmelden und KI-Bewertung holen“. Nach dem Login schließt sich das Fenster, die Bewertung kommt nach, und in den
-Einstellungen steht „Angemeldet als …“.
+Weitere Einstellungen sind optional (siehe `.env.example` und [Weitere Einstellungen](#weitere-einstellungen)).
+
+Beim ersten Start lädt die App das Embedding-Modell (~470 MB) ins Volume `hf-cache`. Bis sie bereit ist
+(„Application startup complete“ im Log), antwortet der Proxy mit 502. Spätere Starts gehen schnell.
+
+### 3. Prüfen
+
+- `https://<DOMAIN>` öffnen, einen Fall spielen, die Auswertung starten.
+- Im Log der App (`docker compose logs app`) steht bei den Aufrufen deine echte IP – nicht `127.0.0.1` oder `172.…`.
+  Sonst setzt der Proxy `X-Forwarded-For` nicht, und alle teilen sich ein Rate-Limit.
+- Von außen ist Port 8000 **nicht** erreichbar: `curl http://<DOMAIN>:8000` muss scheitern.
+- Nur mit mitgeliefertem Caddy: Im Log von Caddy steht `certificate obtained successfully`.
 
 ### Aktualisieren
 
 ```sh
-git pull && docker compose --profile public up -d --build
+git pull && docker compose up -d --build                     # eigener Proxy
+git pull && docker compose --profile public up -d --build    # mitgelieferter Caddy
 ```
 
-Neue Einträge in `deploy/emails.txt` gelten nach `docker compose --profile public restart oauth2-proxy`.
-Die oauth2-proxy-Version in `docker-compose.yml` ab und zu auf das
-[aktuelle Release](https://github.com/oauth2-proxy/oauth2-proxy/releases) heben.
+Nach dem Update laden Browser die neue Version beim nächsten Öffnen (der Service Worker fragt immer zuerst beim Server nach).
 
-### Sicherheit
+### Betrieb
 
-Mit gesetztem `AUTH_HEADER` lehnt die App KI-Bewertungen ohne diesen Header ab (401). Der Header ist nur vertrauenswürdig,
-solange die App ausschließlich über Caddy erreichbar ist (Caddy entfernt ihn, nur oauth2-proxy setzt ihn) – Port 8000
-deshalb nie nach außen freigeben.
-Bei der Anthropic- oder OpenAI-API zusätzlich ein monatliches Ausgabenlimit in deren Konsole setzen.
+- **Neustarts:** Alle Container laufen mit `restart: unless-stopped` und kommen nach einem Server-Neustart von selbst
+  wieder, solange Docker beim Booten startet (`systemctl enable docker`).
+- **Überlast:** Jede Anfrage spielt den ganzen Einsatz nach und rechnet ggf. Embeddings. Die App begrenzt deshalb die
+  API-Aufrufe pro Client-IP (`RATE_LIMIT`, Standard 300 pro Minute, ein zügiger Einsatz braucht ~20). Teilen sich viele
+  Leute eine IP (Lehrgang im selben WLAN) und erscheint „Zu viele Anfragen“, den Wert in `.env` erhöhen und
+  die App mit `docker compose up -d` neu starten (mit Caddy: `--profile public`). Die Grenze gilt pro Prozess und beginnt nach einem Neustart neu.
+- **Client-IP:** Die App übernimmt sie aus `X-Forwarded-For` (`FORWARDED_ALLOW_IPS=*`). Das ist nur sicher, solange
+  Port 8000 nicht nach außen offen ist – in `docker-compose.yml` deshalb `127.0.0.1:8000:8000` lassen – und der Proxy
+  den Header überschreibt (siehe 2a).
+- **Daten:** Die App speichert nichts. Das Einsatzprotokoll liegt nur im Browser und wird bei jeder Äußerung mitgeschickt.
+  Im Log der App stehen nur Zugriffszeilen (Client-IP, Pfad, Status), keine Inhalte. Was dein Proxy protokolliert,
+  regelt seine eigene Konfiguration; der mitgelieferte Caddy schreibt keine Zugriffslogs.
+- **Logs:** `docker compose logs --tail 100 app`
 
-### Alternative: Cloudflare Access
+### Fehlersuche
 
-Liegt die Domain bei Cloudflare, kann statt oauth2-proxy und Caddy ein Cloudflare-Tunnel
-mit Access-Regel (Login per E-Mail-Code, bis 50 Personen kostenlos) vor der App stehen. Dann
-`AUTH_HEADER=Cf-Access-Authenticated-User-Email` setzen und nur `docker compose up` starten. Die Anmeldung im Frontend
-(`/oauth2/…`) ist auf oauth2-proxy zugeschnitten; mit Cloudflare Access am einfachsten die ganze Seite schützen.
+| Symptom                                   | Ursache / Abhilfe                                                                 |
+|-------------------------------------------|-----------------------------------------------------------------------------------|
+| Kein Zertifikat, Browser warnt            | DNS zeigt noch nicht auf den Server oder Port 80/443 ist zu (Firewall, Cloud-Sicherheitsgruppe). Caddy versucht es selbst erneut. |
+| Alle bekommen schnell „Zu viele Anfragen“ | Proxy gibt die Client-IP nicht weiter – im App-Log steht überall dieselbe IP (siehe 3. Prüfen) |
+| 502 Bad Gateway                           | App startet noch (Modell-Download) oder ist abgestürzt: `logs app`                |
+| App wird beendet, `Killed` im Log         | zu wenig RAM – Swap anlegen oder größeren Server nehmen                           |
+| „Zu viele Anfragen – bitte kurz warten.“  | `RATE_LIMIT` erhöhen (siehe Betrieb)                                              |
 
 ## Weitere Einstellungen
 
@@ -179,13 +189,12 @@ Siehe `.env.example`.
 
 | Variable                  | Standard                                                   | Bedeutung                                           |
 |---------------------------|------------------------------------------------------------|-----------------------------------------------------|
-| `AUTH_HEADER`             | leer                                                       | Header mit der angemeldeten Person (vom Login-Proxy); leer = KI-Bewertung ohne Login |
-| `FEEDBACK_LIMIT`          | `20`                                                       | KI-Bewertungen pro Person und Stunde                |
 | `INTENT_MODEL`            | `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` | Embedding-Modell für die Intent-Erkennung        |
 | `INTENT_THRESHOLD`        | `0.72`                                                     | Mindest-Ähnlichkeit für Embedding-Treffer           |
 | `INTENT_EMBEDDINGS`       | `1`                                                        | `0` = nur Regex-Muster (kein Modell nötig)          |
+| `RATE_LIMIT`              | `300`                                                      | API-Aufrufe pro Client-IP und Minute, `0` = aus     |
+| `FORWARDED_ALLOW_IPS`     | `*` (im Docker-Image)                                      | Absender, deren `X-Forwarded-For` gilt (uvicorn)    |
 | `PRELOAD_MODEL`           | `1`                                                        | `0` lädt den Classifier erst bei der ersten Anfrage |
-| `JUDGE_TIMEOUT`           | `180`                                                      | Sekunden bis zum Abbruch der KI-Bewertung           |
 
 PyTorch wird als CPU-Build installiert. Für eine NVIDIA-GPU den `pytorch-cpu`-Index in `pyproject.toml` entfernen.
 

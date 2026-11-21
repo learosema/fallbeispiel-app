@@ -56,7 +56,7 @@
       <li><span>Fall wählen, zum Beispiel „Sturz auf nasser Treppe" oder einen Fall vom DOM oder vom Millerntor.</span></li>
       <li><span>Die 1. Minute durchsprechen: Lage, bedrohliche Blutung, Ansprechen, Schnellcheck (A bis E), Teambesprechung.</span></li>
       <li><span>Mit dem Funkspruch an die Leitstelle abschließen („EVT1 Ende").</span></li>
-      <li><span>Auf <em>Auswertung</em> tippen: sofort eine Checkliste Schritt für Schritt, danach eine Bewertung durch die KI, auch aus Sicht des Patienten.</span></li>
+      <li><span>Auf <em>Auswertung</em> tippen: sofort eine Checkliste Schritt für Schritt mit Reihenfolge, Schlüsselmaßnahmen, Funkspruch und ob du auf Warnzeichen reagiert hast. Am Ende steht, worauf es im Fall ankommt.</span></li>
     </ol>
     <p class="note">Die App ersetzt weder Ausbildung noch Praxis. Die Technik (Seitenlage, Herzdruckmassage, HWS-Griff) übst du weiter an Puppe und Kollegen. Hier trainierst du Ablauf, Fragen, Ansagen und Funk.</p>
 
@@ -65,7 +65,7 @@
     <div class="demo"><div class="log" id="demo"></div></div>
 
     <h3>Beispiel-Auswertung</h3>
-    <p>Zu diesem Gespräch könnte die Auswertung so aussehen (gekürzt). Oben die Checkliste, die sofort erscheint, darunter die Bewertung der KI. Sie zeigt, wie Lücken sichtbar werden, die im Gespräch selbst nicht korrigiert werden.</p>
+    <p>Zu diesem Gespräch könnte die Auswertung so aussehen (gekürzt). Sie zeigt, wie Lücken sichtbar werden, die im Gespräch selbst nicht korrigiert werden.</p>
     <div class="demo"><div class="log" id="debrief"></div></div>
 
     <h3>Was die Simulation macht und was nicht</h3>
@@ -77,7 +77,7 @@
       <li>Der Zustand der Person entwickelt sich weiter: Fehlende oder falsche Maßnahmen verschlechtern ihn.</li>
       <li>Wärmeerhalt zählt, wenn die Person auskühlen kann: bei Kälte, Nässe, Schock oder auf dem Boden, auch im Sommer auf feuchtem Untergrund. Nachfragen allein reicht nicht, du musst es ansagen oder tun. Bei wachen Patient:innen im Warmen und während einer Reanimation wird keine Decke erwartet.</li>
       <li>Die Auswertung bewertet den Algorithmus, nicht die Geschwindigkeit. Die Zeit ist nur eine Randnotiz.</li>
-      <li>Nur für die Bewertung am Ende wird eine KI gefragt. Sie bekommt den ganzen Dialog und die Checkliste und beurteilt auch, wie sich der Patient behandelt gefühlt hätte.</li>
+      <li>Auch die Auswertung ist regelbasiert: Gleicher Einsatz, gleiche Bewertung. Eine KI ist nicht beteiligt.</li>
     </ul>
 
     <h3>Modi</h3>
@@ -152,16 +152,13 @@ SCHLÜSSELMASSNAHMEN
 ✅ Manuelle HWS-Stabilisierung nach Sturz mit Kopfanprall
 ❌ Wärmeerhalt (er friert)
 
+WARNZEICHEN
+❌ Reaktion auf „Mir wird richtig kalt …“: keine Reaktion – erwartet: Wärmeerhalt
+
 TATSÄCHLICHE REIHENFOLGE: Lage → Blutung → Ansprache → HWS → Atmung → Kreislauf → Umfeld → Neurologie → Team → Funk
-ABWEICHUNGEN: Neurologie kam außer der Reihe; Wärme fehlt`;
-    const feedback = `ALGORITHMUS: Teilweise erfüllt
-Klarer Einstieg mit Lage, Blutung und rechtzeitiger HWS-Stabilisierung, der Funkspruch war sauber aufgebaut. Im Schnellcheck fehlten Zyanose und Hautfarbe. Vor allem: Herr Petersen sagt, ihm sei kalt – eine Decke kam nicht. 
+ABWEICHUNGEN: Neurologie kam außer der Reihe; Wärme fehlt
 
-PATIENTENSICHT: Ich habe mich ernst genommen gefühlt, ihr habt euch vorgestellt und mir gesagt, was passiert. Aber ich saß die ganze Zeit frierend im Nassen, und niemand hat mir eine Decke gegeben. Gut fand ich, dass jemand meinen Kopf gehalten hat, als mir der Nacken wehtat.
-
-GUT GEMACHT: HWS früh übernommen; Funkspruch mit beiden Rufnamen und passender Nachforderung.
-VERBESSERN: Bei Frieren sofort zudecken und vom Boden isolieren; Schnellcheck vollständig sprechen (Zyanose, Hautfarbe).`;
-
+WORAUF ES IN DIESEM FALL ANKOMMT: … Er friert (5 °C, nass) – Wärmeerhalt ist entscheidend. …`;
     const log = document.getElementById("demo");
     for (const [kind, text] of convo) {
       if (kind === "phase") {
@@ -178,9 +175,7 @@ VERBESSERN: Bei Frieren sofort zudecken und vom Boden isolieren; Schnellcheck vo
       log.appendChild(d);
     }
     const dl = document.getElementById("debrief");
-    for (const text of [debrief, feedback]) {
-      const dd = document.createElement("div"); dd.className = "msg debrief"; dd.textContent = text; dl.appendChild(dd);
-    }
+    const dd = document.createElement("div"); dd.className = "msg debrief"; dd.textContent = debrief; dl.appendChild(dd);
 
     // ---- Fallliste direkt vom Server, damit die Doku nicht veraltet ----
     fetch("/api/scenarios").then((r) => r.json()).then((list) => {
