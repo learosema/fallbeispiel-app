@@ -80,6 +80,9 @@ docker compose logs -f        # Strg+C beendet nur die Anzeige
 Beim ersten Start lädt die App das Embedding-Modell (~470 MB) ins Volume `hf-cache`. Bis sie bereit ist
 („Application startup complete“ im Log), antwortet nginx mit 502. Spätere Starts gehen schnell.
 Eine `.env` ist nicht nötig; Einstellungen siehe `.env.example` und [Weitere Einstellungen](#weitere-einstellungen).
+Ist Port 8000 auf dem Server schon belegt, z. B. `APP_PORT=8402` in `.env` setzen und in der nginx-Config unten
+`proxy_pass http://127.0.0.1:8402;` eintragen. `docker-compose.yml` selbst nicht ändern – sonst gibt es Konflikte beim
+`git pull`, und ein Port ohne `127.0.0.1:` wäre von außen offen (Docker umgeht dabei auch `ufw`).
 
 ### 2. Zertifikat holen
 
@@ -214,6 +217,7 @@ Siehe `.env.example`.
 | `INTENT_MODEL`            | `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` | Embedding-Modell für die Intent-Erkennung        |
 | `INTENT_THRESHOLD`        | `0.72`                                                     | Mindest-Ähnlichkeit für Embedding-Treffer           |
 | `INTENT_EMBEDDINGS`       | `1`                                                        | `0` = nur Regex-Muster (kein Modell nötig)          |
+| `APP_PORT`                | `8000`                                                     | Port auf dem Server (nur `127.0.0.1`), für den Proxy |
 | `RATE_LIMIT`              | `300`                                                      | API-Aufrufe pro Client-IP und Minute, `0` = aus     |
 | `FORWARDED_ALLOW_IPS`     | `*` (im Docker-Image)                                      | Absender, deren `X-Forwarded-For` gilt (uvicorn)    |
 | `PRELOAD_MODEL`           | `1`                                                        | `0` lädt den Classifier erst bei der ersten Anfrage |
