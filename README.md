@@ -26,18 +26,17 @@ Die verborgenen Fakten der Fälle bleiben auf dem Server.
 Voraussetzung: [uv](https://docs.astral.sh/uv/).
 
 ```sh
-uv sync
-uv run uvicorn backend.main:app --reload
+make serve        # oder ohne make: uv run uvicorn backend.main:app --reload
 ```
 
-Dann <http://localhost:8000> öffnen. Beim ersten Start wird das Embedding-Modell für die Intent-Erkennung
+Dann <http://localhost:8000> öffnen (anderer Port: `make serve PORT=8080`). `make` allein zeigt alle Kurzbefehle. Beim ersten Start wird das Embedding-Modell für die Intent-Erkennung
 heruntergeladen (~470 MB).
 
 Tests:
 
 ```sh
-uv run pytest                          # alles, inkl. Embedding-Modell
-INTENT_EMBEDDINGS=0 uv run pytest      # schnell, nur Regex
+make test         # alles, inkl. Embedding-Modell   (uv run pytest)
+make test-fast    # schnell, nur Regex               (INTENT_EMBEDDINGS=0 uv run pytest)
 ```
 
 Sätze, die in der Praxis falsch erkannt oder beantwortet wurden, gehören als Regressionstest in
