@@ -168,7 +168,7 @@ def test_deterioration_event_fires_once(clf):
 def test_teambesprechung_is_exclusive(clf):
     run = play(clf, "basis-sturz", ["kurz zusammengefasst sturz unter blutverdünner puls gut verdacht auf sht"])
     assert [h.intent for h in run.turns[0].hits] == ["teambesprechung"]
-    assert said(run) == ["Verstanden."]
+    assert said(run) == [content.smalltalk().team_ack[0].text]
 
 
 def test_funk_sequence_ends_first_minute(clf):
@@ -328,7 +328,9 @@ GOOD_MINUTE = [
     "ist die lage sicher", "keine bedrohliche blutung", "hallo wir sind vom drk was ist passiert",
     "kollege bitte hws stabilisieren", "bekommen sie gut luft tut das atmen weh", "ich schaue auf die lippen",
     "hautfarbe puls rekap", "bauch becken oberschenkel", "ist ihnen kalt", "wir decken sie zu",
-    "kurze teambesprechung patient wach reagiert angemessen verdacht auf sht notarzt nötig",
+    "teambesprechung wir haben einen patienten männlich ende 60 wach reagiert angemessen",
+    "kopfanprall", "schmerzen im nacken verdacht auf sht und hws trauma",
+    "wir brauchen rtw und nef siehst du das auch so",
     "rotkreuzhamburg von evt eins kommen",
     "männlicher patient ende sechzig gestürzt wach und ansprechbar verdacht auf sht wir brauchen rtw und nef kommen",
     "evt eins ende",
@@ -833,3 +835,33 @@ def test_rescue_service_takes_over_after_silence(clf):
     assert run.next_event_at == 492 + engine.HANDOVER_SILENCE
     run = engine.replay(s, "full", engine.Settings(), log + [{"t": run.next_event_at, "text": "", "tick": True}], clf)
     assert run.ended and "übernehmen" in said(run, "Rettungsdienst")[-1]
+
+
+
+def test_team_talk_in_several_parts(clf):
+    run = play(clf, "basis-sturz", [
+        "teambesprechung", "wir haben einen patienten, männlich, ende 60", "kopfanprall",
+        "schmerzen im nacken und po. verdacht auf hws-problem nach trauma", "wir brauchen rtw und nef. siehst du das auch so?",
+    ])
+    acks = {l.text for l in content.smalltalk().team_ack}
+    assert all(t.lines[0].who == "Kollege" and t.lines[0].text in acks for t in run.turns[:4])
+    assert said(run, "Kollege")[-1] in {l.text for l in content.smalltalk().team_agree}
+    assert "nachforderung" not in run.first and "puls" not in run.first  # Besprechung, keine Handlung
+    team = next(it for it in evaluate.evaluate(run)["sections"][0]["items"] if it["id"] == "team")
+    assert "Reaktion" in team["note"] and "Abschlussfrage" not in team["note"]
+
+
+@pytest.mark.parametrize("question", [
+    "siehst du das auch so", "sehe ich das richtig", "bist du einverstanden", "was meinst du dazu", "stimmst du mir zu",
+    "hast du noch was zu ergänzen", "passt das für dich", "sind wir uns da einig", "wie siehst du das",
+])
+def test_team_talk_closing_variants(clf, question):
+    run = play(clf, "basis-sturz", ["kurze teambesprechung verdacht auf sht", question])
+    assert run.turns[-1].team_closed, question
+
+
+def test_team_talk_without_closing_question_is_noted(clf):
+    run = play(clf, "basis-sturz", ["teambesprechung patient männlich ende 60 wach verdacht auf sht wir brauchen rtw", "hallo herr petersen"])
+    team = next(it for it in evaluate.evaluate(run)["sections"][0]["items"] if it["id"] == "team")
+    assert team["status"] == evaluate.PARTIAL and "Abschlussfrage" in team["note"]
+    assert not run.turns[-1].team  # „Hallo …“ richtet sich an den Patienten

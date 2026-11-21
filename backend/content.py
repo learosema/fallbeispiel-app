@@ -142,6 +142,8 @@ class Smalltalk:
     fallback: list[Line]
     silence: list[Variant] = field(default_factory=list)  # Standard: wacher Patient bei langer Stille
     alone: list[Variant] = field(default_factory=list)    # Standard: Hilferufe, wenn allein gelassen
+    team_ack: list[Line] = field(default_factory=list)    # Kollege während der Teambesprechung
+    team_agree: list[Line] = field(default_factory=list)  # Kollege auf „Siehst du das auch so?“
 
 
 @cache
@@ -162,7 +164,8 @@ def smalltalk() -> Smalltalk:
     fallback = _lines(data.get("fallback"), "smalltalk.fallback")
     if not fallback:
         raise ValueError("smalltalk.fallback: mindestens eine Rückfrage nötig")
-    return Smalltalk(rules, fallback, _variants(data.get("silence"), "smalltalk.silence"), _variants(data.get("alone"), "smalltalk.alone"))
+    return Smalltalk(rules, fallback, _variants(data.get("silence"), "smalltalk.silence"), _variants(data.get("alone"), "smalltalk.alone"),
+                     _lines(data.get("team_ack"), "smalltalk.team_ack"), _lines(data.get("team_agree"), "smalltalk.team_agree"))
 
 
 @cache

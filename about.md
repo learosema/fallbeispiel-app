@@ -102,6 +102,13 @@ Eintrübung/Bewusstlosigkeit.
   Funk wieder (Berichtsformen wie „Tourniquet angelegt“ bleiben Teil der Meldung);
   die Leitstelle mahnt dann „EVT1 von RotkreuzHamburg, bitte Funkdisziplin, beenden Sie das Gespräch.“ (in der
   Auswertung angemerkt, „EVT1 Ende“ danach geht noch).
+- **Teambesprechung** (an den Kollegen, mehrteilig): beginnt mit „Teambesprechung“ / „Verdacht …“ / „kurz
+  zusammengefasst“; der Kollege bestätigt jeden Teil („Ja.“, „Verstanden.“, „Okay.“, „So korrekt.“), während der
+  Besprechung wird nichts ausgeführt („wir brauchen RTW“ ist keine Nachforderung). Abschluss mit „Siehst du das auch
+  so?“ und Varianten – Regex `TEAM_CLOSE` plus Embedding des letzten Teilsatzes gegen `team_close` in
+  `algorithm.yaml` (Schwelle 0,6, Abstand 0,08 zu Aussagesätzen; gemessen: Aussagen ≤ 0,40). Verlassen auch per Funk
+  oder Satz an den Patienten („Hallo …“, „Haben Sie …“, „Ich messe …“). Auswertung: Patient, Reaktion, Verdacht,
+  Nachforderung, Abschlussfrage (`team_talk`).
 - **Übergabe** (ganzer Fall): nach dem Eintreffen des Rettungsdienstes mehrteilig („(nickt)“ je Teil), Abschluss mit
   „Habt ihr noch Fragen?“ / „Das wär's“ / „Übernehmt ihr?“ oder 15 s Stille → „Danke, wir übernehmen.“ Während der
   Übergabe werden keine Maßnahmen ausgeführt. Geprüft werden die gemeinsamen Bausteine von **ISOBAR** und

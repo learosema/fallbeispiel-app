@@ -22,6 +22,17 @@ fallback:  # nichts erkannt, auch kein Smalltalk
   - Kollege: Das hab ich nicht verstanden – sag es bitte konkreter.
   - Kollege: Was soll passieren? Sag es mir genauer.
 
+team_ack:  # Kollege während der Teambesprechung, reihum
+  - Kollege: Ja.
+  - Kollege: Verstanden.
+  - Kollege: Okay.
+  - Kollege: So korrekt.
+team_agree:  # auf „Siehst du das auch so?“ und Varianten, reihum
+  - Kollege: Ja, sehe ich auch so.
+  - Kollege: Sehe ich genauso.
+  - Kollege: Ja, passt so.
+  - Kollege: Ja, einverstanden.
+
 silence:  # wacher Patient, wenn 30 s niemand etwas sagt (Fälle können das mit `silence:` ersetzen oder abschalten)
   - Patient: Hallo? … Was passiert denn jetzt?
   - Patient: Was ist denn los? Sagen Sie doch was!

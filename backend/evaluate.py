@@ -51,6 +51,8 @@ def check_item(item: dict[str, Any], run: Run) -> dict[str, Any]:
         return out | check_reevaluation(run)
     if item.get("special") == "uebergabe":
         return out | check_handover(run)
+    if item.get("special") == "team":
+        return out | check_team(run)
 
     elements: list[Any] = list(item.get("all", [])) or list(item.get("of", []))
     for cond, extra in (item.get("extra") or {}).items():
@@ -202,6 +204,28 @@ def vague_findings(run: Run, embedder=None) -> list[str]:
 REEVAL_INTENTS = ["puls", "spo2", "rr", "af_zaehlen", "atemkontrolle", "gcs", "orientierung", "bz", "rekap", "temperatur"]
 
 
+def _blocks(text: str, blocks: list[dict[str, Any]]) -> list[str]:
+    """Bausteine (label + patterns, optional min), die im Text fehlen."""
+    missing = []
+    for block in blocks:
+        found = {p for p in block["patterns"] if re.search(p.replace("ß", "ss"), text)}
+        if len(found) < block.get("min", 1):
+            missing.append(block["label"])
+    return missing
+
+
+def check_team(run: Run) -> dict[str, Any]:
+    """Teambesprechung: Welche Bausteine kamen in der (mehrteiligen) Besprechung vor?"""
+    parts = [n for n, t in enumerate(run.turns) if t.team]
+    if not parts:
+        return {"status": MISSING, "note": ""}
+    missing = _blocks(normalize(" ".join(run.turns[n].text for n in parts)), algorithm().get("team_talk", []))
+    if not any(run.turns[n].team_closed for n in parts):
+        missing.append("Abschlussfrage an den Kollegen („Siehst du das auch so?“)")
+    return {"status": OK if not missing else PARTIAL, "note": ("Fehlt: " + "; ".join(missing)) if missing else "",
+            "quote": _quote(parts[0], run), "at": (parts[0], 0)}
+
+
 def check_handover(run: Run) -> dict[str, Any]:
     """Übergabe an den Rettungsdienst: Welche Bausteine (ISOBAR/SINNHAFT) kamen im gesamten Übergabetext vor?"""
     parts = [n for n, t in enumerate(run.turns) if t.handover]
@@ -210,12 +234,7 @@ def check_handover(run: Run) -> dict[str, Any]:
             return {"status": PARTIAL, "note": "Übergabe angesagt, bevor der Rettungsdienst da war",
                     "quote": _quote(run.first["uebergabe"][0], run), "at": run.first["uebergabe"]}
         return {"status": MISSING, "note": ""}
-    text = normalize(" ".join(run.turns[n].text for n in parts))
-    missing = []
-    for block in algorithm().get("handover", []):
-        found = {p for p in block["patterns"] if re.search(p.replace("ß", "ss"), text)}
-        if len(found) < block.get("min", 1):
-            missing.append(block["label"])
+    missing = _blocks(normalize(" ".join(run.turns[n].text for n in parts)), algorithm().get("handover", []))
     return {
         "status": OK if not missing else PARTIAL,
         "note": ("Fehlt: " + "; ".join(missing)) if missing else "",
@@ -360,10 +379,6 @@ def evaluate(run: Run, embedder=None) -> dict[str, Any]:
     alg = algorithm()
     minute_def = alg["minute_conscious"] if run.scenario.conscious else alg["minute_unconscious"]
     minute = [check_item(it, run) for it in minute_def]
-    for it in minute:
-        if it["id"] == "team" and it["status"] == OK and it["at"] and not REACTION.search(normalize(run.turns[it["at"][0]].text)):
-            it["status"] = PARTIAL
-            it["note"] = "Reaktion (angemessen?) nicht genannt"
     sections = [{"title": "1. MINUTE", "items": minute}]
     full: list[dict[str, Any]] = []
     if run.mode == "full":

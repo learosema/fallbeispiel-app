@@ -19,6 +19,17 @@ ALONE_FIRST, ALONE_REPEAT, ALONE_LATER = 10, 15, 45  # allein: erster Hilferuf n
 DIED = Line("Befund", "Der Patient ist verstorben. Du kannst die Auswertung starten.")
 AFTER_DEATH = Line("Befund", "(Der Patient ist verstorben.)")
 BACK = Line("Befund", "(Ihr seid wieder beim Patienten.)")
+# Teambesprechung: Abschlussfrage an den Kollegen bzw. ein Satz an den Patienten / eine Handlung, die sie verlässt
+TEAM_CLOSE = re.compile(
+    r"siehst du (das|es) (auch |genauso |ähnlich |genau )?so|siehst du das genauso|wie siehst du (das|es)"
+    r"|sehe? ich (das|es) richtig|stimmt das so|passt das (für dich|so)?\W*$|bist du (damit )?einverstanden|\beinverstanden\W*$"
+    r"|was (meinst|denkst|sagst) du( dazu)?|stimmst du( mir)? zu|bist du (auch )?(der meinung|dabei)|teilst du (die|meine|diese) einschätzung"
+    r"|(hast|willst|möchtest) du (noch )?(was|etwas) (zu )?(ergänzen|hinzufügen)|noch (was|etwas) (zu ergänzen|vergessen)"
+    r"|hab(e)? ich (was|etwas) vergessen|fällt dir noch (was|etwas) ein|kannst du das (so )?mittragen|(sind wir uns|bist du) (da )?einig|\boder\W*$|\brichtig\W*$")
+TEAM_LEAVE = re.compile(r"\bhallo\b|\b(können|haben|sind|bleiben|wissen|hören|spüren|merken|bekommen|frieren) sie\b"
+                        r"|\bich (messe|fühle|prüfe|schaue|lege|mache|decke|taste|höre|gebe|kontrolliere|lagere|leuchte)\b"
+                        r"|^(kollege,? )?(bitte )?(mach|hol|leg|gib|miss|kontrollier|verbind|stabilisier)")
+TEAM_CLOSE_THRESHOLD, TEAM_CLOSE_MARGIN = 0.6, 0.08  # gemessen: Aussagesätze ≤ 0,40, Umschreibungen der Frage 0,55–0,77
 HANDOVER_ACK = Line("Rettungsdienst", "(nickt)")
 HANDOVER_SILENCE = 15  # so lange Stille während der Übergabe, dann übernimmt der Rettungsdienst
 # Abschluss der Übergabe: Rückfragen, Verantwortung abgeben
@@ -63,6 +74,8 @@ class Turn:
     funk: dict[str, Any] | None = None
     unhandled: list[str] = field(default_factory=list)
     tip: str | None = None   # Checklisten-Punkt, zu dem der Kollege hier einen Tipp gegeben hat
+    team: bool = False       # Teil der Teambesprechung
+    team_closed: bool = False  # mit der Abschlussfrage („Siehst du das auch so?“)
     handover: bool = False   # Teil der Übergabe an den Rettungsdienst
 
 
@@ -81,6 +94,33 @@ class Run:
     ended_at: int | None = None             # Äußerung, mit der der Einsatz endete („1. Minute beendet“, Übergabe)
     alone: list[tuple[float, float | None]] = field(default_factory=list)  # Zeiträume, in denen der Patient allein war
     died_at: float | None = None            # Nettozeit, zu der der Patient verstorben ist
+
+
+_team_close_matrix: dict[int, Any] = {}
+
+
+def is_team_close(text: str, clf: Any) -> bool:
+    """Abschlussfrage der Teambesprechung: Regex, sonst Ähnlichkeit des letzten Teilsatzes zu den Beispielfragen."""
+    nt = normalize(text)
+    if TEAM_CLOSE.search(nt):
+        return True
+    emb = getattr(clf, "embedder", None)
+    if emb is None or not hasattr(clf, "_clauses"):
+        return False
+    clauses = clf._clauses(nt)
+    if not clauses:
+        return False
+    ex = algorithm().get("team_close", {})
+    questions, statements = [normalize(q) for q in ex.get("questions", [])], [normalize(q) for q in ex.get("statements", [])]
+    if not questions:
+        return False
+    if id(emb) not in _team_close_matrix:
+        _team_close_matrix[id(emb)] = (emb.embed(questions), emb.embed(statements) if statements else None)
+    q, st = _team_close_matrix[id(emb)]
+    v = emb.embed([clauses[-1][1]])
+    best_q = float((v @ q.T).max())
+    best_s = float((v @ st.T).max()) if st is not None else 0.0
+    return best_q >= TEAM_CLOSE_THRESHOLD and best_q - best_s >= TEAM_CLOSE_MARGIN
 
 
 def compact(text: str) -> str:
@@ -321,6 +361,8 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
         unhandled: list[str] = []
         remind = False  # Funk ohne „… Ende“ verlassen: Die Leitstelle mahnt nach der Antwort
         handover = False
+        team_part = False
+        team_closed = False
         if not tick:
             last_said, silence_done = t, False
         f = None if tick or state.get("verstorben") else funk(text, settings, state, mode, end_minute=not scenario.funk_early)
@@ -342,15 +384,30 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
             # Während eines Funkspruchs zählt nur der Funk – „Verdacht auf …“ ist dann keine Teambesprechung.
             hits, funk_lines, info = f
             lines += funk_lines
+            state["team_offen"] = False
         else:
             hits, info = clf.classify(text), None
             if state.get("allein") and any(h.intent not in ("weggehen", "kurz_weg") and h.source != "implied" for h in hits):
                 state["allein"] = False  # wer etwas am Patienten macht, ist wieder da
                 lines.append(BACK)
-            team = next((h for h in hits if h.intent == "teambesprechung"), None)
-            if team and REACTION.search(normalize(text)) and "reaktion" not in {h.intent for h in hits}:
-                hits.append(Hit("reaktion", team.pos, 1.0, "implied"))
             ids = {h.intent for h in hits}
+            nt = normalize(text)
+            if state.get("team_offen") and "teambesprechung" not in ids and TEAM_LEAVE.search(nt):
+                state["team_offen"] = False  # Satz an den Patienten bzw. Handlung: Besprechung vorbei
+            if ("teambesprechung" in ids or state.get("team_offen")) and not state.get("uebergabe_offen"):
+                # Teambesprechung (oft mehrteilig, an den Kollegen): Er bestätigt jeden Teil, bis „Siehst du das auch so?“
+                team_part = True
+                hits = [h for h in hits if h.intent == "teambesprechung"] or [Hit("teambesprechung", 0, 1.0, "implied")]
+                if REACTION.search(nt):
+                    hits.append(Hit("reaktion", 0, 1.0, "implied"))
+                if is_team_close(text, clf):
+                    team_closed = True
+                    lines.append(rotate("_team_agree", st.team_agree))
+                    state["team_offen"] = False
+                else:
+                    lines.append(rotate("_team_ack", st.team_ack))
+                    state["team_offen"] = True
+                ids = {h.intent for h in hits}
             if state.get("rd_da") and not state.get("uebergeben") and ("uebergabe" in ids or state.get("uebergabe_offen")):
                 # Übergabe (oft mehrteilig): Der Rettungsdienst hört zu, bis Rückfragen/Abschluss kommen
                 handover = True
@@ -367,7 +424,7 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
                     lines.append(HANDOVER_ACK)
                 hits = [h for h in hits if h.intent == "uebergabe"]  # während der Übergabe werden keine Maßnahmen ausgeführt
             for h in hits:
-                if h.source == "implied" or handover:
+                if h.source == "implied" or handover or team_part:
                     continue
                 v = respond(scenario, h.intent, state)
                 if v is None:
@@ -457,7 +514,7 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
         seen: set[Line] = set()
         lines = [Line(l.who, _fill(l.text, settings)) for l in lines]
         lines = [l for l in lines if not (l in seen or seen.add(l))]
-        turns.append(Turn(t, text, hits, lines, info, unhandled, tip, handover))
+        turns.append(Turn(t, text, hits, lines, info, unhandled, tip=tip, handover=handover, team=team_part, team_closed=team_closed))
 
     now = turns[-1].t if turns else 0.0
     extra: list[float] = []
