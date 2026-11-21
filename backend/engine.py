@@ -366,11 +366,12 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
         return scenario.conscious and not state.get("bewusstlos") and not state.get("verstorben")
 
     def speakable(options: list[Variant]) -> list[Line]:
-        """Zeilen der ersten passenden Variante, die gerade jemand sagen kann: der Patient nur, solange er wach ist."""
+        """Zeilen der ersten passenden Variante, die gerade passen: Was der Patient sagt oder tut (Patient, Befund),
+        nur solange er wach ist – sonst reagieren nur noch Umstehende."""
         v = pick(options, state)
         if v is None or state.get("verstorben"):
             return []
-        return [l for l in v.say if l.who != "Patient" or awake()]
+        return [l for l in v.say if awake() or l.who not in ("Patient", "Befund")]
 
     def rotate(key: str, options: list[Line]) -> Line:
         k = said.get(key, 0)
