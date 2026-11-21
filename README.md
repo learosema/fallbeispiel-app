@@ -54,64 +54,100 @@ Die App läuft auf <http://localhost:8000> (nur von diesem Rechner aus erreichba
 ## Öffentlich betreiben
 
 Die App ist ohne Anmeldung nutzbar: Simulation und Auswertung laufen komplett auf dem eigenen Server, ohne KI und
-ohne kostenpflichtige Dienste. Davor gehört ein Reverse Proxy für HTTPS – entweder einer, der auf dem Server ohnehin
-läuft (nginx, Traefik, Caddy …), oder der mitgelieferte Caddy (Zertifikat von Let's Encrypt, automatisch erneuert).
+ohne kostenpflichtige Dienste. Für HTTPS steht ein Reverse Proxy davor, der auf dem Server ohnehin läuft – unten
+am Beispiel nginx mit einem Zertifikat von Let's Encrypt (certbot).
 
 ```
-Browser ──HTTPS──▶ Reverse Proxy ──▶ App (127.0.0.1:8000, von außen nicht erreichbar)
+Browser ──HTTPS──▶ nginx ──▶ App (127.0.0.1:8000, von außen nicht erreichbar)
 ```
 
 ### Voraussetzungen
 
-- Linux-Server mit Docker und Compose-Plugin ab 2.24 (`docker compose version`)
-- eine (Sub-)Domain, deren A/AAAA-Eintrag auf den Server zeigt (`dig +short fallbeispiel.example.org`)
-- Ports 80 und 443 von außen erreichbar – beim mitgelieferten Caddy außerdem frei (kein anderer Webserver darauf)
+- Linux-Server mit Docker und Compose-Plugin ab 2.24 (`docker compose version`), nginx und certbot
+- eine (Sub-)Domain, deren A- und ggf. AAAA-Eintrag auf den Server zeigt (`dig +short fallbeispiel.example.org A`
+  bzw. `AAAA` – Let's Encrypt bevorzugt IPv6, ein veralteter AAAA-Eintrag lässt die Prüfung scheitern)
 - mindestens 2–3 GB RAM (PyTorch und Embedding-Modell) und ca. 5 GB Platz; der erste Build dauert einige Minuten
 
-### 1. Code holen
+### 1. App starten
 
 ```sh
 git clone https://github.com/learosema/fallbeispiel-app.git
 cd fallbeispiel-app
-```
-
-### 2a. Starten hinter dem eigenen Reverse Proxy
-
-```sh
 docker compose up -d --build
 docker compose logs -f        # Strg+C beendet nur die Anzeige
 ```
 
-Den Proxy für die Domain auf `http://127.0.0.1:8000` zeigen lassen. Wichtig für das Rate-Limit: `X-Forwarded-For`
-muss die echte Client-IP enthalten und **überschrieben**, nicht ergänzt werden. Die App nimmt den ersten Eintrag;
-ein angehängter Header ließe Clients eine beliebige IP vorschicken.
+Beim ersten Start lädt die App das Embedding-Modell (~470 MB) ins Volume `hf-cache`. Bis sie bereit ist
+(„Application startup complete“ im Log), antwortet nginx mit 502. Spätere Starts gehen schnell.
+Eine `.env` ist nicht nötig; Einstellungen siehe `.env.example` und [Weitere Einstellungen](#weitere-einstellungen).
 
-nginx (`$remote_addr` statt des üblichen `$proxy_add_x_forwarded_for`):
+### 2. Zertifikat holen
+
+Zuerst nur HTTP, damit Let's Encrypt die Domain prüfen kann (`/etc/nginx/sites-available/fallbeispiel`):
 
 ```nginx
-location / {
-    proxy_pass http://127.0.0.1:8000;
-    proxy_set_header Host $host;
-    proxy_set_header X-Forwarded-For $remote_addr;
-    proxy_set_header X-Forwarded-Proto $scheme;
+server {
+    listen 80;
+    listen [::]:80;
+    server_name fallbeispiel.example.org;
+
+    location /.well-known/acme-challenge/ { root /var/www/html; }
+    location / { return 301 https://$host$request_uri; }
 }
 ```
 
-Caddy (überschreibt den Header von selbst, solange `trusted_proxies` nicht gesetzt ist):
-
+```sh
+sudo ln -s ../sites-available/fallbeispiel /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
+sudo certbot certonly --webroot -w /var/www/html -d fallbeispiel.example.org --deploy-hook "systemctl reload nginx"
 ```
-fallbeispiel.example.org {
-	reverse_proxy 127.0.0.1:8000
+
+Der `--deploy-hook` lädt nginx nach jeder automatischen Verlängerung neu. Ist in `/etc/letsencrypt/cli.ini` schon ein
+anderes Verfahren eingestellt, dasselbe nehmen (sonst: „Too many flags setting configurators“).
+
+### 3. HTTPS einrichten
+
+In dieselbe Datei:
+
+```nginx
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;                       # nginx < 1.25.1: stattdessen „listen 443 ssl http2;“
+    server_name fallbeispiel.example.org;
+
+    ssl_certificate     /etc/letsencrypt/live/fallbeispiel.example.org/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/fallbeispiel.example.org/privkey.pem;
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Forwarded-For   $remote_addr;   # überschreiben, nicht anhängen (siehe unten)
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
 }
 ```
 
-Traefik überschreibt den Header ebenfalls, solange `forwardedHeaders.insecure` bzw. `trustedIPs` nicht gesetzt sind.
-Steht vor dem Proxy noch ein weiterer (z. B. Cloudflare), muss der Proxy die IP von dort übernehmen
-(nginx: `real_ip_header`/`set_real_ip_from`) – sonst teilen sich alle die IP des vorderen Proxys.
+```sh
+sudo nginx -t && sudo systemctl reload nginx
+sudo certbot renew --dry-run
+```
 
-Läuft der Proxy selbst in einem Docker-Container, erreicht er `127.0.0.1:8000` des Servers nicht. Dann die App in
-das Netzwerk des Proxys hängen und ihn auf `http://fallbeispiel-app:8000` zeigen lassen, z. B. mit einer
-`docker-compose.override.yml` (wird von `docker compose` automatisch gelesen):
+Das Zertifikat gilt sofort. Meldet der Browser einen falschen Namen, liefert nginx noch ein anderes Zertifikat aus
+(Block fehlt oder nicht neu geladen) – prüfen mit
+`echo | openssl s_client -connect <DOMAIN>:443 -servername <DOMAIN> 2>/dev/null | openssl x509 -noout -subject`.
+
+**Warum `$remote_addr`:** Das Rate-Limit braucht die echte Client-IP. Die App nimmt den ersten Eintrag aus
+`X-Forwarded-For`; das übliche `$proxy_add_x_forwarded_for` hängt nur an, damit könnte jeder eine beliebige IP
+vorschicken. Steht vor nginx noch ein Proxy (z. B. Cloudflare), zusätzlich `set_real_ip_from` und `real_ip_header`
+setzen, sonst teilen sich alle dessen IP.
+
+**Andere Proxys:** Caddy (`reverse_proxy 127.0.0.1:8000`) und Traefik überschreiben `X-Forwarded-For` von selbst,
+solange keine vertrauenswürdigen Proxys (`trusted_proxies` bzw. `trustedIPs`) eingestellt sind. Läuft der Proxy in
+einem Docker-Container, erreicht er `127.0.0.1:8000` des Servers nicht. Dann die App in sein Netzwerk hängen und ihn
+auf `http://fallbeispiel-app:8000` zeigen lassen, z. B. mit einer `docker-compose.override.yml`
+(wird von `docker compose` automatisch gelesen):
 
 ```yaml
 services:
@@ -127,32 +163,17 @@ networks:
     name: <Netzwerk des Proxys>
 ```
 
-### 2b. Oder: Starten mit dem mitgelieferten Caddy
-
-```sh
-echo "DOMAIN=fallbeispiel.example.org" > .env
-docker compose --profile public up -d --build
-docker compose --profile public logs -f
-```
-
-Weitere Einstellungen sind optional (siehe `.env.example` und [Weitere Einstellungen](#weitere-einstellungen)).
-
-Beim ersten Start lädt die App das Embedding-Modell (~470 MB) ins Volume `hf-cache`. Bis sie bereit ist
-(„Application startup complete“ im Log), antwortet der Proxy mit 502. Spätere Starts gehen schnell.
-
-### 3. Prüfen
+### 4. Prüfen
 
 - `https://<DOMAIN>` öffnen, einen Fall spielen, die Auswertung starten.
 - Im Log der App (`docker compose logs app`) steht bei den Aufrufen deine echte IP – nicht `127.0.0.1` oder `172.…`.
   Sonst setzt der Proxy `X-Forwarded-For` nicht, und alle teilen sich ein Rate-Limit.
 - Von außen ist Port 8000 **nicht** erreichbar: `curl http://<DOMAIN>:8000` muss scheitern.
-- Nur mit mitgeliefertem Caddy: Im Log von Caddy steht `certificate obtained successfully`.
 
 ### Aktualisieren
 
 ```sh
-git pull && docker compose up -d --build                     # eigener Proxy
-git pull && docker compose --profile public up -d --build    # mitgelieferter Caddy
+git pull && docker compose up -d --build
 ```
 
 Nach dem Update laden Browser die neue Version beim nächsten Öffnen (der Service Worker fragt immer zuerst beim Server nach).
@@ -164,20 +185,21 @@ Nach dem Update laden Browser die neue Version beim nächsten Öffnen (der Servi
 - **Überlast:** Jede Anfrage spielt den ganzen Einsatz nach und rechnet ggf. Embeddings. Die App begrenzt deshalb die
   API-Aufrufe pro Client-IP (`RATE_LIMIT`, Standard 300 pro Minute, ein zügiger Einsatz braucht ~20). Teilen sich viele
   Leute eine IP (Lehrgang im selben WLAN) und erscheint „Zu viele Anfragen“, den Wert in `.env` erhöhen und
-  die App mit `docker compose up -d` neu starten (mit Caddy: `--profile public`). Die Grenze gilt pro Prozess und beginnt nach einem Neustart neu.
+  die App mit `docker compose up -d` neu starten. Die Grenze gilt pro Prozess und beginnt nach einem Neustart neu.
 - **Client-IP:** Die App übernimmt sie aus `X-Forwarded-For` (`FORWARDED_ALLOW_IPS=*`). Das ist nur sicher, solange
   Port 8000 nicht nach außen offen ist – in `docker-compose.yml` deshalb `127.0.0.1:8000:8000` lassen – und der Proxy
-  den Header überschreibt (siehe 2a).
+  den Header überschreibt (siehe 3.).
 - **Daten:** Die App speichert nichts. Das Einsatzprotokoll liegt nur im Browser und wird bei jeder Äußerung mitgeschickt.
   Im Log der App stehen nur Zugriffszeilen (Client-IP, Pfad, Status), keine Inhalte. Was dein Proxy protokolliert,
-  regelt seine eigene Konfiguration; der mitgelieferte Caddy schreibt keine Zugriffslogs.
+  regelt seine eigene Konfiguration.
 - **Logs:** `docker compose logs --tail 100 app`
 
 ### Fehlersuche
 
 | Symptom                                   | Ursache / Abhilfe                                                                 |
 |-------------------------------------------|-----------------------------------------------------------------------------------|
-| Kein Zertifikat, Browser warnt            | DNS zeigt noch nicht auf den Server oder Port 80/443 ist zu (Firewall, Cloud-Sicherheitsgruppe). Caddy versucht es selbst erneut. |
+| certbot: Prüfung fehlgeschlagen           | DNS (auch AAAA) zeigt nicht auf den Server, Port 80 ist zu, oder ein anderer `server`-Block fängt die Anfrage ab. Test: Datei nach `/var/www/html/.well-known/acme-challenge/test` legen und per `curl http://<DOMAIN>/.well-known/acme-challenge/test` abrufen |
+| Browser: falscher Name im Zertifikat      | nginx liefert ein anderes Zertifikat aus – 443-Block fehlt oder nginx nicht neu geladen (siehe 3.) |
 | Alle bekommen schnell „Zu viele Anfragen“ | Proxy gibt die Client-IP nicht weiter – im App-Log steht überall dieselbe IP (siehe 3. Prüfen) |
 | 502 Bad Gateway                           | App startet noch (Modell-Download) oder ist abgestürzt: `logs app`                |
 | App wird beendet, `Killed` im Log         | zu wenig RAM – Swap anlegen oder größeren Server nehmen                           |
