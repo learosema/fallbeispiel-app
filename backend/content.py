@@ -119,6 +119,42 @@ def intents() -> dict[str, Intent]:
     return out
 
 
+@dataclass
+class SmalltalkRule:
+    id: str
+    patterns: list[re.Pattern]
+    say: list[Line]                # Varianten, reihum
+    repeat: bool = False           # vorige Antworten wiederholen („Wie bitte?“)
+    max_words: int | None = None   # für nicht verankerte Muster
+    tip: bool = False              # Bitte um Hilfe: Tipp zum nächsten offenen Punkt der Checkliste
+
+
+@dataclass
+class Smalltalk:
+    rules: list[SmalltalkRule]
+    fallback: list[Line]
+
+
+@cache
+def smalltalk() -> Smalltalk:
+    data = yaml.safe_load((CONTENT_DIR / "smalltalk.yaml").read_text(encoding="utf-8"))
+    rules = []
+    for rid, d in (data.get("rules") or {}).items():
+        say = _lines(d.get("say"), f"smalltalk.{rid}.say")
+        repeat = bool(d.get("repeat", False))
+        if not say and not repeat:
+            raise ValueError(f"smalltalk.{rid}: braucht say oder repeat")
+        # wie im Classifier: Muster gelten für normalisierten Text (ß → ss), Groß/klein regelt re.I
+        pats = [re.compile(p.replace("ß", "ss"), re.I) for p in d.get("patterns", [])]
+        if not pats:
+            raise ValueError(f"smalltalk.{rid}: keine patterns")
+        rules.append(SmalltalkRule(rid, pats, say, repeat, d.get("max_words"), bool(d.get("tip", False))))
+    fallback = _lines(data.get("fallback"), "smalltalk.fallback")
+    if not fallback:
+        raise ValueError("smalltalk.fallback: mindestens eine Rückfrage nötig")
+    return Smalltalk(rules, fallback)
+
+
 @cache
 def algorithm() -> dict[str, Any]:
     data = yaml.safe_load((CONTENT_DIR / "algorithm.yaml").read_text(encoding="utf-8"))
@@ -128,6 +164,8 @@ def algorithm() -> dict[str, Any]:
             for ref in _item_refs(item):
                 if ref not in known:
                     raise ValueError(f"algorithm.{section}.{item['id']}: unbekannter Intent {ref!r}")
+            if not str(item.get("tip") or "").strip():
+                raise ValueError(f"algorithm.{section}.{item['id']}: tip fehlt (was der Kollege auf Nachfrage sagt)")
     return data
 
 

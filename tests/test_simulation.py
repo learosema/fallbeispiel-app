@@ -64,8 +64,93 @@ def test_regex_patterns_hit_their_examples(clf):
 # ---------- Engine ----------
 
 def test_unrecognised_utterance_gets_fallback(clf):
-    run = play(clf, "basis-sturz", ["schönes wetter heute"])
+    run = play(clf, "basis-sturz", ["die blaue banane tanzt"])
     assert said(run) == [engine.FALLBACK.text]
+
+
+def test_fallback_varies_but_starts_with_the_documented_question(clf):
+    assert content.smalltalk().fallback[0] == engine.FALLBACK
+    run = play(clf, "basis-sturz", ["die blaue banane tanzt"] * 2)
+    replies = said(run, "Kollege")
+    assert replies[0] == engine.FALLBACK.text and replies[1] != replies[0]
+
+
+@pytest.mark.parametrize("text,reply", [
+    ("danke", "Gerne"),
+    ("okay", "Okay"),
+    ("Moment bitte!", "Ansage"),
+    ("Scheiße", "Schritt für Schritt"),
+    ("was soll ich jetzt machen", "Einsatzstelle"),  # Tipp: erster offener Punkt ist die Lage
+    ("gib mir mal das", "Was genau brauchst du"),
+    ("schönes wetter heute", "Später"),
+])
+def test_smalltalk_gets_an_answer_but_no_intent(clf, text, reply):
+    run = play(clf, "basis-sturz", [text])
+    assert not run.turns[0].hits
+    assert reply in " ".join(said(run))
+
+
+def test_smalltalk_does_not_nod_off_unclear_actions(clf):
+    # verankerte Muster: ein langer, nicht erkannter Satz bekommt weiter eine Rückfrage
+    run = play(clf, "basis-sturz", ["okay ich mache jetzt das dings"])
+    assert said(run) == [engine.FALLBACK.text]
+
+
+def test_smalltalk_rotates_and_repeats(clf):
+    run = play(clf, "basis-sturz", ["danke", "danke", "wie bitte"])
+    replies = said(run)
+    assert replies[0] != replies[1]
+    assert replies[2] == replies[1]
+
+
+def play_settings(clf, sid, lines, settings, mode="minute"):
+    s = content.scenarios()[sid]
+    return engine.replay(s, mode, settings, [{"t": 8 * (i + 1), "text": t} for i, t in enumerate(lines)], clf)
+
+
+def test_tip_names_the_next_open_checklist_item(clf):
+    run = play(clf, "basis-sturz", ["ist die einsatzstelle sicher", "hast du einen tipp"])
+    assert run.turns[1].tip == "blutung"
+    assert "Blutung" in said(run, "Kollege")[-1]
+
+
+def test_no_tips_when_switched_off(clf):
+    run = play_settings(clf, "basis-sturz", ["hast du einen tipp"], engine.Settings(tips=False))
+    assert run.turns[0].tip is None
+    assert "Leitung" in said(run)[0]
+
+
+def test_tip_when_everything_is_done(clf):
+    s = content.scenarios()["basis-sturz"]
+    run = play(clf, "basis-sturz", ["was fehlt noch"])
+    done = set(content.intents())  # alles erledigt
+    assert engine.next_open(s, "minute", done) is None
+    assert run.turns[0].tip == "lage"
+
+
+def test_tips_do_not_reveal_the_breathing_finding():
+    alg = content.algorithm()
+    by_id = {it["id"]: it["tip"] for it in alg["minute_unconscious"]}
+    assert by_id["seitenlage"] == by_id["hlw"]
+
+
+def test_tips_are_noted_in_the_evaluation_but_keep_the_verdict(clf):
+    steps = ["ist die einsatzstelle sicher", "ich ziehe handschuhe an", "hallo ich bin vom drk was ist passiert"]
+    plain = evaluate.evaluate(play(clf, "basis-sturz", ["ist die einsatzstelle sicher", "hast du einen tipp", "ich prüfe auf bedrohliche blutungen"]))
+    blut = next(i for sec in plain["sections"] for i in sec["items"] if i["id"] == "blutung")
+    assert blut["status"] == evaluate.OK and "nach Tipp" in blut["note"]
+    assert "Blutung erst nach Tipp vom Kollegen" in plain["improve"]
+    other = evaluate.evaluate(play(clf, "basis-sturz", ["ist die einsatzstelle sicher", "okay", "ich prüfe auf bedrohliche blutungen"]))
+    assert plain["verdict"] == other["verdict"]
+
+
+def test_smalltalk_does_not_change_the_evaluation(clf):
+    steps = ["ist die einsatzstelle sicher", "ich ziehe handschuhe an", "hallo ich bin vom drk was ist passiert"]
+    plain = evaluate.evaluate(play(clf, "basis-sturz", steps))
+    chatty = evaluate.evaluate(play(clf, "basis-sturz", ["okay", steps[0], "danke", steps[1], "moment", steps[2]], step=4))
+    def keys(r):
+        return [(i["label"], i["status"]) for sec in r["sections"] for i in sec["items"] if sec["title"] != "ZEITLEISTE"]
+    assert keys(plain) == keys(chatty)
 
 
 def test_state_dependent_response(clf):

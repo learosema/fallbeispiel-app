@@ -47,6 +47,7 @@ class RunRequest(BaseModel):
     mode: Literal["minute", "full"] = "minute"
     callsign: str = Field(default="EVT1", min_length=1, max_length=40)
     dispatcher: str = Field(default="RotkreuzHamburg", min_length=1, max_length=60)
+    tips: bool = True   # Kollege gibt auf Nachfrage Tipps
     log: list[Utterance] = Field(min_length=1, max_length=300)
 
     @model_validator(mode="after")
@@ -135,7 +136,7 @@ def _run(req: RunRequest) -> engine.Run:
     scenario = content.scenarios().get(req.scenario)
     if scenario is None:
         raise HTTPException(404, "Unbekannter Fall.")
-    settings = engine.Settings(callsign=req.callsign.strip(), dispatcher=req.dispatcher.strip())
+    settings = engine.Settings(callsign=req.callsign.strip(), dispatcher=req.dispatcher.strip(), tips=req.tips)
     return engine.replay(scenario, req.mode, settings, [u.model_dump() for u in req.log], classifier.get())
 
 

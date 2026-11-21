@@ -130,3 +130,21 @@
   no_reply: Was genau
 - text: verbind bitte die platzwunde
   expect: [wunde_versorgen]
+
+# ---- Smalltalk: Antwort vom Kollegen, aber kein Intent und keine Rückfrage
+- text: danke
+  reply: Gerne
+- text: Moment bitte
+  reply: Ansage
+  no_reply: Was genau
+- text: was soll ich jetzt machen
+  reply: Einsatzstelle
+  no_reply: Was genau
+- text: hast du einen tipp kollege
+  reply: Einsatzstelle
+- text: hab ich was vergessen
+  reply: Einsatzstelle
+- text: scheiße
+  reply: Schritt für Schritt
+- text: okay ich mache jetzt das dings
+  reply: Was genau machst du
