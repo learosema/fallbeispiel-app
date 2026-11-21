@@ -206,9 +206,11 @@
     M: "Em", N: "En", O: "O", P: "Pe", Q: "Ku", R: "Er", S: "Ess", T: "Te", U: "U", V: "Fau", W: "We", X: "Ix", Y: "Üpsilon", Z: "Zett",
     Ä: "Ä", Ö: "Ö", Ü: "Ü" };
   const SPELLED = ["RTW", "KTW", "DRK", "AED", "HWS", "SHT", "GCS", "EKG", "AVPU", "BZ", "RR"];
+  // Aussprache, wo die Stimme sonst danebenliegt (Ergänzungen einfach hier eintragen)
+  const PRONOUNCE = [[/\bSAN-?memo\b/gi, "San-Memo"]];
   const spell = (word) => [...word].map((ch) => LETTERS[ch.toUpperCase()] ?? ch).join(" ");
   function forSpeech(text) {
-    let out = text;
+    let out = PRONOUNCE.reduce((s, [re, say]) => s.replace(re, say), text);
     const cs = String(settings.callsign || "").trim();
     if (/[A-Za-zÄÖÜäöü]/.test(cs)) {
       // Buchstaben und Ziffern des Rufnamens, im Text auch mit Leerzeichen dazwischen („EVT 1“)
