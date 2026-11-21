@@ -11,10 +11,11 @@ from dataclasses import dataclass, field
 from typing import Any, Protocol
 
 from .classifier import Hit, normalize
-from .content import Line, Scenario, Variant, intents
+from .content import Line, Scenario, Variant, algorithm, intents, smalltalk
 
 ARRIVAL_SECONDS = 480  # Rettungsdienst trifft ca. 8 Minuten nach der Nachforderung ein
-FALLBACK = Line("Kollege", "Was genau machst du?")
+FALLBACK = Line("Kollege", "Was genau machst du?")  # erste Rückfrage; weitere Varianten in content/smalltalk.yaml
+TIP_DONE = Line("Kollege", "Von mir aus haben wir alles. Du entscheidest, wie es weitergeht.")
 # Erkannt, aber der Fall hat keine Antwort: lieber nachfragen als einen Befund erfinden.
 UNHANDLED = Line("Kollege", "Was genau meinst du?")
 
@@ -37,6 +38,7 @@ class Classifier(Protocol):
 class Settings:
     callsign: str = "EVT1"
     dispatcher: str = "RotkreuzHamburg"
+    tips: bool = True   # Kollege gibt auf Nachfrage einen Tipp zum nächsten offenen Punkt der Checkliste
 
 
 @dataclass
@@ -47,6 +49,7 @@ class Turn:
     lines: list[Line]
     funk: dict[str, Any] | None = None
     unhandled: list[str] = field(default_factory=list)
+    tip: str | None = None   # Checklisten-Punkt, zu dem der Kollege hier einen Tipp gegeben hat
 
 
 @dataclass
@@ -161,6 +164,67 @@ def funk(text: str, s: Settings, state: dict[str, Any], mode: str) -> tuple[list
     return hits, lines, info
 
 
+# ---------- Smalltalk ----------
+
+def smalltalk_rule(text: str):
+    """Regel aus content/smalltalk.yaml für eine kurze Äußerung ohne fachliche Handlung (oder None)."""
+    t = re.sub(r"[^\w\s]", " ", normalize(text))
+    t = re.sub(r"\s+", " ", t).strip()
+    if not t:
+        return None
+    words = len(t.split())
+    for rule in smalltalk().rules:
+        if rule.max_words and words > rule.max_words:
+            continue
+        if any(p.search(t) for p in rule.patterns):
+            return rule
+    return None
+
+
+# ---------- Tipps vom Kollegen ----------
+
+def applies(cond: str | None, s: Scenario) -> bool:
+    """Gilt eine `only`/`extra`-Bedingung aus algorithm.yaml für diesen Fall?"""
+    return {
+        None: True,
+        "trauma": s.trauma,
+        "bleeding": s.bleeding,
+        "conscious": s.conscious,
+        "unconscious": not s.conscious,
+        "breathing_normal": not s.conscious and s.breathing == "normal",
+        "breathing_abnormal": not s.conscious and s.breathing != "normal",
+    }[cond]
+
+
+def checklist(scenario: Scenario, mode: str) -> list[dict[str, Any]]:
+    """Die Punkte der Checkliste in Reihenfolge: 1. Minute, im ganzen Fall danach xABCDE (ohne ausgeblendete)."""
+    alg = algorithm()
+    items = list(alg["minute_conscious"] if scenario.conscious else alg["minute_unconscious"])
+    if mode == "full":
+        items += alg["full"]
+    return [it for it in items if it["id"] not in scenario.skip and applies(it.get("only"), scenario)]
+
+
+def item_done(item: dict[str, Any], scenario: Scenario, done: set[str]) -> bool:
+    """Vereinfachte Fassung von evaluate.check_item: Ist der Punkt vollständig erledigt?"""
+    if item.get("special") == "funk":
+        return "funk_meldung" in done and "funk_ende" in done
+    if item.get("special") == "reevaluation":
+        return "reevaluation" in done
+    elements: list[Any] = list(item.get("all", [])) or list(item.get("of", []))
+    for cond, extra in (item.get("extra") or {}).items():
+        if applies(cond, scenario):
+            elements += extra
+    if "any" in item:
+        elements = [list(item["any"])]
+    need = item.get("min", len(elements))
+    return sum(any(i in done for i in (el if isinstance(el, list) else [el])) for el in elements) >= need
+
+
+def next_open(scenario: Scenario, mode: str, done: set[str]) -> dict[str, Any] | None:
+    return next((it for it in checklist(scenario, mode) if not item_done(it, scenario, done)), None)
+
+
 # ---------- Wiederholung des Einsatzes ----------
 
 def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str, Any]], clf: Classifier) -> Run:
@@ -172,6 +236,12 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
     fired_log: list[tuple[int, int]] = []
     ended_at: int | None = None
     turns: list[Turn] = []
+    said: dict[str, int] = {}  # Smalltalk-Regel bzw. Rückfrage → wie oft schon (für die Varianten reihum)
+
+    def rotate(key: str, options: list[Line]) -> Line:
+        k = said.get(key, 0)
+        said[key] = k + 1
+        return options[k % len(options)]
 
     def apply(v: Variant, t: float) -> None:
         state.update(v.set)
@@ -226,12 +296,27 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
 
         if state.get("_beendet") and ended_at is None:
             ended_at = n
+        tip: str | None = None
+        if not hits and not tick and f is None and (rule := smalltalk_rule(text)):
+            # zählt nicht in die Auswertung: keine Treffer, nur eine Antwort (Tipps merkt sich die Auswertung)
+            if rule.tip and settings.tips:
+                item = next_open(scenario, mode, set(first))
+                if item:
+                    tip = item["id"]
+                    lines = [Line("Kollege", item["tip"])] + lines
+                else:
+                    lines = [TIP_DONE] + lines
+            elif rule.repeat:
+                prev = next((tt.lines for tt in reversed(turns) if tt.lines), [])
+                lines = list(prev or [Line("Kollege", "Es hat noch niemand etwas gesagt.")]) + lines
+            else:
+                lines = [rotate(rule.id, rule.say)] + lines
         if not hits and not lines and not tick:
-            lines.append(FALLBACK)
+            lines.append(rotate("_fallback", smalltalk().fallback))
         seen: set[Line] = set()
         lines = [Line(l.who, _fill(l.text, settings)) for l in lines]
         lines = [l for l in lines if not (l in seen or seen.add(l))]
-        turns.append(Turn(t, text, hits, lines, info, unhandled))
+        turns.append(Turn(t, text, hits, lines, info, unhandled, tip))
 
     return Run(scenario, mode, settings, turns, state, first, first_t, bool(state.get("_beendet")),
                _next_event_at(scenario, state, fired, first_t, turns[-1].t if turns else 0.0), fired_log, ended_at)

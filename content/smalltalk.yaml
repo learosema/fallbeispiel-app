@@ -1,0 +1,117 @@
+# Smalltalk: Antworten auf kurze Äußerungen ohne fachliche Handlung („Danke“, „Moment“, „Mist“).
+#
+# Greift nur, wenn in der Äußerung KEIN Intent erkannt wurde, und zählt nicht in die Auswertung.
+# Muster werden auf den ganzen normalisierten Satz angewendet (klein, ß → ss, Satzzeichen → Leerzeichen)
+# und sind mit ^…$ verankert: Ein langer, nicht erkannter Satz („okay ich mache jetzt das dings“)
+# soll weiter eine Rückfrage bekommen, statt mit „Okay.“ abgenickt zu werden.
+#
+# Je Regel:
+#   patterns  Regex (ein Treffer reicht)
+#   say       Antwortvarianten, reihum (erste beim ersten Mal, dann die nächste …)
+#   repeat    true: wiederholt stattdessen die Antworten der vorigen Äußerung („Wie bitte?“)
+#   tip       true: Bitte um Hilfe – Tipp zum nächsten offenen Punkt der Checkliste (abschaltbar)
+#
+# Leitlinien: Fachliche Tipps nur über `tip` (auf Nachfrage); nichts über verborgene Befunde des Falls.
+# Nichts, was sich auch an Patient:innen richten könnte (Kinderfälle duzen!), z. B. „Wie geht's dir?“ –
+# außer es nennt ausdrücklich den Kollegen.
+
+fallback:  # nichts erkannt, auch kein Smalltalk
+  - Kollege: Was genau machst du?
+  - Kollege: Wie meinst du das?
+  - Kollege: Das hab ich nicht verstanden – sag es bitte konkreter.
+  - Kollege: Was soll passieren? Sag es mir genauer.
+
+rules:
+  wiederholen:
+    patterns:
+      - ^(wie bitte|bitte was|hä|häh|was|was hat (er|sie) gesagt|was hast du gesagt|was haben sie gesagt|(kannst du |können sie )?(das )?(noch ?mal|nochmal) (wiederholen|sagen)( bitte)?|noch ?mal bitte|bitte noch ?mal)$
+    repeat: true
+
+  danke:
+    patterns:
+      - ^(danke|danke dir|danke schön|dankeschön|danke sehr|vielen dank|merci|thx)( kollege| kollegin)?$
+    say:
+      - Kollege: Gerne.
+      - Kollege: Klar doch.
+      - Kollege: Kein Ding.
+
+  lob:
+    patterns:
+      - ^((das hast du |hast du )?(gut|super|klasse|toll|stark|prima|sehr gut) gemacht|gute arbeit|danke für (die|deine) hilfe|wir sind ein gutes team)( kollege| kollegin)?$
+    say:
+      - Kollege: Danke, du auch.
+      - Kollege: Gerne. Wir sind ein gutes Team.
+
+  bestaetigung:
+    patterns:
+      - ^(ok|okay|okey|oke|o k|alles klar|klar|gut|sehr gut|verstanden|passt|in ordnung|jawohl|ja|jo|jep|jup|genau|super|prima|perfekt|alles klar danke|okay danke|gut danke)( kollege| kollegin)?$
+    say:
+      - Kollege: Okay.
+      - Kollege: Alles klar.
+      - Kollege: Verstanden.
+
+  warten:
+    patterns:
+      - ^((einen?|eine) )?(moment|momentchen|augenblick|sekunde|sekündchen)( bitte| mal| noch)?$
+      - ^(warte|wart|warte mal|wart mal|warte kurz|kurz warten|warte bitte)( kollege| kollegin)?$
+      - ^(ich (überlege|ueberlege|denke) (kurz|mal|nach|kurz nach)|lass mich (kurz |mal )?(überlegen|ueberlegen|nachdenken)|äh+|ähm+|öhm+|hm+|also|schauen wir mal|mal sehen)$
+    say:
+      - Kollege: Ich warte auf deine Ansage.
+      - Kollege: Klar, sag Bescheid.
+      - Kollege: Okay, ich bin da.
+
+  unsicher:  # Bitte um Hilfe: mit Tipps (Einstellung, Standard an) nennt der Kollege den nächsten offenen
+             # Punkt der Checkliste (`tip` in algorithm.yaml), sonst eine der Antworten unter `say`
+    patterns:
+      - ^((kollege|kollegin) )?(ich weiss (nicht|nich|net) (weiter|mehr|was ich machen soll)|was (soll|sollen) (ich|wir) (jetzt |nun |als nächstes )?(machen|tun)|was (machen|tun) wir (jetzt|nun|als nächstes)|was jetzt|und jetzt|hilf mir( mal)?|keine ahnung|ich bin (unsicher|überfordert|ueberfordert)|hast du (eine idee|einen tipp|nen tipp|einen vorschlag)|(gib mir |hast du )?(mal )?(einen|nen) tipp( bitte)?|tipp bitte|was fehlt (noch|mir noch)|fehlt noch was|hab(e)? ich (was|etwas|irgendwas) vergessen|was hab(e)? ich vergessen|was würdest du (jetzt |als nächstes )?(machen|tun)|was kommt (jetzt|als nächstes))( kollege| kollegin)?$
+    tip: true
+    say:  # ohne Tipps: die Einsatzleitung bleibt bei dir
+      - Kollege: Du hast die Leitung. Sag mir, was ich machen soll.
+      - Kollege: Ich bin bei dir. Geh in Ruhe dein Schema durch.
+      - Kollege: Was brauchst du von mir?
+
+  fluchen:
+    patterns:
+      - ^((oh |ach |ach du )?(scheisse|mist|verdammt|verdammte scheisse|shit|fuck|kacke)|oh (gott|nein|mann|je)|ohje|oje|mann|alter)$
+    say:
+      - Kollege: Ruhig. Wir machen das Schritt für Schritt.
+      - Kollege: Alles gut, ich bin da.
+      - Kollege: Tief durchatmen. Weiter geht's.
+
+  bereit:
+    patterns:
+      - ^((bist du |seid ihr )?(bereit|so weit|soweit|fertig)|kann es losgehen|kanns losgehen|los gehts|los geht es|los|auf gehts|lass uns (anfangen|loslegen|starten)|fangen wir an|weiter gehts|weiter|machen wir weiter)( kollege| kollegin)?$
+    say:
+      - Kollege: Bin bereit.
+      - Kollege: Bin dabei.
+
+  kollege_befinden:
+    patterns:
+      - ^(hallo|hi|moin|na)?( ?)(kollege|kollegin)( wie gehts| wie geht es dir| alles (gut|ok|okay|klar)( bei dir)?)?$
+      - ^(wie gehts|wie geht es) (dir )?(kollege|kollegin)$
+      - ^(alles (gut|ok|okay|klar) bei dir|bei dir alles (gut|ok|okay|klar))$
+    say:
+      - Kollege: Alles gut, ich bin bereit.
+      - Kollege: Passt bei mir. Was soll ich machen?
+
+  was_machst_du:  # an den Kollegen gerichtet
+    patterns:
+      - ^(und )?(was machst du( gerade| da| jetzt)?|was tust du( gerade| da)?)( kollege| kollegin)?$
+    say:
+      - Kollege: Ich warte auf deine Ansage.
+      - Kollege: Ich bin bei dir und mache, was du ansagst.
+
+  unklare_bitte:  # „Gib mir mal das“ – was denn?
+    patterns:
+      - ^((kannst du |könntest du )?(gib|reich|reichst|gibst|geben|reichen|halt|halte|halten|hol|holen) (mir )?(mal |bitte |kurz |doch )*(das|die|den|es|das hier|das da|das ding)?( mal| bitte| kurz| her)*)$
+    say:
+      - Kollege: Was genau brauchst du?
+      - Kollege: Was soll ich dir geben?
+
+  nebenbei:  # Themen ohne Bezug zum Einsatz
+    patterns:
+      - (wetter|regen|hunger|kaffee|feierabend|wochenende|fussball|mittagessen|kantine|urlaub|kino|witz)
+    max_words: 8
+    say:
+      - Kollege: Später gern – erst mal der Einsatz.
+      - Kollege: Erzähl ich dir nach dem Einsatz.

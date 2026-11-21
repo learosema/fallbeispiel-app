@@ -13,6 +13,13 @@ Jeder Intent ist ein Schritt („Puls“, „Decke“, „Rückenschläge“ …
 - `default`: Antwort, wenn ein Fall selbst keine festlegt (typisch: Handgriffe des Kollegen).
 - `implies` / `overrides` / `exclusive`: siehe Kommentar am Dateianfang.
 
+## `smalltalk.yaml` – Antworten ohne fachliche Handlung
+
+Greift nur, wenn kein Intent erkannt wurde, und zählt nicht in die Auswertung. Jede Regel hat `patterns` (auf den ganzen
+Satz, mit `^…$` verankert, damit lange unklare Sätze weiter eine Rückfrage bekommen) und `say` (Varianten reihum) oder
+`repeat: true` (wiederholt die letzte Antwort). `fallback` sind die Rückfragen, wenn gar nichts passt. Keine
+fachlichen Tipps, nichts, was sich an Patient:innen richten könnte.
+
 ## `algorithm.yaml` – wie ausgewertet wird
 
 Checklisten für die 1. Minute (wach / bewusstlos) und den ganzen Fall, plus Beispielsätze für die Befundsprache.

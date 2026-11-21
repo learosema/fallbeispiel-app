@@ -7,53 +7,58 @@
 #   only: trauma | bleeding | conscious | unconscious | breathing_normal | breathing_abnormal
 #   extra: {trauma: [...]} zusätzliche Elemente, wenn die Bedingung für den Fall gilt
 #   special: funk | reevaluation
+#   tip: was der Kollege auf Nachfrage sagt, solange der Punkt offen ist („Hast du einen Tipp?“).
+#        Keine verborgenen Befunde verraten.
 # Fälle können einzelne Punkte per `skip: [id]` ausblenden („–“).
 
 minute_conscious:
-  - {id: lage, short: Lage, label: "Sicherheit und Lage", any: [lage_pruefen]}
-  - {id: blutung, short: Blutung, label: "Bedrohliche Blutung geprüft", any: [blutung_pruefen]}
-  - {id: ansprache, short: Ansprache, label: "Vorstellung und Ansprache (Hallo, wir sind vom DRK, was ist passiert?)", all: [vorstellen, was_passiert]}
-  - {id: hws, short: HWS, label: "HWS bei Trauma (manuelle Stabilisierung)", any: [hws_manuell], only: trauma}
-  - {id: atmung, short: Atmung, label: "Atmung (Luft? Schmerzen beim Atmen? Zyanose?)", all: [[atmung_fragen, atmung_beurteilen], schmerz_atmen, zyanose]}
+  - {id: lage, short: Lage, label: "Sicherheit und Lage", any: [lage_pruefen], tip: "Ist die Einsatzstelle eigentlich sicher? Schau dich mal um."}
+  - {id: blutung, short: Blutung, label: "Bedrohliche Blutung geprüft", any: [blutung_pruefen], tip: "Hast du schon nach einer bedrohlichen Blutung geschaut?"}
+  - {id: ansprache, short: Ansprache, label: "Vorstellung und Ansprache (Hallo, wir sind vom DRK, was ist passiert?)", all: [vorstellen, was_passiert], tip: "Wollen wir uns vorstellen und fragen, was passiert ist?"}
+  - {id: hws, short: HWS, label: "HWS bei Trauma (manuelle Stabilisierung)", any: [hws_manuell], only: trauma, tip: "Denk beim Unfallhergang an die HWS."}
+  - {id: atmung, short: Atmung, label: "Atmung (Luft? Schmerzen beim Atmen? Zyanose?)", all: [[atmung_fragen, atmung_beurteilen], schmerz_atmen, zyanose], tip: "Wie sieht es mit der Atmung aus? Luft, Schmerzen beim Atmen, Zyanose?"}
   - id: kreislauf
+    tip: "Hast du dir den Kreislauf schon angeschaut? Hautfarbe, Puls, Rekap."
     short: Kreislauf
     label: Kreislauf (Hautfarbe, Puls, Rekap-Zeit, bei Trauma Bauch/Becken/Oberschenkel)
     all: [hautfarbe, puls, rekap]
     extra: {trauma: [trauma_check]}
-  - {id: neuro, short: Neurologie, label: "Neurologie (Reaktion angemessen, Orientierung)", any: [orientierung, gcs]}
-  - {id: umfeld, short: Umfeld, label: "Umfeld (Verletzungsmechanismus, Frieren)", any: [frieren_fragen, decke]}
-  - {id: waerme, short: Wärme, label: "Wärmeerhalt (Decke, Isolation vom Boden)", any: [decke]}
-  - {id: team, short: Team, label: "Teambesprechung (Lage, Verdachtsdiagnose, Notarzt)", any: [teambesprechung]}
-  - {id: funk, short: Funk, label: "Funkspruch an die Leitstelle", special: funk}
+  - {id: neuro, short: Neurologie, label: "Neurologie (Reaktion angemessen, Orientierung)", any: [orientierung, gcs], tip: "Wie ist es mit der Neurologie? Reaktion, Orientierung?"}
+  - {id: umfeld, short: Umfeld, label: "Umfeld (Verletzungsmechanismus, Frieren)", any: [frieren_fragen, decke], tip: "Und das Umfeld? Friert die Person?"}
+  - {id: waerme, short: Wärme, label: "Wärmeerhalt (Decke, Isolation vom Boden)", any: [decke], tip: "Denk an den Wärmeerhalt."}
+  - {id: team, short: Team, label: "Teambesprechung (Lage, Verdachtsdiagnose, Notarzt)", any: [teambesprechung], tip: "Lass uns kurz besprechen: Lage, dein Verdacht, brauchen wir den Notarzt?"}
+  - {id: funk, short: Funk, label: "Funkspruch an die Leitstelle", special: funk, tip: "Sollen wir die Leitstelle anfunken?"}
 
 minute_unconscious:
-  - {id: lage, short: Lage, label: "Sicherheit und Lage", any: [lage_pruefen]}
-  - {id: blutung, short: Blutung, label: "Bedrohliche Blutung geprüft", any: [blutung_pruefen]}
-  - {id: ansprechen, short: Ansprechen, label: "Laut ansprechen, anfassen, ggf. Schmerzreiz", any: [laut_ansprechen, schmerzreiz]}
-  - {id: atemwege, short: Atemwege, label: "Atemwege freimachen (Kopf überstrecken, Kinn anheben)", any: [atemwege_freimachen]}
-  - {id: atemkontrolle, short: Atemkontrolle, label: "Atemkontrolle (sehen, hören, fühlen, max. 10 s)", any: [atemkontrolle, atmung_beurteilen]}
-  - {id: seitenlage, short: Seitenlage, label: "Atmung normal: stabile Seitenlage", any: [seitenlage], only: breathing_normal}
-  - {id: hlw, short: HLW, label: "Atmung nicht normal: sofort HLW 30:2", any: [hlw], only: breathing_abnormal}
-  - {id: waerme, short: Wärme, label: "Wärmeerhalt (Decke, Isolation vom Boden)", any: [decke]}
-  - {id: funk, short: Funk, label: "Funkspruch an die Leitstelle", special: funk}
+  - {id: lage, short: Lage, label: "Sicherheit und Lage", any: [lage_pruefen], tip: "Ist die Einsatzstelle eigentlich sicher? Schau dich mal um."}
+  - {id: blutung, short: Blutung, label: "Bedrohliche Blutung geprüft", any: [blutung_pruefen], tip: "Hast du schon nach einer bedrohlichen Blutung geschaut?"}
+  - {id: ansprechen, short: Ansprechen, label: "Laut ansprechen, anfassen, ggf. Schmerzreiz", any: [laut_ansprechen, schmerzreiz], tip: "Reagiert die Person? Sprich sie laut an, fass sie an."}
+  - {id: atemwege, short: Atemwege, label: "Atemwege freimachen (Kopf überstrecken, Kinn anheben)", any: [atemwege_freimachen], tip: "Denk an die Atemwege: Kopf überstrecken, Kinn anheben."}
+  - {id: atemkontrolle, short: Atemkontrolle, label: "Atemkontrolle (sehen, hören, fühlen, max. 10 s)", any: [atemkontrolle, atmung_beurteilen], tip: "Atmet die Person? Sehen, hören, fühlen."}
+  - {id: seitenlage, short: Seitenlage, label: "Atmung normal: stabile Seitenlage", any: [seitenlage], only: breathing_normal, tip: "Du hast die Atmung kontrolliert. Was folgt daraus?"}
+  - {id: hlw, short: HLW, label: "Atmung nicht normal: sofort HLW 30:2", any: [hlw], only: breathing_abnormal, tip: "Du hast die Atmung kontrolliert. Was folgt daraus?"}
+  - {id: waerme, short: Wärme, label: "Wärmeerhalt (Decke, Isolation vom Boden)", any: [decke], tip: "Denk an den Wärmeerhalt."}
+  - {id: funk, short: Funk, label: "Funkspruch an die Leitstelle", special: funk, tip: "Sollen wir die Leitstelle anfunken?"}
 
 full:
-  - {id: x, short: x, label: "x – Extreme Blutung", any: [blutung_pruefen], extra: {bleeding: [blutung_stillen]}}
-  - {id: a, short: A, label: "A – Airway (Atemwege beurteilt)", any: [atemwege_freimachen, atemkontrolle, atmung_fragen, atmung_beurteilen]}
-  - {id: b, short: B, label: "B – Breathing (Atemfrequenz, SpO2, Auskultation)", all: [af_zaehlen, spo2, auskultation]}
-  - {id: c, short: C, label: "C – Circulation (Puls, Blutdruck, Rekap-Zeit)", all: [puls, rr, rekap]}
-  - {id: d, short: D, label: "D – Disability (Bewusstsein/Orientierung, Pupillen, Blutzucker)", all: [[gcs, orientierung], pupillen, bz]}
+  - {id: x, short: x, label: "x – Extreme Blutung", any: [blutung_pruefen], extra: {bleeding: [blutung_stillen]}, tip: "Ist mit Blutungen alles erledigt?"}
+  - {id: a, short: A, label: "A – Airway (Atemwege beurteilt)", any: [atemwege_freimachen, atemkontrolle, atmung_fragen, atmung_beurteilen], tip: "Sind die Atemwege beurteilt?"}
+  - {id: b, short: B, label: "B – Breathing (Atemfrequenz, SpO2, Auskultation)", all: [af_zaehlen, spo2, auskultation], tip: "Machen wir B: Atemfrequenz, Sättigung, abhören?"}
+  - {id: c, short: C, label: "C – Circulation (Puls, Blutdruck, Rekap-Zeit)", all: [puls, rr, rekap], tip: "Weiter mit C: Puls, Blutdruck, Rekap?"}
+  - {id: d, short: D, label: "D – Disability (Bewusstsein/Orientierung, Pupillen, Blutzucker)", all: [[gcs, orientierung], pupillen, bz], tip: "Dann D: Bewusstsein, Pupillen, Blutzucker?"}
   - id: e
+    tip: "Fehlt noch E: SAMPLER, Bodycheck, Wärmeerhalt?"
     short: E
     label: E – Exposure/Environment (SAMPLER, Ganzkörperuntersuchung, Wärmeerhalt)
     all: [[sample_allergie, sample_medikamente, sample_vorerkrankung, sample_mahlzeit, sample_risiko, sample], bodycheck, decke]
   - id: sample
+    tip: "Ist die SAMPLER-Anamnese schon komplett?"
     short: SAMPLER
     label: SAMPLER (Symptome, Allergien, Medikamente, Patientenvorgeschichte, Letzte Mahlzeit/Stuhlgang, Ereignis, Risikofaktoren)
     min: 5
     of: [beschwerden_fragen, sample_allergie, sample_medikamente, sample_vorerkrankung, sample_mahlzeit, was_passiert, sample_risiko]
-  - {id: reevaluation, short: Reevaluation, label: "Reevaluation (erneut beurteilt bzw. wieder bei A begonnen)", special: reevaluation}
-  - {id: uebergabe, short: Übergabe, label: "Strukturierte Übergabe an den Rettungsdienst", any: [uebergabe]}
+  - {id: reevaluation, short: Reevaluation, label: "Reevaluation (erneut beurteilt bzw. wieder bei A begonnen)", special: reevaluation, tip: "Wollen wir noch mal kontrollieren, ob unsere Maßnahmen wirken?"}
+  - {id: uebergabe, short: Übergabe, label: "Strukturierte Übergabe an den Rettungsdienst", any: [uebergabe], tip: "Wenn der Rettungsdienst da ist, braucht er eine strukturierte Übergabe."}
 
 # Befundsprache: Ein Teilsatz über einen Befund gilt als „vage“, wenn er diesen Beispielen per Embedding
 # deutlich ähnlicher ist als den konkreten Befunden und den reinen Handlungen/Fragen.

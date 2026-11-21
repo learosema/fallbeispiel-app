@@ -4,7 +4,7 @@
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
   // ---------- Einstellungen ----------
-  const DEFAULTS = { rate: 1, speak: true, handsfree: false, mode: "minute", callsign: "EVT1", dispatcher: "RotkreuzHamburg" };
+  const DEFAULTS = { rate: 1, speak: true, handsfree: false, mode: "minute", callsign: "EVT1", dispatcher: "RotkreuzHamburg", tips: true };
   let settings = { ...DEFAULTS };
   try {
     settings = { ...DEFAULTS, ...JSON.parse(localStorage.getItem("settings") || "{}") };
@@ -276,7 +276,7 @@
   }
 
   // ---------- Backend ----------
-  const payload = () => ({ scenario: scenario.id, mode, callsign: settings.callsign, dispatcher: settings.dispatcher, log: [...userLog] });
+  const payload = () => ({ scenario: scenario.id, mode, callsign: settings.callsign, dispatcher: settings.dispatcher, tips: settings.tips !== false, log: [...userLog] });
   async function api(path, body = payload()) {
     const res = await fetch(path, {
       method: "POST",
@@ -343,6 +343,7 @@
     $("rate").value = settings.rate;
     $("rateOut").textContent = Number(settings.rate).toFixed(2);
     $("speak").checked = settings.speak;
+    $("tips").checked = settings.tips !== false;
     $("callsign").value = settings.callsign;
     $("dispatcher").value = settings.dispatcher;
     $("settings").showModal();
@@ -355,6 +356,7 @@
     if (e.submitter && e.submitter.value === "save") {
       settings.rate = $("rate").value;
       settings.speak = $("speak").checked;
+      settings.tips = $("tips").checked;
       settings.callsign = $("callsign").value.trim() || DEFAULTS.callsign;
       settings.dispatcher = $("dispatcher").value.trim() || DEFAULTS.dispatcher;
       saveSettings();

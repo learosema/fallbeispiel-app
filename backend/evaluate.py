@@ -10,7 +10,7 @@ from typing import Any
 import re
 
 from .content import algorithm, intents
-from .engine import Run, compact
+from .engine import Run, applies, compact
 
 OK, PARTIAL, MISSING, NA = "✅", "⚠️", "❌", "–"
 
@@ -21,16 +21,7 @@ def fmt(sec: float) -> str:
 
 
 def _applies(cond: str | None, run: Run) -> bool:
-    s = run.scenario
-    return {
-        None: True,
-        "trauma": s.trauma,
-        "bleeding": s.bleeding,
-        "conscious": s.conscious,
-        "unconscious": not s.conscious,
-        "breathing_normal": not s.conscious and s.breathing == "normal",
-        "breathing_abnormal": not s.conscious and s.breathing != "normal",
-    }[cond]
+    return applies(cond, run.scenario)
 
 
 def _label(el: str | list[str]) -> str:
@@ -347,6 +338,18 @@ def evaluate(run: Run, embedder=None) -> dict[str, Any]:
     if warnings:
         sections.append({"title": "WARNZEICHEN", "items": warnings})
 
+    # Tipps vom Kollegen (auf Nachfrage): Vermerk am Punkt und unter „Verbessern“, ändert das Urteil nicht.
+    # Ein Tipp gibt es nur zu Punkten, die in dem Moment noch nicht vollständig erledigt waren.
+    tipped = {t.tip for t in run.turns if t.tip}
+    after_tip = []
+    for it in minute + full:
+        if it["id"] in tipped and it["status"] != NA:
+            remark = "erst nach Tipp vom Kollegen" if it["status"] == OK else "trotz Tipp vom Kollegen"
+            it["note"] = f"{it['note']}; {remark}" if it["note"] else remark[0].upper() + remark[1:]
+            it["tipped"] = True
+            if it["status"] == OK:
+                after_tip.append(f"{it['short']} erst nach Tipp vom Kollegen")
+
     ordered = sorted((it for it in minute if it["at"] is not None and it["status"] != NA), key=lambda it: it["at"])
     wrong = _out_of_order(minute)
     deviations = [f"{it['short']} kam außer der Reihe" for it in wrong]
@@ -370,6 +373,7 @@ def evaluate(run: Run, embedder=None) -> dict[str, Any]:
                     key=lambda it: (0 if it.get("critical") else 1 if it["id"] == "warn" else 2, it["status"] != MISSING))
     vague = vague_findings(run, embedder)
     improve = [it.get("improve") or it["label"] + (f" ({it['note']})" if it["note"] else "") for it in issues][:4]
+    improve += after_tip
     if vague:
         improve.append("Befunde konkret benennen statt „normal“ (z. B. „Puls regelmäßig, gut tastbar“, „Rekap unter 2 s“)")
     return {
