@@ -33,6 +33,8 @@
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 h1:focus:not(:focus-visible) { outline: none; }
 html, body { height: 100%; margin: 0; }
+/* dvh: sichtbarer Viewport auf Mobilgeräten (ohne Adressleiste), sonst scrollt die Seite zusätzlich zum Log */
+body.app { height: 100dvh; overflow: hidden; }
 body {
   background: var(--bg);
   color: var(--fg);
@@ -92,8 +94,8 @@ a { color: var(--accent); }
 .scenario .letter.small { font-size: .9rem; }
 .scenario small { display: block; color: var(--muted); }
 
-.log { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 0 0 8px; margin: 0; list-style: none; }
-.msg { max-width: 85%; padding: 9px 13px; border-radius: 16px; border: 1px solid var(--line); white-space: pre-wrap; }
+.log { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; gap: 8px; padding: 0 0 8px; margin: 0; list-style: none; }
+.msg { max-width: 85%; padding: 9px 13px; border-radius: 16px; border: 1px solid var(--line); white-space: pre-wrap; overflow-wrap: anywhere; }
 .msg.me { align-self: flex-end; background: var(--me); border-bottom-right-radius: 4px; }
 .msg.them { align-self: flex-start; background: var(--them); border-bottom-left-radius: 4px; }
 .msg.sys { align-self: stretch; max-width: none; background: var(--sys); color: var(--muted); border-radius: 10px; font-size: .92rem; }
