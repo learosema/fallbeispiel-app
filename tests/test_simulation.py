@@ -893,3 +893,13 @@ def test_smalltalk_after_losing_consciousness_gets_no_reaction(clf):
     run = replay_ticks(clf, "a-bolus", {5: "hallo", 100: "oh das ist ja unglücklich"}, until=100)
     last = next(t for t in reversed(run.turns) if t.text)
     assert all(l.who != "Patient" for l in last.lines), last.lines
+
+
+@pytest.mark.parametrize("sid", list(content.scenarios()))
+def test_no_patient_behaviour_after_losing_consciousness(clf, sid):
+    # niemand lässt den Fall laufen und lässt den Patienten danach allein – nach dem Zusammensacken kommt nichts mehr vom Patienten
+    run = replay_ticks(clf, sid, {5: "hallo", 400: "wir holen kurz was aus dem auto"}, until=480)
+    for n, t in enumerate(run.turns):
+        before = run.turns[:n]
+        if any("bewusstlos" in (l.text) or "reagiert nicht mehr" in l.text for b in before for l in b.lines) and not t.text:
+            assert all(l.who not in ("Patient",) and not l.text.startswith(("(Herr", "(Frau")) for l in t.lines), (sid, t.t, t.lines)

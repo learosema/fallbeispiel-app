@@ -150,6 +150,9 @@ silence:
       - Patient: (murmelt) Ich muss … zum Termin …
       - Patient: Lassen Sie mich doch!
 alone:
+  - when: {bewusstlos: true}
+    say:
+      - Umstehende: Hallo? Die Frau reagiert gar nicht mehr!
   - when: {glukose: false}
     say:
       - Befund: (Frau Demir steht auf und torkelt Richtung Straße)

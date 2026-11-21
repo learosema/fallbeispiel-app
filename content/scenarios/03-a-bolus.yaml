@@ -217,11 +217,17 @@ events:
 
 # ENTWURF Eskalation
 silence:  # mit verlegtem Atemweg kann er nicht sprechen
+  - when: {bewusstlos: true, hlw: false}
+    say:
+      - Umstehende: Er rührt sich nicht mehr! Tun Sie doch was!
   - when: {geloest: false}
     say:
       - Befund: (Herr Weber greift sich an den Hals und schaut dich panisch an, er bekommt keinen Ton heraus)
       - Umstehende: Tun Sie doch was, er erstickt!
 alone:
+  - when: {bewusstlos: true}
+    say:
+      - Umstehende: Wo gehen Sie hin? Er rührt sich nicht mehr!
   - when: {geloest: false}
     say:
       - Umstehende: Wo gehen Sie denn hin? Er erstickt!
