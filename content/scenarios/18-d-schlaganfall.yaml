@@ -136,6 +136,10 @@ alone:
   - say:
       - Umstehende: (Ehefrau) Sie können uns doch nicht allein lassen! Hilfe!
 
+patient_smalltalk:
+  - say:
+      - Patient: (nickt und sagt etwas Unverständliches)
+
 key_actions:
   - label: Früher Funkspruch / Nachforderung mit Verdacht auf Schlaganfall
     any: [nachforderung]

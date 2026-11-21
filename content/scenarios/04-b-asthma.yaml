@@ -141,6 +141,10 @@ alone:
       - Patient: (keuchend) Nicht … weg… gehen …
       - Umstehende: Hallo? Sie können sie doch nicht allein lassen!
 
+patient_smalltalk:
+  - say:
+      - Patient: (keuchend, nickt nur)
+
 key_actions:
   - label: Sitzende Position / Oberkörper hoch
     any: [oberkoerper_hoch]

@@ -139,6 +139,10 @@ alone:
       - Patient: (keuchend) Nicht … weggehen …
       - Umstehende: Hey! Ihr könnt sie doch nicht hier im Rauch lassen!
 
+patient_smalltalk:
+  - say:
+      - Patient: (hustet, nickt nur)
+
 key_actions:
   - label: Eigenschutz und Patientin aus dem Rauch gebracht
     any: [aus_gefahr_bringen]

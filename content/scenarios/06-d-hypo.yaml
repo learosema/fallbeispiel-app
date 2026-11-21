@@ -155,6 +155,11 @@ alone:
       - Befund: (Frau Demir steht auf und torkelt Richtung Straße)
       - Umstehende: Hallo? Die läuft gleich vor ein Auto!
 
+patient_smalltalk:
+  - when: {glukose: false}
+    say:
+      - Patient: (schaut dich verwirrt an)
+
 key_actions:
   - label: Blutzucker gemessen
     phase: full

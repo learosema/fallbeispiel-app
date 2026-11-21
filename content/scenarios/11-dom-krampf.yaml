@@ -190,6 +190,11 @@ alone:
   - say:
       - Umstehende: Hey! Ihr könnt den doch nicht hier liegen lassen!
 
+patient_smalltalk:
+  - when: {krampft: true}
+    say:
+      - Befund: (Jonas krampft weiter)
+
 key_actions:
   - label: Während des Anfalls schützen (Kopf polstern, nichts in den Mund)
     any: [kopf_schuetzen]

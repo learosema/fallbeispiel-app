@@ -201,3 +201,12 @@
 - text: gute Idee
   reply: Okay
   no_reply: Wie meinst
+
+# ---- Mitgefühl, wenn der Patient nicht sprechen kann
+- text: das ist ja doof
+  scenario: a-bolus
+  reply: kann nicht antworten
+  no_reply: (seufzt)
+- text: das ist ja doof
+  scenario: b-asthma
+  reply: keuchend

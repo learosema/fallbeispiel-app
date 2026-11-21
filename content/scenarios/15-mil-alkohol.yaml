@@ -132,6 +132,10 @@ alone:
   - say:
       - Umstehende: (der Ordner) Wo wollt ihr hin? Der kippt mir hier gleich weg!
 
+patient_smalltalk:
+  - say:
+      - Patient: (lallt etwas Unverständliches)
+
 key_actions:
   - label: Atemweg gesichert (Absaugen / Seitenlage)
     any: [seitenlage, absaugen]

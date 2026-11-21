@@ -227,6 +227,11 @@ alone:
       - Umstehende: Wo gehen Sie denn hin? Er erstickt!
       - Befund: (Herr Weber klopft verzweifelt auf den Tisch)
 
+patient_smalltalk:  # solange das Fleischstück sitzt, kann er nicht sprechen
+  - when: {geloest: false}
+    say:
+      - Befund: (Herr Weber würgt und kann nicht antworten)
+
 key_actions:
   - label: Husten beurteilt bzw. zum Husten aufgefordert
     any: [husten_auffordern]

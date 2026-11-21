@@ -72,6 +72,8 @@ class Scenario:
     funk_early: list[str] = field(default_factory=list)
     silence: list[Variant] | None = None  # was bei langer Stille gesagt wird (None = Standard, [] = nichts); Varianten mit when
     alone: list[Variant] | None = None    # Hilferufe, wenn der Patient allein gelassen wird (None = Standard, [] = nichts)
+    # Wie der Patient auf Smalltalk („Oh, das ist ja doof“) reagiert, wenn er nicht normal sprechen kann (Bolus, Atemnot …)
+    patient_smalltalk: list[Variant] = field(default_factory=list)
 
 
 def _lines(raw: Any, where: str) -> list[Line]:
@@ -273,6 +275,7 @@ def _load_scenario(path: Path) -> Scenario:
         funk_early=funk_early,
         silence=_optional_lines(d, "silence", path.name),
         alone=_optional_lines(d, "alone", path.name),
+        patient_smalltalk=_optional_lines(d, "patient_smalltalk", path.name) or [],
     )
 
 

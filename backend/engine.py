@@ -534,10 +534,13 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
             elif rule.repeat:
                 prev = next((tt.lines for tt in reversed(turns) if tt.lines), [])
                 lines = list(prev or [Line("Kollege", "Es hat noch niemand etwas gesagt.")]) + lines
-            elif rule.unconscious and not scenario.conscious:
+            elif rule.unconscious and not awake():
                 lines = [rotate(rule.id, rule.unconscious)] + lines
             else:
-                lines = [rotate(rule.id, rule.say)] + lines
+                line = rotate(rule.id, rule.say)
+                if line.who == "Patient" and (v := pick(scenario.patient_smalltalk, state)):
+                    line = v.say[said.get(rule.id, 1) % len(v.say)]  # kann gerade nicht normal sprechen
+                lines = [line] + lines
         if not hits and not lines and not tick:
             lines.append(rotate("_fallback", smalltalk().fallback))
         seen: set[Line] = set()

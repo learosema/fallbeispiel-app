@@ -171,6 +171,11 @@ alone:  # Jens drückt weiter auf die Wunde, Markus ruft
       - Patient: Hallo? Wo seid ihr?
       - Umstehende: (Jens, ruft) Hallo! Kommt ihr wieder?
 
+patient_smalltalk:
+  - when: {blutung_stillen: false}
+    say:
+      - Patient: Ja, verdammt! Macht doch was!
+
 key_actions:
   - label: Blutstillung (Tourniquet/Druckverband) vor allem anderen
     any: [blutung_stillen]
