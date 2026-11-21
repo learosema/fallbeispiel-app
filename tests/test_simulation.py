@@ -722,3 +722,9 @@ def test_open_radio_goes_to_dispatch_even_without_kommen(clf):
 def test_patient_sentence_leaves_a_forgotten_radio_call(clf):
     run = play(clf, "basis-sturz", ["rotkreuzhamburg von evt eins kommen", "älterer mann gestürzt rtw kommen", "ich fühle den puls"])
     assert run.turns[-1].lines[0].who == "Befund" and not run.state.get("funk_offen")
+    assert said(run)[-1] == "EVT1 von RotkreuzHamburg, bitte Funkdisziplin, beenden Sie das Gespräch."
+    run = play(clf, "basis-sturz", ["rotkreuzhamburg von evt eins kommen", "älterer mann gestürzt rtw kommen", "ich fühle den puls",
+                                    "evt eins ende"])
+    assert "funk_ende" in run.first
+    funk = next(it for it in evaluate.evaluate(run)["sections"][0]["items"] if it["id"] == "funk")
+    assert "Funkdisziplin" in funk["note"] and "Ende“ fehlt" not in funk["note"]
