@@ -201,6 +201,30 @@ events:
       - Befund: Er sackt zusammen und reagiert nicht mehr.
     expect: {any: [laut_ansprechen, atemwege_freimachen, atemkontrolle, hlw], within: 15, label: Bewusstlosigkeit erkannt (Ansprechen, Atemwege, Atemkontrolle bzw. HLW)}
     set: {bewusstlos: true}
+  # ENTWURF Eskalation – Zeiten und Befunde fachlich gegenlesen
+  - at: 150
+    when: {geloest: false, hlw: false}
+    say:
+      - Befund: Keine Atmung, kein Puls tastbar. Herr Weber ist grau-blau.
+    set: {kreislaufstillstand: true}
+  - at: 330
+    when: {geloest: false, hlw: false}
+    say:
+      - Befund: Ohne Herzdruckmassage ist es zu spät – Herr Weber ist erstickt.
+    set: {verstorben: true}
+    expect: false
+
+# ENTWURF Eskalation
+silence:  # mit verlegtem Atemweg kann er nicht sprechen
+  - when: {geloest: false}
+    say:
+      - Befund: (Herr Weber greift sich an den Hals und schaut dich panisch an, er bekommt keinen Ton heraus)
+      - Umstehende: Tun Sie doch was, er erstickt!
+alone:
+  - when: {geloest: false}
+    say:
+      - Umstehende: Wo gehen Sie denn hin? Er erstickt!
+      - Befund: (Herr Weber klopft verzweifelt auf den Tisch)
 
 key_actions:
   - label: Husten beurteilt bzw. zum Husten aufgefordert

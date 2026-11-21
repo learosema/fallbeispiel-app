@@ -123,6 +123,25 @@ events:
     say:
       - Patient: Ich will mal aufstehen … (wird wieder blass und schwankt)
     expect: [nicht_aufstehen, schocklage]
+  # ENTWURF Eskalation – Zeiten und Befunde fachlich gegenlesen
+  - at: 150
+    when: {schocklage: false}
+    say:
+      - Befund: Sie sackt wieder zusammen und ist für einige Sekunden nicht ansprechbar.
+      - Umstehende: (Ayla) Mira! MIRA!
+  - at: 165
+    when: {schocklage: false}
+    say:
+      - Befund: Mira kommt wieder zu sich, ist aber sehr blass und schweißig.
+    expect: false
+
+# ENTWURF Eskalation
+silence:
+  - say:
+      - Patient: Mir ist so schwindelig …
+alone:
+  - say:
+      - Umstehende: (Ayla) Hallo? Was soll ich denn jetzt machen?
 
 key_actions:
   - label: Flach lagern / Beine hoch

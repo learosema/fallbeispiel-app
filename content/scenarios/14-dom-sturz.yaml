@@ -134,6 +134,16 @@ events:
     say:
       - Rettungsdienst: Rettungsdienst und Notarzt sind da. Was habt ihr?
     set: {rd_da: true}
+  # ENTWURF Eskalation – Zeiten und Befunde fachlich gegenlesen
+  - at: 420
+    when: {gestaut: true, sauerstoff: false, oberkoerper_hoch: false}
+    say:
+      - Befund: Marco ringt nach Luft, SpO2 82 %, er trübt ein und antwortet kaum noch.
+
+# ENTWURF Eskalation
+alone:
+  - say:
+      - Umstehende: (ein Mitarbeiter des Fahrgeschäfts) Hallo? Wo gehen Sie hin? Der rührt sich kaum!
 
 key_actions:
   - label: Sicherheit (Not-Aus bestätigt) vor dem Betreten

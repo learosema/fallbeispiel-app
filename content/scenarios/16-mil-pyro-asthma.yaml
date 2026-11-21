@@ -111,6 +111,32 @@ events:
     when: {aus_gefahr_bringen: false}
     say:
       - Befund: SpO2 sinkt, sie kann kaum noch sprechen.
+  # ENTWURF Eskalation – Zeiten und Befunde fachlich gegenlesen
+  - at: 240
+    when: {aus_gefahr_bringen: false}
+    say:
+      - Befund: Sophie wird schläfrig, die Lippen sind blau, sie atmet flach.
+  - at: 330
+    when: {aus_gefahr_bringen: false}
+    say:
+      - Befund: Sophie sackt zusammen und reagiert nicht mehr. Nur noch vereinzelte, schnappende Atemzüge.
+    set: {bewusstlos: true}
+    expect: {any: [aus_gefahr_bringen, laut_ansprechen, atemkontrolle, hlw], within: 15, label: Bewusstlosigkeit erkannt – raus aus dem Rauch}
+  - at: 450
+    when: {aus_gefahr_bringen: false, hlw: false}
+    say:
+      - Befund: Sophie hat aufgehört zu atmen. Im Rauch ist es zu spät – sie ist verstorben.
+    set: {verstorben: true}
+    expect: false
+
+# ENTWURF Eskalation
+silence:
+  - say:
+      - Patient: (hustend, keuchend) Ich … krieg … keine Luft …
+alone:
+  - say:
+      - Patient: (keuchend) Nicht … weggehen …
+      - Umstehende: Hey! Ihr könnt sie doch nicht hier im Rauch lassen!
 
 key_actions:
   - label: Eigenschutz und Patientin aus dem Rauch gebracht

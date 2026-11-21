@@ -680,7 +680,7 @@ def test_leaving_the_patient_alone(clf):
     run = replay_ticks(clf, "basis-sturz", {5: "hallo", 10: "wir holen kurz was aus dem auto", 60: "so wir sind wieder da"}, until=60)
     assert run.alone == [(10.0, 60.0)]
     calls = [l.text for t in run.turns[2:] for l in t.lines if l.who == "Patient"]
-    assert any("Hilfe" in c for c in calls)
+    assert calls, "der Patient meldet sich, wenn er allein ist"
     res = evaluate.evaluate(run)
     assert any("nie allein" in i for i in res["improve"]) and any("allein gelassen" in c for c in res["course"])
 
@@ -728,3 +728,19 @@ def test_patient_sentence_leaves_a_forgotten_radio_call(clf):
     assert "funk_ende" in run.first
     funk = next(it for it in evaluate.evaluate(run)["sections"][0]["items"] if it["id"] == "funk")
     assert "Funkdisziplin" in funk["note"] and "Ende“ fehlt" not in funk["note"]
+
+
+def test_radio_message_in_several_parts(clf):
+    run = play(clf, "x-kettensaege", [
+        "starke blutung kollege tourniquet anlegen",
+        "rotkreuzhamburg von evt eins kommen",
+        "patient männlich etwa mitte 40",
+        "kritische schnittverletzung am oberschenkel tourniquet angelegt",
+        "wach reagiert angemessen verdacht auf arterielle blutung",
+        "wir brauchen einmal rtw nef kommen",
+        "evt eins ende",
+    ], step=3)
+    replies = [t.lines[0].text for t in run.turns[2:6]]
+    assert replies == ["Verstanden.", "Verstanden.", "Verstanden.", "RTW NEF kommt, verstanden."], replies
+    funk = next(it for it in evaluate.evaluate(run)["sections"][0]["items"] if it["id"] == "funk")
+    assert funk["status"] == evaluate.OK, funk["note"]

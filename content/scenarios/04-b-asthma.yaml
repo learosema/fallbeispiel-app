@@ -113,6 +113,33 @@ events:
     when: {sauerstoff: false}
     say:
       - Befund: Die Lippen werden deutlicher blau.
+  # ENTWURF Eskalation – Zeiten und Befunde fachlich gegenlesen
+  - at: 280
+    when: {sauerstoff: false}
+    say:
+      - Befund: Lena kann nicht mehr sprechen, die Augen fallen ihr zu, die Atmung wird immer flacher.
+  - at: 360
+    when: {sauerstoff: false}
+    say:
+      - Befund: Lena sackt zusammen und reagiert nicht mehr. Nur noch vereinzelte, schnappende Atemzüge.
+    set: {bewusstlos: true}
+    expect: {any: [laut_ansprechen, atemkontrolle, hlw], within: 15, label: Bewusstlosigkeit erkannt (Ansprechen, Atemkontrolle bzw. HLW)}
+  - at: 450
+    when: {sauerstoff: false, hlw: false}
+    say:
+      - Befund: Lena hat aufgehört zu atmen. Ohne Hilfe ist es zu spät – sie ist verstorben.
+    set: {verstorben: true}
+    expect: false
+
+# ENTWURF Eskalation
+silence:
+  - say:
+      - Patient: (keuchend) Ich … krieg … keine … Luft!
+      - Patient: (keuchend, mit Tränen) Bitte … helfen …
+alone:
+  - say:
+      - Patient: (keuchend) Nicht … weg… gehen …
+      - Umstehende: Hallo? Sie können sie doch nicht allein lassen!
 
 key_actions:
   - label: Sitzende Position / Oberkörper hoch

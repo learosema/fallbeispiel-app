@@ -136,6 +136,9 @@ def respond(scenario: Scenario, iid: str, state: dict[str, Any]) -> Variant | No
 
 # ---------- Funk ----------
 
+# wendet sich an jemanden vor Ort („ich fühle den Puls“, „Kollege …“, „Haben Sie …“) – Berichtsformen wie
+# „Tourniquet angelegt“ gehören dagegen zur Meldung
+ADDRESS = re.compile(r"\b(ich|sie|du|ihr|ihnen|dir|dich|kollege|kollegin|hallo|kannst|können|könnten|bitte)\b")
 MELDUNG = re.compile(r"verdacht|patient|männlich|weiblich|\bmann\b|\bfrau\b|jahre|\bjahrig")
 
 
@@ -314,7 +317,7 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
         if f is None and not tick and state.get("funk_offen") and not state.get("verstorben"):
             # Funk offen: Alles geht an die Leitstelle – außer einem klaren Satz an den Patienten ohne Funkbegriffe,
             # dann hat man den Funk (ohne „… Ende“) verlassen
-            if MELDUNG.search(normalize(text)) or not clf.classify(text):
+            if MELDUNG.search(normalize(text)) or not ADDRESS.search(normalize(text)) or not clf.classify(text):
                 f = funk(text, settings, state, mode, end_minute=not scenario.funk_early, force=True)
             else:
                 state["funk_offen"] = False

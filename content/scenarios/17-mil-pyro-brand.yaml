@@ -112,6 +112,15 @@ events:
     when: {kuehlen: true, decke: false}
     say:
       - Befund: Leon zittert, das Kühlen bei 5 °C lässt ihn auskühlen.
+  # ENTWURF Eskalation – Zeiten und Befunde fachlich gegenlesen
+  - at: 90
+    when: {kuehlen: false}
+    say:
+      - Patient: Das brennt so! Bitte macht doch was!
+  - at: 210
+    when: {kuehlen: true, decke: false}
+    say:
+      - Befund: Leon zittert stark, die Lippen sind bläulich, er wird still.
 
 key_actions:
   - label: Angeschmolzene Kleidung belassen (nicht abreißen)

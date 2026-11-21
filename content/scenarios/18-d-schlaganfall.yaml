@@ -5,7 +5,7 @@ title: Plötzlich undeutliche Sprache
 teaser: "Neurologie: Schlaganfall – jede Minute zählt"
 dispatch: "Einsatzmeldung: Supermarkt, Mann (72) kann plötzlich nicht mehr richtig sprechen."
 debrief_notes: >
-  Herr Krüger (72) an der Supermarktkasse: seit 10:42 Uhr hängender rechter Mundwinkel, Schwäche im rechten Arm,
+  Herr Brandt (72) an der Supermarktkasse: seit 10:42 Uhr hängender rechter Mundwinkel, Schwäche im rechten Arm,
   verwaschene Sprache. Vorhofflimmern, den Blutverdünner hat er vor einer Woche selbst abgesetzt. Verdacht auf Schlaganfall:
   Hier zählt jede Minute. Der Funkspruch mit Verdacht auf Schlaganfall und Symptombeginn gehört so früh wie möglich abgesetzt,
   nicht erst am Ende der 1. Minute. Im D: BE-FAST und Blutzucker (Unterzucker kann einen Schlaganfall vortäuschen),
@@ -40,7 +40,7 @@ responses:
   gcs:
     - Befund: Wach, GCS 14 (Augen 4, verbal 4, motorisch 6), Sprache verwaschen, versteht Aufforderungen.
   orientierung:
-    - Patient: (verwaschen) Krü… Krüger. Im … Laden. (nickt bei der Frage nach dem Wochentag, kann ihn aber nicht aussprechen)
+    - Patient: (verwaschen) Bra… Brandt. Im … Laden. (nickt bei der Frage nach dem Wochentag, kann ihn aber nicht aussprechen)
   alter_fragen:
     - Patient: (hält zwei Finger hoch, dann setzt er an) Sieb… siebzig … zwei.
   fast:
@@ -50,7 +50,7 @@ responses:
   bz:
     - Befund: BZ 118 mg/dl.
   glukose_geben:
-    - Befund: Beim ersten Schluck verschluckt sich Herr Krüger und hustet. (Schluckstörung)
+    - Befund: Beim ersten Schluck verschluckt sich Herr Brandt und hustet. (Schluckstörung)
   atemwege_freimachen:
     - Befund: Atemwege frei.
   atmung_fragen:
@@ -76,7 +76,7 @@ responses:
   rr:
     - Befund: RR 190/100.
   oberkoerper_hoch:
-    - Befund: Oberkörper etwa 30° erhöht, Herr Krüger sitzt angelehnt und stabil.
+    - Befund: Oberkörper etwa 30° erhöht, Herr Brandt sitzt angelehnt und stabil.
   nicht_aufstehen:
     - Patient: (nickt)
   frieren_fragen:
@@ -88,7 +88,7 @@ responses:
   bodycheck:
     - Befund: Keine Verletzungen, kein Sturz. Rechte Hand greift schwächer als die linke.
   dms:
-    - Befund: Rechts Kraft in Arm und Hand deutlich vermindert, Gefühl laut Herrn Krüger „taub“. Links unauffällig.
+    - Befund: Rechts Kraft in Arm und Hand deutlich vermindert, Gefühl laut Herrn Brandt „taub“. Links unauffällig.
   sample_allergie:
     - Umstehende: (Ehefrau) Allergien hat er keine.
   sample_medikamente:
@@ -114,8 +114,26 @@ events:
   - at: 120
     when: {nachforderung: false}
     say:
-      - Befund: Herr Krüger versucht etwas zu sagen, es kommen nur noch Wortfetzen. Der rechte Arm hängt jetzt schlaff herunter.
+      - Befund: Herr Brandt versucht etwas zu sagen, es kommen nur noch Wortfetzen. Der rechte Arm hängt jetzt schlaff herunter.
       - Umstehende: (Ehefrau) Es wird schlimmer! Kommt denn niemand?
+  # ENTWURF Eskalation – Zeiten und Befunde fachlich gegenlesen
+  - at: 240
+    when: {nachforderung: false}
+    say:
+      - Befund: Herr Brandt ist schläfrig und reagiert nur verzögert. Der rechte Mundwinkel hängt stark.
+  - at: 360
+    when: {nachforderung: false}
+    say:
+      - Befund: Herr Brandt reagiert nur noch auf lautes Ansprechen.
+
+# ENTWURF Eskalation
+silence:
+  - say:
+      - Patient: (verwaschen) Was … ist … jetzt?
+      - Umstehende: (Ehefrau) Bitte, wann kommt denn jemand?
+alone:
+  - say:
+      - Umstehende: (Ehefrau) Sie können uns doch nicht allein lassen! Hilfe!
 
 key_actions:
   - label: Früher Funkspruch / Nachforderung mit Verdacht auf Schlaganfall

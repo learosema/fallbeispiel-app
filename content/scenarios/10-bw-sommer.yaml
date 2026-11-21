@@ -106,6 +106,16 @@ events:
     when: {decke: false}
     say:
       - Befund: Seine Haut fühlt sich am Rücken kühl an.
+  # ENTWURF Eskalation – Zeiten und Befunde fachlich gegenlesen
+  - at: 210
+    when: {seitenlage: false}
+    say:
+      - Befund: Es gurgelt bei jedem Atemzug, die Lippen werden blau.
+
+# ENTWURF Eskalation
+alone:
+  - say:
+      - Umstehende: (ein Freund) Ey, wo wollt ihr hin? Was machen wir denn jetzt mit ihm?
 
 key_actions:
   - label: Stabile Seitenlage
