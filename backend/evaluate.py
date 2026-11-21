@@ -204,10 +204,12 @@ def vague_findings(run: Run, embedder=None) -> list[str]:
 REEVAL_INTENTS = ["puls", "spo2", "rr", "af_zaehlen", "atemkontrolle", "gcs", "orientierung", "bz", "rekap", "temperatur"]
 
 
-def _blocks(text: str, blocks: list[dict[str, Any]]) -> list[str]:
-    """Bausteine (label + patterns, optional min), die im Text fehlen."""
+def _blocks(text: str, blocks: list[dict[str, Any]], run: Run | None = None) -> list[str]:
+    """Bausteine (label + patterns, optional min), die im Text fehlen. `if_intent`: nur, wenn der Intent vorkam."""
     missing = []
     for block in blocks:
+        if block.get("if_intent") and (run is None or block["if_intent"] not in run.first):
+            continue
         found = {p for p in block["patterns"] if re.search(p.replace("ß", "ss"), text)}
         if len(found) < block.get("min", 1):
             missing.append(block["label"])
@@ -234,7 +236,7 @@ def check_handover(run: Run) -> dict[str, Any]:
             return {"status": PARTIAL, "note": "Übergabe angesagt, bevor der Rettungsdienst da war",
                     "quote": _quote(run.first["uebergabe"][0], run), "at": run.first["uebergabe"]}
         return {"status": MISSING, "note": ""}
-    missing = _blocks(normalize(" ".join(run.turns[n].text for n in parts)), algorithm().get("handover", []))
+    missing = _blocks(normalize(" ".join(run.turns[n].text for n in parts)), algorithm().get("handover", []), run)
     return {
         "status": OK if not missing else PARTIAL,
         "note": ("Fehlt: " + "; ".join(missing)) if missing else "",

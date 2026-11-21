@@ -903,3 +903,68 @@ def test_no_patient_behaviour_after_losing_consciousness(clf, sid):
         before = run.turns[:n]
         if any("bewusstlos" in (l.text) or "reagiert nicht mehr" in l.text for b in before for l in b.lines) and not t.text:
             assert all(l.who not in ("Patient",) and not l.text.startswith(("(Herr", "(Frau")) for l in t.lines), (sid, t.t, t.lines)
+
+
+def test_chainsaw_pressure_bandage_first_then_tourniquet(clf):
+    run = replay_ticks(clf, "x-kettensaege", {5: "starke blutung kollege druckverband anlegen", 30: "tourniquet anlegen"}, until=200)
+    texts = said(run)
+    assert any("durchgeblutet" in x for x in texts) and run.state.get("blutung_steht") and run.died_at is None
+    keys = {k["label"]: k for k in keys_of(evaluate.evaluate(run))}
+    assert keys["Erst Druckverband, Tourniquet erst wenn er nicht reicht"]["status"] == evaluate.OK
+    assert keys["Blutung steht (Tourniquet, als der Druckverband durchgeblutet war)"]["status"] == evaluate.OK
+
+
+def test_chainsaw_pressure_bandage_alone_is_not_enough(clf):
+    run = replay_ticks(clf, "x-kettensaege", {5: "druckverband anlegen"}, until=330)
+    assert run.died_at is not None
+
+
+def test_chainsaw_tourniquet_without_bandage_is_noted(clf):
+    res = evaluate.evaluate(play(clf, "x-kettensaege", ["tourniquet anlegen"]))
+    key = next(k for k in keys_of(res) if k["label"].startswith("Erst Druckverband"))
+    assert key["status"] == evaluate.MISSING
+
+
+@pytest.mark.parametrize("text,intent", [
+    ("ich lege einen druckverband an", "druckverband"), ("tourniquet anlegen", "tourniquet"),
+    ("ich drücke die wunde fest ab", "abdruecken"), ("kollege kümmere dich um die blutung", "blutung_stillen"),
+])
+def test_bleeding_control_methods(clf, text, intent):
+    hits = {h.intent for h in clf.classify(text)}
+    assert intent in hits and "blutung_stillen" in hits and "wunde_versorgen" not in hits
+
+
+def _chainsaw_handover(clf, handover):
+    script = {5: "starke blutung kollege druckverband anlegen", 30: "tourniquet anlegen",
+              40: "rotkreuzhamburg von evt eins kommen", 43: "patient männlich mitte vierzig wir brauchen rtw und nef kommen",
+              46: "evt eins ende"}
+    script |= {530 + 3 * i: x for i, x in enumerate(handover)}
+    run = replay_ticks(clf, "x-kettensaege", script, until=560, mode="full")
+    res = evaluate.evaluate(run)
+    return next(it for sec in res["sections"] for it in sec["items"] if it["id"] == "uebergabe")
+
+
+def test_handover_needs_tourniquet_time(clf):
+    without = _chainsaw_handover(clf, ["übergabe: markus mitte vierzig, kettensäge ins bein, puls 112, rr 105 zu 65, "
+                                       "keine allergien, tourniquet angelegt, verdacht auf arterielle blutung", "fragen?"])
+    assert "Uhrzeit des Tourniquets" in without["note"]
+    with_time = _chainsaw_handover(clf, ["übergabe: markus mitte vierzig, kettensäge ins bein, puls 112, rr 105 zu 65, "
+                                         "keine allergien, tourniquet seit 10:47, verdacht auf arterielle blutung", "fragen?"])
+    assert "Uhrzeit" not in with_time["note"], with_time["note"]
+
+
+def test_handover_without_tourniquet_needs_no_time(clf):
+    run = _arrived(clf, ["übergabe: herr petersen ende sechzig gestürzt, puls 78, gcs 15, nimmt apixaban, hws stabilisiert, "
+                         "verdacht auf sht", "habt ihr noch fragen"])
+    assert "Uhrzeit" not in _handover_item(run)["note"]
+
+
+def test_note_the_time(clf):
+    run = play(clf, "x-kettensaege", ["kollege merk dir die uhrzeit"])
+    assert [h.intent for h in run.turns[0].hits] == ["uhrzeit_notieren"] and said(run) == ["(notiert die Uhrzeit)"]
+    run = play(clf, "x-kettensaege", ["tourniquet anlegen", "schreib die uhrzeit auf das tourniquet"])
+    assert any("10:47" in x for x in said(run))
+    key = next(k for k in keys_of(evaluate.evaluate(run)) if k["label"] == "Uhrzeit auf das Tourniquet geschrieben")
+    assert key["status"] == evaluate.OK
+    run = play(clf, "dom-krampf", ["ich stoppe die zeit"])
+    assert "uhrzeit_notieren" in run.first and said(run, "Kollege") != ["(notiert die Uhrzeit)"]

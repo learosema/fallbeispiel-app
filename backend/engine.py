@@ -424,7 +424,8 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
             nt = normalize(text)
             if state.get("team_offen") and "teambesprechung" not in ids and TEAM_LEAVE.search(nt):
                 state["team_offen"] = False  # Satz an den Patienten bzw. Handlung: Besprechung vorbei
-            if ("teambesprechung" in ids or state.get("team_offen")) and not state.get("uebergabe_offen"):
+            handing_over = state.get("rd_da") and not state.get("uebergeben") and ("uebergabe" in ids or state.get("uebergabe_offen"))
+            if ("teambesprechung" in ids or state.get("team_offen")) and not handing_over:
                 # Teambesprechung (oft mehrteilig, an den Kollegen): Er bestätigt jeden Teil, bis „Siehst du das auch so?“
                 team_part = True
                 hits = [h for h in hits if h.intent == "teambesprechung"] or [Hit("teambesprechung", 0, 1.0, "implied")]

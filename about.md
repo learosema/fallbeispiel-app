@@ -168,6 +168,10 @@ Bitte nicht „wegoptimieren“ – im Zweifel nachfragen.
 
 **Einzelne Fälle**
 
+- **Kettensäge / starke Blutung:** in der Regel **zuerst abdrücken und Druckverband**, Tourniquet erst, wenn es nicht
+  anders geht (hier: Druckverband blutet nach 20 s durch). Eigene Intents `abdruecken`, `druckverband`, `tourniquet`
+  (alle `implies: blutung_stillen`). Die **Uhrzeit wird auf das Tourniquet geschrieben** („Schreib die Uhrzeit aufs
+  Tourniquet“ → Kollege: „10:47“) und gehört in die Übergabe (Baustein mit `if_intent: tourniquet`).
 - **Schlaganfall (Entwurf, gegenlesen):** Herr Brandt (72), Supermarkt, Symptombeginn 10:42 (Ehefrau weiß es genau).
   Früher Funk mit Verdacht Schlaganfall als kritische Schlüsselmaßnahme `within: 90`; BZ als Hypo-Ausschluss.
 - **Sturz auf nasser Treppe:** Herr Petersen will nach Hause → Aufklärung (Kopfanprall unter Blutverdünner). Kennt

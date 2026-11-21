@@ -179,26 +179,64 @@ blutung_pruefen:
     - Blutet er irgendwo?
     - Keine lebensbedrohliche Blutung zu sehen
 
-blutung_stillen:
-  label: Blutstillung (Tourniquet / Druckverband / Abdrücken)
+blutung_stillen:  # Oberbegriff – Abdrücken, Druckverband und Tourniquet zählen mit (implies)
+  label: Blutstillung (Abdrücken / Druckverband / Tourniquet)
   implies: [blutung_pruefen]
   overrides: [wunde_versorgen]
   patterns:
-    - tourniquet|tourniket|turnicket|torniquet
-    - abbind
-    - druckverband
-    - abdrück
-    - (fest |kräftig )?drauf ?drücken
-    - druck auf die wunde
-    - (blutung|wunde) (stillen|komprimieren|abdrücken)
+    - (blutung|wunde) (stillen|stoppen)
     - (stille|stoppe) (die )?blutung
-    - komprimier
     - wunde (aus)?tamponier|tamponade
     - (kümmer|versorg)\w* (\w+ ){0,3}(die |der )?blutung
   examples:
-    - Ich lege sofort ein Tourniquet oberhalb der Wunde an
+    - Wir müssen die Blutung stillen
+    - Kümmere dich um die Blutung
+  default:
+    - Befund: (die Blutung wird gestoppt)
+
+abdruecken:  # vorübergehend, bis ein Verband sitzt
+  label: Blutung abgedrückt
+  implies: [blutung_stillen, blutung_pruefen]
+  fallback: [blutung_stillen]
+  patterns:
+    - abdrück
+    - (fest |kräftig )?drauf ?drücken
+    - druck auf die wunde
+    - (blutung|wunde) (komprimieren|abdrücken)
+    - komprimier
+    - drück\w* (\w+ ){0,4}ab\b
+  examples:
     - Ich drücke die Wunde fest ab
+    - Drück mal kräftig drauf
+  default:
+    - Befund: (die Blutung wird gestoppt)
+
+druckverband:  # Standard bei starker Blutung an Arm oder Bein
+  label: Druckverband
+  implies: [blutung_stillen, blutung_pruefen]
+  overrides: [wunde_versorgen]
+  fallback: [blutung_stillen]
+  patterns:
+    - druckverband|druck ?verband
+    - druckpolster
+    - (zweiten|noch einen|weiteren) (druck)?verband
+  examples:
     - Druckverband anlegen
+    - Ich lege einen Druckverband an
+  default:
+    - Befund: (die Blutung wird gestoppt)
+
+tourniquet:  # wenn der Druckverband nicht reicht
+  label: Tourniquet
+  implies: [blutung_stillen, blutung_pruefen]
+  overrides: [wunde_versorgen]
+  fallback: [blutung_stillen]
+  patterns:
+    - tourniquet|tourniket|turnicket|torniquet|turniquet
+    - abbind
+  examples:
+    - Ich lege sofort ein Tourniquet oberhalb der Wunde an
+    - Tourniquet anlegen
   default:
     - Befund: (die Blutung wird gestoppt)
 
@@ -719,12 +757,27 @@ krampf_dauer:
     - Umstehende: Seit ein paar Minuten.
   fallback: [was_passiert]
   patterns:
-    - zeit (stoppen|merken|notieren|nehmen|festhalten)
     - wie lange (krampft|dauert|zuckt) (er|sie|es|der anfall|das)
     - seit wann (krampft|zuckt)
     - (anfalls|krampf)dauer
   examples:
     - Seit wann krampft er? Ich merke mir die Uhrzeit
+
+uhrzeit_notieren:  # z. B. wann das Tourniquet angelegt wurde – gehört in die Übergabe; im Krampf-Fall die Anfallsdauer
+  label: Uhrzeit notiert
+  fallback: [krampf_dauer]
+  overrides: [symptombeginn, krampf_dauer]
+  patterns:
+    - (uhr)?zeit (stoppen|merken|notieren|nehmen|festhalten|aufschreiben)
+    - (merk|notier|schreib|stopp|nimm|nehme)\w* (dir |mal |bitte |jetzt )*(die )?(uhr)?zeit
+    - (uhr)?zeit (\w+ ){0,2}(auf|an) (das |dem |den )?tourniquet
+    - (auf|aufs) (das |den )?tourniquet (\w+ ){0,2}schreib
+  examples:
+    - Kollege, merk dir die Uhrzeit
+    - Notier bitte die Uhrzeit vom Tourniquet
+    - Schreib die Uhrzeit auf das Tourniquet
+  default:
+    - Kollege: (notiert die Uhrzeit)
 
 symptombeginn:  # das „T“ in BE-FAST: Zeitfenster für die Behandlung (Schlaganfall), Krampfdauer, Beginn der Beschwerden
   label: Symptombeginn erfragt (Uhrzeit)
@@ -1190,6 +1243,7 @@ aufklaeren:
 
 uebergabe:
   label: Übergabe an den Rettungsdienst
+  exclusive: true   # Zusammenfassung, keine Handlung – wie die Teambesprechung (beide bleiben, die Engine entscheidet)
   patterns:
     - übergabe|übergebe|übergeben
     - (an|für) (den |die )?(rettungsdienst|kollegen vom rettungsdienst|notarzt)
