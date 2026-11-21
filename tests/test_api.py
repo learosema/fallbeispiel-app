@@ -21,3 +21,23 @@ def test_log_size_limit(n):
 
 def test_ai_feedback_is_gone():
     assert client.post("/api/feedback", json={"scenario": "x", "log": [{"t": 0, "text": "Hallo"}]}).status_code in (404, 405)
+
+
+def test_rate_limit_per_client(monkeypatch):
+    clock = [0.0]
+    monkeypatch.setattr(main.time, "monotonic", lambda: clock[0])
+    limit = main.RateLimit(2, 60)
+    assert limit.hit("a") and limit.hit("a")
+    assert not limit.hit("a")
+    assert limit.hit("b")  # andere IP, eigenes Kontingent
+    clock[0] = 61
+    assert limit.hit("a")  # Fenster abgelaufen
+    assert main.RateLimit(0, 60).hit("a")  # 0 = aus
+
+
+def test_api_is_rate_limited(monkeypatch):
+    monkeypatch.setattr(main, "api_limit", main.RateLimit(1, 60))
+    assert client.post("/api/turn", json=TOO_LONG).status_code == 400
+    res = client.post("/api/turn", json=TOO_LONG)
+    assert res.status_code == 429 and res.headers["Retry-After"] == "60"
+    assert client.get("/").status_code == 200  # statische Dateien sind nicht begrenzt

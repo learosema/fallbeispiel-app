@@ -54,7 +54,8 @@ Die App läuft auf <http://localhost:8000> (nur von diesem Rechner aus erreichba
 ## Öffentlich betreiben
 
 Die App braucht keinen Login: Simulation und Auswertung laufen komplett auf dem eigenen Server, es gibt keine
-kostenpflichtigen Dienste dahinter. Caddy davor sorgt für HTTPS.
+kostenpflichtigen Dienste dahinter. Caddy davor sorgt für HTTPS. Gegen Überlast (jede Anfrage spielt den Einsatz nach
+und rechnet Embeddings) begrenzt die App die API-Aufrufe pro Client-IP (`RATE_LIMIT`).
 
 ```
 Browser ──HTTPS──▶ Caddy ──▶ App (Port 8000, nur lokal erreichbar)
@@ -94,6 +95,7 @@ Siehe `.env.example`.
 | `INTENT_MODEL`            | `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` | Embedding-Modell für die Intent-Erkennung        |
 | `INTENT_THRESHOLD`        | `0.72`                                                     | Mindest-Ähnlichkeit für Embedding-Treffer           |
 | `INTENT_EMBEDDINGS`       | `1`                                                        | `0` = nur Regex-Muster (kein Modell nötig)          |
+| `RATE_LIMIT`              | `300`                                                      | API-Aufrufe pro Client-IP und Minute, `0` = aus     |
 | `PRELOAD_MODEL`           | `1`                                                        | `0` lädt den Classifier erst bei der ersten Anfrage |
 
 PyTorch wird als CPU-Build installiert. Für eine NVIDIA-GPU den `pytorch-cpu`-Index in `pyproject.toml` entfernen.

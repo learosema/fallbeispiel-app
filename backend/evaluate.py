@@ -336,6 +336,8 @@ def as_text(result: dict[str, Any]) -> str:
         quotes = "; ".join(f"„{q}“" for q in result["vague"][:3])
         lines.append("BEFUNDSPRACHE: ungenau – " + quotes + ". Besser konkret: „Puls regelmäßig, gut/schlecht/nicht tastbar“, „Puls schnell“, „Rekap unter 2 s“ oder „Rekap verzögert“.")
     lines.append("ZEIT (nachrangig): " + result["time"])
+    lines += ["", "GUT GEMACHT: " + ("; ".join(result["praise"]) or "–"),
+              "VERBESSERN: " + ("; ".join(result["improve"]) or "nichts Wesentliches")]
     return "\n".join(lines)
 
 

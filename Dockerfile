@@ -8,4 +8,6 @@ COPY backend ./backend
 COPY public ./public
 COPY content ./content
 EXPOSE 8000
-CMD ["uv", "run", "--no-sync", "uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Client-IP aus X-Forwarded-For übernehmen (für RATE_LIMIT): Port 8000 ist nur lokal und für Caddy erreichbar,
+# Caddy setzt den Header selbst.
+CMD ["uv", "run", "--no-sync", "uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers", "--forwarded-allow-ips", "*"]

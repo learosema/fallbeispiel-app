@@ -4,16 +4,19 @@
   POST /api/turn        Protokoll → Antwort der Simulation auf die letzte Äußerung
   POST /api/debrief     Protokoll → regelbasierte Auswertung
 
-Umgebungsvariablen: siehe README.md (INTENT_*, PRELOAD_MODEL).
+Umgebungsvariablen: siehe README.md (INTENT_*, PRELOAD_MODEL, RATE_LIMIT).
 """
 from __future__ import annotations
 
 import os
+import threading
+import time
+from collections import deque
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Literal
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.concurrency import run_in_threadpool
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse
@@ -57,6 +60,35 @@ def error(msg: str, status: int) -> JSONResponse:
     return JSONResponse({"error": msg}, status_code=status, headers=NO_STORE)
 
 
+class RateLimit:
+    """Höchstens `limit` Aufrufe je Schlüssel (Client-IP) in `window` Sekunden – im Speicher, ein Prozess."""
+
+    def __init__(self, limit: int, window: float):
+        self.limit, self.window = limit, window
+        self._calls: dict[str, deque[float]] = {}
+        self._lock = threading.Lock()
+
+    def hit(self, key: str) -> bool:
+        if self.limit <= 0:
+            return True
+        now = time.monotonic()
+        with self._lock:
+            if len(self._calls) > 10_000:  # abgelaufene Einträge aufräumen, damit der Speicher nicht wächst
+                self._calls = {k: q for k, q in self._calls.items() if q and q[-1] > now - self.window}
+            calls = self._calls.setdefault(key, deque())
+            while calls and calls[0] <= now - self.window:
+                calls.popleft()
+            if len(calls) >= self.limit:
+                return False
+            calls.append(now)
+            return True
+
+
+# Jede Äußerung ist ein Aufruf, dazu Takte; ein zügiger Einsatz liegt bei ~20/min. Großzügig, weil sich eine
+# Gruppe im selben WLAN eine IP teilt. Hinter Caddy ist die IP die echte (uvicorn --forwarded-allow-ips, Dockerfile).
+api_limit = RateLimit(int(os.environ.get("RATE_LIMIT", "300")), 60)
+
+
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     content.scenarios()  # Inhalte beim Start prüfen – Fehler sollen sofort auffallen
@@ -79,6 +111,14 @@ async def revalidate_static(request, call_next):
     if request.method in ("GET", "HEAD") and not request.url.path.startswith("/api/"):
         response.headers.setdefault("Cache-Control", "no-cache")
     return response
+
+
+@app.middleware("http")
+async def rate_limit(request: Request, call_next):
+    if request.url.path.startswith("/api/") and not api_limit.hit(request.client.host if request.client else "?"):
+        return JSONResponse({"error": "Zu viele Anfragen – bitte kurz warten."}, status_code=429,
+                            headers=NO_STORE | {"Retry-After": "60"})
+    return await call_next(request)
 
 
 @app.exception_handler(RequestValidationError)
