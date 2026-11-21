@@ -141,6 +141,7 @@ events:
       - Befund: Frau Demir reagiert nicht mehr auf Ansprache, nur noch auf Schmerzreiz. Sie schwitzt stark.
     set: {bewusstlos: true}
     expect: {any: [laut_ansprechen, atemkontrolle, seitenlage, bz], within: 20, label: Bewusstlosigkeit erkannt (nichts mehr in den Mund)}
+    request: [NEF]   # ab hier ist der Notarzt nötig
 
 # ENTWURF Eskalation
 silence:

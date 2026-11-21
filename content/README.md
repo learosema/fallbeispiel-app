@@ -86,6 +86,7 @@ events:                      # zeitgesteuert (Nettozeit der Sanitäter:in in Sek
     when: {blutung_stillen: false}
     say: [...]
     set: {verstorben: true}  # Patient verstorben: Einsatz endet, Urteil „Nicht erfüllt“ – nur wo das realistisch ist
+    request: [NEF]           # ab diesem Ereignis zusätzlich nachzufordern (vorher optional)
 
 silence:                     # optional: was bei 30 s Stille gesagt wird (Standard: smalltalk.yaml; false = nichts)
   - when: {blutung_stillen: false}

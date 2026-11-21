@@ -93,7 +93,12 @@ Eintrübung/Bewusstlosigkeit.
   endet erst, wenn alle Punkte erledigt sind, und der Kollege schlägt auf Nachfrage früh den Funk vor.
   Bei **offenem Funk** geht alles an die Leitstelle („Verstanden.“), auch ohne „kommen“; eine Meldung in mehreren
   Stücken wird zusammen ausgewertet. „RTW kommt, verstanden“ und die Nachforderung gibt es nur bei einer Anforderung
-  („wir brauchen / benötigen / bitte / einmal RTW“), nicht bei einer Erwähnung („RTW ist schon alarmiert“). Ein klarer Satz an jemanden vor Ort („ich …“, „Sie …“, „Kollege …“) ohne Funkbegriffe verlässt den
+  („wir brauchen / benötigen / bitte / einmal RTW“), nicht bei einer Erwähnung („RTW ist schon alarmiert“).
+  **Nachforderung im Verlauf:** Ein zweiter Funkspruch („… zusätzlich einen NEF“) zählt mit. Ereignisse können
+  `request: [NEF]` setzen – ab dann wird der NEF erwartet („NEF nach der Verschlechterung nicht nachgefordert“),
+  vorher ist er optional. Gesetzt bei Bewusstlosigkeit bzw. ernsten Atemproblemen in Bolus, Hypo, Seitenlage,
+  Elbstrand, Krampf, Alkohol, Pyro-Asthma und Schlaganfall. Der Rettungsdienst kommt weiter ~8 min nach der ersten
+  Nachforderung (RTW und NEF zusammen). Ein klarer Satz an jemanden vor Ort („ich …“, „Sie …“, „Kollege …“) ohne Funkbegriffe verlässt den
   Funk wieder (Berichtsformen wie „Tourniquet angelegt“ bleiben Teil der Meldung);
   die Leitstelle mahnt dann „EVT1 von RotkreuzHamburg, bitte Funkdisziplin, beenden Sie das Gespräch.“ (in der
   Auswertung angemerkt, „EVT1 Ende“ danach geht noch).

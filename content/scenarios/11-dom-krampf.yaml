@@ -177,6 +177,7 @@ events:
     when: {seitenlage: false, krampft: false}
     say:
       - Befund: Jonas' Lippen werden blau, die Atmung klingt brodelnd.
+    request: [NEF]   # ab hier ist der Notarzt nötig
 
 # ENTWURF Eskalation
 silence:

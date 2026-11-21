@@ -759,3 +759,24 @@ def test_dispatch_confirms_resources_only_when_requested(clf, text, requested):
     reply = said(run)[-1]
     assert ("kommt, verstanden" in reply) == requested, reply
     assert ("nachforderung" in run.first) == requested
+
+
+def test_nef_becomes_necessary_after_deterioration(clf):
+    first_call = {5: "rotkreuzhamburg von evt eins kommen",
+                  8: "patientin mitte fünfzig verwirrt verdacht auf unterzucker wir brauchen einen rtw kommen", 11: "evt eins ende"}
+    run = replay_ticks(clf, "d-hypo", first_call, until=260, mode="full")
+    funk = next(it for it in evaluate.evaluate(run)["sections"][0]["items"] if it["id"] == "funk")
+    assert "NEF nach der Verschlechterung nicht nachgefordert" in funk["note"]
+    second = first_call | {250: "rotkreuzhamburg von evt eins kommen",
+                           253: "patientin jetzt bewusstlos wir brauchen zusätzlich einen nef kommen", 256: "evt eins ende"}
+    run = replay_ticks(clf, "d-hypo", second, until=260, mode="full")
+    assert "NEF kommt, verstanden." in said(run)
+    funk = next(it for it in evaluate.evaluate(run)["sections"][0]["items"] if it["id"] == "funk")
+    assert "NEF" not in funk["note"], funk["note"]
+
+
+def test_early_nef_is_fine_before_deterioration(clf):
+    run = play(clf, "d-hypo", ["rotkreuzhamburg von evt eins kommen",
+                               "patientin mitte fünfzig verwirrt wach verdacht auf unterzucker wir brauchen rtw und nef kommen", "evt eins ende"])
+    funk = next(it for it in evaluate.evaluate(run)["sections"][0]["items"] if it["id"] == "funk")
+    assert "NEF" not in funk["note"], funk["note"]

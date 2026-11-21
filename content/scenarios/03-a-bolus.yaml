@@ -201,6 +201,7 @@ events:
       - Befund: Er sackt zusammen und reagiert nicht mehr.
     expect: {any: [laut_ansprechen, atemwege_freimachen, atemkontrolle, hlw], within: 15, label: Bewusstlosigkeit erkannt (Ansprechen, Atemwege, Atemkontrolle bzw. HLW)}
     set: {bewusstlos: true}
+    request: [NEF]   # ab hier ist der Notarzt nötig
   # ENTWURF Eskalation – Zeiten und Befunde fachlich gegenlesen
   - at: 150
     when: {geloest: false, hlw: false}

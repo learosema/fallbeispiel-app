@@ -109,6 +109,7 @@ events:
     when: {seitenlage: false}
     say:
       - Befund: Es brodelt bei jedem Atemzug, die Lippen werden blau. SpO2 fällt.
+    request: [NEF]   # ab hier ist der Notarzt nötig
 
 # ENTWURF Eskalation
 alone:
