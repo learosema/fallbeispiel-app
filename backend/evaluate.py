@@ -108,10 +108,15 @@ def check_funk(run: Run) -> dict[str, Any]:
             problems.append("Meldung nicht mit „kommen“ abgeschlossen")
     requested = {r.upper() for f in infos for r in f["resources"]}
     s = run.scenario
+    # nach einer Verschlechterung kann mehr nötig werden (erst RTW, dann NEF dazu)
+    escalated = [r for k, _ in run.fired for r in s.events[k].request if r not in s.request_required]
     lacking = [r for r in s.request_required if r not in requested]
-    extra = [r for r in requested if r not in s.request_required + s.request_optional]
+    extra = [r for r in requested if r not in s.request_required + s.request_optional + escalated]
     if lacking:
         problems.append("Nachforderung unpassend: " + ", ".join(lacking) + " fehlt")
+    late = sorted({r for r in escalated if r not in requested})
+    if late:
+        problems.append(", ".join(late) + " nach der Verschlechterung nicht nachgefordert")
     if extra:
         problems.append("nicht nötig nachgefordert: " + ", ".join(sorted(extra)))
     if run.state.get("funk_ermahnt"):

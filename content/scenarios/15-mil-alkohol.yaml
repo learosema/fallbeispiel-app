@@ -122,6 +122,7 @@ events:
       - Befund: Er reagiert nicht mehr, auch nicht auf Schmerzreiz. Er schwitzt stark.
     set: {bewusstlos: true}
     expect: {any: [laut_ansprechen, atemkontrolle, seitenlage, bz], within: 20, label: Bewusstlosigkeit erkannt}
+    request: [NEF]   # ab hier ist der Notarzt nötig
 
 # ENTWURF Eskalation
 silence:

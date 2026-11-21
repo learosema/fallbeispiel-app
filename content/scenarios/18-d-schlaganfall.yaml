@@ -125,6 +125,7 @@ events:
     when: {nachforderung: false}
     say:
       - Befund: Herr Brandt reagiert nur noch auf lautes Ansprechen.
+    request: [NEF]   # ab hier ist der Notarzt nötig
 
 # ENTWURF Eskalation
 silence:

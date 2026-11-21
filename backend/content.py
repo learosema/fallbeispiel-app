@@ -48,6 +48,7 @@ class Event:
     variant: Variant
     repeat: float | None = None   # Sekunden: feuert danach immer wieder, solange `when` passt
     expect: dict[str, Any] | None = None  # Warnzeichen: erwartete Reaktion {any: [...], within: s, label} für die Auswertung
+    request: list[str] = field(default_factory=list)  # ab diesem Ereignis zusätzlich nachzufordern (z. B. NEF nach Verschlechterung)
 
 
 @dataclass
@@ -236,7 +237,8 @@ def _load_scenario(path: Path) -> Scenario:
         when = dict(e.get("when") or {})
         events.append(Event(float(e["at"]), e.get("since"), when,
                             Variant(_lines(e.get("say"), f"{path.name}.events[{n}]"), {}, dict(e.get("set") or {})), repeat,
-                            _expect(e, when, known, f"{path.name}: events[{n}].expect")))
+                            _expect(e, when, known, f"{path.name}: events[{n}].expect"),
+                            [r.upper() for r in e.get("request") or []]))
     for ka in d.get("key_actions") or []:
         if ka.get("phase", "minute") not in ("minute", "full"):
             raise ValueError(f"{path.name}: key_actions {ka.get('label')!r}: phase muss minute oder full sein")

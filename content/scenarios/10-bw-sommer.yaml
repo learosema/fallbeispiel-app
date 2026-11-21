@@ -111,6 +111,7 @@ events:
     when: {seitenlage: false}
     say:
       - Befund: Es gurgelt bei jedem Atemzug, die Lippen werden blau.
+    request: [NEF]   # ab hier ist der Notarzt nötig
 
 # ENTWURF Eskalation
 alone:

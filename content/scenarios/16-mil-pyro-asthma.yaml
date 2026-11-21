@@ -122,6 +122,7 @@ events:
       - Befund: Sophie sackt zusammen und reagiert nicht mehr. Nur noch vereinzelte, schnappende Atemzüge.
     set: {bewusstlos: true}
     expect: {any: [aus_gefahr_bringen, laut_ansprechen, atemkontrolle, hlw], within: 15, label: Bewusstlosigkeit erkannt – raus aus dem Rauch}
+    request: [NEF]   # ab hier ist der Notarzt nötig
   - at: 450
     when: {aus_gefahr_bringen: false, hlw: false}
     say:
