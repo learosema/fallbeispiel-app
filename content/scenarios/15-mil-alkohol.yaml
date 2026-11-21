@@ -111,6 +111,25 @@ events:
     when: {bz: false}
     say:
       - Befund: Er wird schläfriger, reagiert nur noch auf Schmerzreiz.
+  # ENTWURF Eskalation – Zeiten und Befunde fachlich gegenlesen
+  - at: 150
+    when: {seitenlage: false}
+    say:
+      - Befund: Er erbricht erneut auf dem Rücken liegend, es gurgelt.
+  - at: 300
+    when: {bz: false}
+    say:
+      - Befund: Er reagiert nicht mehr, auch nicht auf Schmerzreiz. Er schwitzt stark.
+    set: {bewusstlos: true}
+    expect: {any: [laut_ansprechen, atemkontrolle, seitenlage, bz], within: 20, label: Bewusstlosigkeit erkannt}
+
+# ENTWURF Eskalation
+silence:
+  - say:
+      - Patient: (lallt) Lass misch … in Ruhe …
+alone:
+  - say:
+      - Umstehende: (der Ordner) Wo wollt ihr hin? Der kippt mir hier gleich weg!
 
 key_actions:
   - label: Atemweg gesichert (Absaugen / Seitenlage)

@@ -168,6 +168,26 @@ events:
     when: {decke: false}
     say:
       - Befund: Jonas zittert, die Kleidung ist nass vom Boden.
+  # ENTWURF Eskalation – Zeiten und Befunde fachlich gegenlesen
+  - at: 150
+    when: {seitenlage: false, krampft: false}
+    say:
+      - Befund: Jonas schnarcht laut, die Atmung klingt verlegt.
+  - at: 240
+    when: {seitenlage: false, krampft: false}
+    say:
+      - Befund: Jonas' Lippen werden blau, die Atmung klingt brodelnd.
+
+# ENTWURF Eskalation
+silence:
+  - when: {krampft: true}
+    say:
+      - Umstehende: Der hört gar nicht auf! Tut doch was!
+  - say:
+      - Patient: (verwaschen, schläfrig) Wo … bin ich?
+alone:
+  - say:
+      - Umstehende: Hey! Ihr könnt den doch nicht hier liegen lassen!
 
 key_actions:
   - label: Während des Anfalls schützen (Kopf polstern, nichts in den Mund)

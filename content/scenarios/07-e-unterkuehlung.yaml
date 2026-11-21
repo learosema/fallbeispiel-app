@@ -108,6 +108,19 @@ events:
     when: {decke: false}
     say:
       - Befund: Herr Hartmann wird zunehmend schläfrig und antwortet kaum noch.
+  # ENTWURF Eskalation – Zeiten und Befunde fachlich gegenlesen
+  - at: 240
+    when: {decke: false}
+    say:
+      - Befund: Herr Hartmann antwortet nicht mehr und reagiert nur noch auf Schmerzreiz. Der Puls ist langsam.
+    set: {bewusstlos: true}
+    expect: {any: [laut_ansprechen, atemkontrolle, seitenlage, decke], within: 20, label: Bewusstlosigkeit erkannt}
+
+# ENTWURF Eskalation
+silence:
+  - when: {decke: false}
+    say:
+      - Patient: (leise, langsam) Mir … ist so müde …
 
 key_actions:
   - label: Wärmeerhalt mit Isolation vom Boden

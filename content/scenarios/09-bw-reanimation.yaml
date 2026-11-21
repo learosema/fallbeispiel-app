@@ -213,6 +213,26 @@ events:
     say:
       - Rettungsdienst: Rettungsdienst und Notarzt sind da. Was habt ihr bisher gemacht?
     set: {rd_da: true}
+  # ENTWURF Eskalation – Zeiten und Befunde fachlich gegenlesen
+  - at: 120
+    when: {hlw: false}
+    say:
+      - Befund: Keine Atemzüge mehr, die Haut ist grau-blau.
+  - at: 300
+    when: {hlw: false}
+    say:
+      - Befund: Ohne Herzdruckmassage ist es zu spät – der Läufer ist verstorben.
+    set: {verstorben: true}
+    expect: false
+
+# ENTWURF Eskalation
+silence:
+  - when: {hlw: false}
+    say:
+      - Umstehende: Macht doch was! Der atmet nicht!
+alone:
+  - say:
+      - Umstehende: Ihr könnt doch jetzt nicht gehen! Hilfe!
 
 key_actions:
   - label: Schnappatmung als nicht normal erkannt, sofort HLW

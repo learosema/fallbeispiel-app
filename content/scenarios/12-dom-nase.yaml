@@ -115,6 +115,23 @@ events:
     when: {aufklaeren: false}
     say:
       - Patient: Ich geh jetzt weiter feiern. (steht auf)
+  # ENTWURF Eskalation – Zeiten und Befunde fachlich gegenlesen
+  - at: 180
+    when: {oberkoerper_hoch: false}
+    say:
+      - Befund: Er wird blass und schwitzig, ihm ist übel – er erbricht Blut.
+  - at: 300
+    when: {oberkoerper_hoch: false}
+    say:
+      - Befund: Er wirkt zunehmend benommen und antwortet nur noch langsam.
+
+# ENTWURF Eskalation
+alone:
+  - when: {aufklaeren: false}
+    say:
+      - Befund: (Er steht auf, hält sich die Nase und verschwindet in der Menge)
+  - say:
+      - Patient: Hallo? Lasst ihr mich hier jetzt sitzen?
 
 key_actions:
   - label: Eigenschutz / Polizei / Deeskalation

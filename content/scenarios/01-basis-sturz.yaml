@@ -139,6 +139,23 @@ events:
     when: {aufklaeren: false}
     say:
       - Patient: Ich glaube, es geht schon wieder. Ich will eigentlich nur nach Hause.
+  # ENTWURF Eskalation – Zeiten und Befunde fachlich gegenlesen
+  - at: 240
+    when: {decke: false}
+    say:
+      - Befund: Herr Petersen zittert stark, die Lippen werden bläulich, er antwortet langsamer.
+  - at: 120
+    when: {aufklaeren: false}
+    say:
+      - Patient: (versucht sich am Geländer hochzuziehen) So, ich geh jetzt.
+    expect: [aufklaeren, nicht_aufstehen]
+
+# ENTWURF Eskalation
+alone:
+  - when: {aufklaeren: false}
+    say:
+      - Patient: Hallo? … Na gut, dann geh ich eben allein nach Hause. (zieht sich am Geländer hoch)
+      - Patient: (ruft) Hallo? Ist da wer?
 
 key_actions:
   - label: Manuelle HWS-Stabilisierung nach Sturz mit Kopfanprall

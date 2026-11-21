@@ -114,6 +114,17 @@ events:
     when: {schocklage: false}
     say:
       - Befund: Er wird zunehmend schläfrig, der Puls ist kaum noch tastbar.
+  # ENTWURF Eskalation – Zeiten und Befunde fachlich gegenlesen
+  - at: 240
+    when: {schocklage: false}
+    say:
+      - Befund: Er reagiert nur noch auf lautes Ansprechen, die Haut ist grau und kalt.
+  - at: 330
+    when: {schocklage: false}
+    say:
+      - Befund: Herr Krüger ist nicht mehr ansprechbar, der Radialispuls ist nicht mehr tastbar.
+    set: {bewusstlos: true}
+    expect: {any: [laut_ansprechen, atemkontrolle, schocklage], within: 20, label: Bewusstlosigkeit erkannt}
 
 key_actions:
   - label: Schock erkannt (Puls, Rekap, Haut)

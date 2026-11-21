@@ -104,6 +104,16 @@ events:
     say:
       - Befund: Er schnarcht wieder, dann würgt er und erbricht – auf dem Rücken liegend läuft das Erbrochene in den Rachen.
     set: {aspiration: true}
+  # ENTWURF Eskalation – Zeiten und Befunde fachlich gegenlesen
+  - at: 210
+    when: {seitenlage: false}
+    say:
+      - Befund: Es brodelt bei jedem Atemzug, die Lippen werden blau. SpO2 fällt.
+
+# ENTWURF Eskalation
+alone:
+  - say:
+      - Umstehende: (der Passant) Hallo? Sie können ihn doch nicht einfach so liegen lassen!
 
 key_actions:
   - label: Atemwege frei gemacht vor der Atemkontrolle

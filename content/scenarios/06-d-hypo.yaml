@@ -134,6 +134,25 @@ events:
     say:
       - Befund: Frau Demir wird schläfriger, reagiert nur noch auf lautes Ansprechen.
     expect: [bz, glukose_geben, gcs]
+  # ENTWURF Eskalation – Zeiten und Befunde fachlich gegenlesen
+  - at: 240
+    when: {glukose: false}
+    say:
+      - Befund: Frau Demir reagiert nicht mehr auf Ansprache, nur noch auf Schmerzreiz. Sie schwitzt stark.
+    set: {bewusstlos: true}
+    expect: {any: [laut_ansprechen, atemkontrolle, seitenlage, bz], within: 20, label: Bewusstlosigkeit erkannt (nichts mehr in den Mund)}
+
+# ENTWURF Eskalation
+silence:
+  - when: {glukose: false}
+    say:
+      - Patient: (murmelt) Ich muss … zum Termin …
+      - Patient: Lassen Sie mich doch!
+alone:
+  - when: {glukose: false}
+    say:
+      - Befund: (Frau Demir steht auf und torkelt Richtung Straße)
+      - Umstehende: Hallo? Die läuft gleich vor ein Auto!
 
 key_actions:
   - label: Blutzucker gemessen

@@ -68,7 +68,9 @@ Antwortsuche je Intent, in dieser Reihenfolge:
 Funkverkehr mit der Leitstelle (Anruf, Meldung, „… Ende“) und das Eintreffen des Rettungsdienstes ~8 Minuten nach
 der Nachforderung übernimmt die Engine selbst. Rufnamen sind in den Einstellungen änderbar.
 
-**Eskalation** (Pilot: Kettensäge, die anderen Fälle folgen nach Leas Durchsicht):
+**Eskalation** (alle Fälle, Stellen mit `# ENTWURF Eskalation` markiert – fachlich gegenlesen). Tod ohne Hilfe nur bei
+Kettensäge (4:30), Bolus (5:30), Reanimation ohne HLW (5:00), Asthma und Pyro-Asthma (7:30); sonst Verschlechterung bis
+Eintrübung/Bewusstlosigkeit.
 
 - **Allein lassen:** „Wir holen was aus dem Auto“, „Kollege, komm mit“ → Flag `allein`; wache Patient:innen bzw.
   Umstehende rufen um Hilfe (nach 10 s, dann alle 15 s, ab dem 4. Ruf alle 45 s). Wer danach etwas am Patienten macht,
@@ -90,7 +92,8 @@ der Nachforderung übernimmt die Engine selbst. Rufnamen sind in den Einstellung
   `funk_early` (zeitkritisch): Dort darf/soll früh gefunkt werden, das ist nicht „außer der Reihe“, die 1. Minute
   endet erst, wenn alle Punkte erledigt sind, und der Kollege schlägt auf Nachfrage früh den Funk vor.
   Bei **offenem Funk** geht alles an die Leitstelle („Verstanden.“), auch ohne „kommen“; eine Meldung in mehreren
-  Stücken wird zusammen ausgewertet. Ein klarer Satz an den Patienten ohne Funkbegriffe verlässt den Funk wieder;
+  Stücken wird zusammen ausgewertet. Ein klarer Satz an jemanden vor Ort („ich …“, „Sie …“, „Kollege …“) ohne Funkbegriffe verlässt den
+  Funk wieder (Berichtsformen wie „Tourniquet angelegt“ bleiben Teil der Meldung);
   die Leitstelle mahnt dann „EVT1 von RotkreuzHamburg, bitte Funkdisziplin, beenden Sie das Gespräch.“ (in der
   Auswertung angemerkt, „EVT1 Ende“ danach geht noch).
 - **Warnzeichen:** Wurde auf ein Ereignis (z. B. „Mir wird kalt“) rechtzeitig reagiert? Zählt nicht ins Urteil,
@@ -142,7 +145,7 @@ Bitte nicht „wegoptimieren“ – im Zweifel nachfragen.
 
 **Einzelne Fälle**
 
-- **Schlaganfall (Entwurf, gegenlesen):** Herr Krüger (72), Supermarkt, Symptombeginn 10:42 (Ehefrau weiß es genau).
+- **Schlaganfall (Entwurf, gegenlesen):** Herr Brandt (72), Supermarkt, Symptombeginn 10:42 (Ehefrau weiß es genau).
   Früher Funk mit Verdacht Schlaganfall als kritische Schlüsselmaßnahme `within: 90`; BZ als Hypo-Ausschluss.
 - **Sturz auf nasser Treppe:** Herr Petersen will nach Hause → Aufklärung (Kopfanprall unter Blutverdünner). Kennt
   man den Blutverdünner, willigt er sofort ein, sonst beim zweiten Anlauf.
