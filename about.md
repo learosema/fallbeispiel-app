@@ -96,7 +96,9 @@ Eintrübung/Bewusstlosigkeit.
   („wir brauchen / benötigen / bitte / einmal RTW“), nicht bei einer Erwähnung („RTW ist schon alarmiert“).
   Nach „… Ende“ ohne Ende der 1. Minute (früher Funk, ganzer Fall) sagt der Kollege „Gut. Dann machen wir mit der
   Untersuchung weiter.“; ein zweites „Ende“ → „Der Funkspruch ist schon beendet.“ Rufnamen werden unscharf erkannt
-  (ohne Vokale, f = v: „Eva T1“, „Efte eins“ = EVT1), „End“ gilt wie „Ende“.
+  (ohne Vokale, f = v: „Eva T1“, „Efau Tee eins“ = EVT1; „evtl.“/„eventuell“ = EVT), „End“ gilt wie „Ende“.
+  Beim **Vorlesen** buchstabiert die App Kürzel im Rufnamen („EVT1“ → „E Fau Te 1“) und einige Abkürzungen (RTW,
+  DRK, AED, HWS, SHT, GCS, EKG …; NEF bleibt ein Wort), „RotkreuzHamburg“ → „Rotkreuz Hamburg“ (`forSpeech` in app.js).
   **Nachforderung im Verlauf:** Ein zweiter Funkspruch („… zusätzlich einen NEF“) zählt mit. Ereignisse können
   `request: [NEF]` setzen – ab dann wird der NEF erwartet („NEF nach der Verschlechterung nicht nachgefordert“),
   vorher ist er optional. Gesetzt bei Bewusstlosigkeit bzw. ernsten Atemproblemen in Bolus, Hypo, Seitenlage,

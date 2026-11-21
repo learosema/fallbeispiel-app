@@ -200,11 +200,32 @@
   }
   if ("speechSynthesis" in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
 
+  // Buchstabieren beim Vorlesen: Rufname „EVT1“ → „E Fau Te 1“ (sonst liest die Stimme ihn als Wort),
+  // dazu Abkürzungen, die man buchstabiert spricht. NEF bleibt ein Wort („Neff“).
+  const LETTERS = { A: "A", B: "Be", C: "Ze", D: "De", E: "E", F: "Eff", G: "Ge", H: "Ha", I: "I", J: "Jott", K: "Ka", L: "El",
+    M: "Em", N: "En", O: "O", P: "Pe", Q: "Ku", R: "Er", S: "Ess", T: "Te", U: "U", V: "Fau", W: "We", X: "Ix", Y: "Üpsilon", Z: "Zett",
+    Ä: "Ä", Ö: "Ö", Ü: "Ü" };
+  const SPELLED = ["RTW", "KTW", "DRK", "AED", "HWS", "SHT", "GCS", "EKG", "AVPU", "BZ", "RR"];
+  const spell = (word) => [...word].map((ch) => LETTERS[ch.toUpperCase()] ?? ch).join(" ");
+  function forSpeech(text) {
+    let out = text;
+    const cs = String(settings.callsign || "").trim();
+    if (/[A-Za-zÄÖÜäöü]/.test(cs)) {
+      // Buchstaben und Ziffern des Rufnamens, im Text auch mit Leerzeichen dazwischen („EVT 1“)
+      const parts = cs.match(/[A-Za-zÄÖÜäöü]+|\d+/g) || [];
+      const re = new RegExp("\\b" + parts.map((p) => p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("\\s?") + "\\b", "gi");
+      // nur Kürzel buchstabieren („EVT“), Wörter wie „Florian“ nicht
+      out = out.replace(re, () => parts.map((p) => (/\d/.test(p) || p.length > 4 ? p : spell(p))).join(" "));
+    }
+    out = out.replace(/([a-zäöü])([A-ZÄÖÜ])/g, "$1 $2"); // „RotkreuzHamburg“ → „Rotkreuz Hamburg“
+    return out.replace(new RegExp("\\b(" + SPELLED.join("|") + ")\\b", "g"), (m) => spell(m));
+  }
+
   function speak(text, pitch = 1) {
     return new Promise((resolve) => {
       if (!settings.speak || !("speechSynthesis" in window)) return resolve();
       speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text.replace(/[*_#`]/g, ""));
+      const u = new SpeechSynthesisUtterance(forSpeech(text.replace(/[*_#`]/g, "")));
       u.lang = "de-DE";
       if (germanVoice) u.voice = germanVoice;
       u.rate = Number(settings.rate) || 1;

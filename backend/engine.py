@@ -135,6 +135,8 @@ def skeleton(text: str) -> str:
 
 
 def has_name(name: str, text: str) -> bool:
+    if compact(name).startswith("evt"):  # „E-Fau-Tee“ wird gern zu „evtl.“ / „eventuell“
+        text = re.sub(r"\b(evtl|eventuell)\b\.?", "evt", normalize(text))
     c, n = compact(text), compact(name)
     if n and n in c:
         return True
