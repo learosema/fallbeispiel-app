@@ -47,6 +47,7 @@ class Event:
     when: dict[str, Any]
     variant: Variant
     repeat: float | None = None   # Sekunden: feuert danach immer wieder, solange `when` passt
+    expect: dict[str, Any] | None = None  # Warnzeichen: erwartete Reaktion {any: [...], within: s, label} für die Auswertung
 
 
 @dataclass
@@ -138,6 +139,32 @@ def _item_refs(item: dict[str, Any]) -> list[str]:
     return refs
 
 
+EXPECT_WITHIN = 30.0  # Sekunden bis zur Reaktion auf ein Warnzeichen, wenn der Fall nichts anderes angibt
+
+
+def _expect(e: dict[str, Any], when: dict[str, Any], known: dict[str, Intent], where: str) -> dict[str, Any] | None:
+    """Erwartete Reaktion auf ein Ereignis. Ohne Angabe abgeleitet: Kommt das Ereignis, weil ein Intent fehlt
+    (`when: {decke: false}`), ist genau dieser Intent die Reaktion. Ereignisse mit `since`/`repeat` (Abläufe wie
+    der AED-Rhythmus) und `expect: false` werden nicht bewertet."""
+    raw = e.get("expect")
+    if raw is False:
+        return None
+    if raw is None:
+        if e.get("since") or e.get("repeat"):
+            return None
+        derived = [k for k, v in when.items() if v is False and k in known]
+        return {"any": derived, "within": EXPECT_WITHIN, "label": None} if derived else None
+    if isinstance(raw, list):
+        raw = {"any": raw}
+    refs = list(raw.get("any") or [])
+    if not refs:
+        raise ValueError(f"{where}: any: [...] fehlt")
+    for ref in refs:
+        if ref not in known:
+            raise ValueError(f"{where}: unbekannter Intent {ref!r}")
+    return {"any": refs, "within": float(raw.get("within", EXPECT_WITHIN)), "label": raw.get("label")}
+
+
 def _load_scenario(path: Path) -> Scenario:
     d = yaml.safe_load(path.read_text(encoding="utf-8"))
     sid = d["id"]
@@ -159,8 +186,10 @@ def _load_scenario(path: Path) -> Scenario:
         repeat = float(e["repeat"]) if e.get("repeat") else None
         if repeat is not None and repeat < 10:
             raise ValueError(f"{path.name}: events[{n}].repeat muss mindestens 10 Sekunden sein")
-        events.append(Event(float(e["at"]), e.get("since"), dict(e.get("when") or {}),
-                            Variant(_lines(e.get("say"), f"{path.name}.events[{n}]"), {}, dict(e.get("set") or {})), repeat))
+        when = dict(e.get("when") or {})
+        events.append(Event(float(e["at"]), e.get("since"), when,
+                            Variant(_lines(e.get("say"), f"{path.name}.events[{n}]"), {}, dict(e.get("set") or {})), repeat,
+                            _expect(e, when, known, f"{path.name}: events[{n}].expect")))
     for ka in d.get("key_actions") or []:
         if ka.get("phase", "minute") not in ("minute", "full"):
             raise ValueError(f"{path.name}: key_actions {ka.get('label')!r}: phase muss minute oder full sein")

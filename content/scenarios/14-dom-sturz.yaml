@@ -127,6 +127,7 @@ events:
   - at: 360
     say:
       - Befund: Marco wird unruhiger, die Atemnot nimmt zu.
+    expect: {any: [auskultation, halsvenen, spo2, af_zaehlen, atmung_beurteilen, sauerstoff, oberkoerper_hoch, reevaluation], within: 45, label: Zunehmende Atemnot neu beurteilt (B erneut prüfen)}
     set: {gestaut: true}
   - at: 480
     say:

@@ -122,6 +122,7 @@ events:
     when: {schocklage: false}
     say:
       - Patient: Ich will mal aufstehen … (wird wieder blass und schwankt)
+    expect: [nicht_aufstehen, schocklage]
 
 key_actions:
   - label: Flach lagern / Beine hoch

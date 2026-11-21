@@ -60,6 +60,8 @@ class Run:
     first_t: dict[str, float]
     ended: bool
     next_event_at: float | None = None      # Nettozeit, zu der das nächste Ereignis fällig wird (für den Takt im Browser)
+    fired: list[tuple[int, int]] = field(default_factory=list)  # ausgelöste Ereignisse: (Index in scenario.events, Äußerung)
+    ended_at: int | None = None             # Äußerung, mit der der Einsatz endete („1. Minute beendet“, Übergabe)
 
 
 def compact(text: str) -> str:
@@ -167,6 +169,8 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
     first: dict[str, tuple[int, int]] = {}
     first_t: dict[str, float] = {}
     fired: dict[int, int] = {}  # Ereignis → wie oft schon ausgelöst
+    fired_log: list[tuple[int, int]] = []
+    ended_at: int | None = None
     turns: list[Turn] = []
 
     def apply(v: Variant, t: float) -> None:
@@ -210,6 +214,7 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
             due = _due(ev, fired.get(k, 0), first_t)
             if due is not None and t >= due and matches(ev.when, state):
                 fired[k] = fired.get(k, 0) + 1
+                fired_log.append((k, n))
                 lines += ev.variant.say
                 apply(ev.variant, t)
         if "nachforderung" in first_t and not state.get("rd_da") and t >= first_t["nachforderung"] + ARRIVAL_SECONDS:
@@ -219,6 +224,8 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
             state["_beendet"] = True
             lines.append(Line("Befund", "Der Patient ist übergeben. Du kannst die Auswertung starten."))
 
+        if state.get("_beendet") and ended_at is None:
+            ended_at = n
         if not hits and not lines and not tick:
             lines.append(FALLBACK)
         seen: set[Line] = set()
@@ -227,7 +234,7 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
         turns.append(Turn(t, text, hits, lines, info, unhandled))
 
     return Run(scenario, mode, settings, turns, state, first, first_t, bool(state.get("_beendet")),
-               _next_event_at(scenario, state, fired, first_t, turns[-1].t if turns else 0.0))
+               _next_event_at(scenario, state, fired, first_t, turns[-1].t if turns else 0.0), fired_log, ended_at)
 
 
 def _due(ev, count: int, first_t: dict[str, float]) -> float | None:

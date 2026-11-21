@@ -162,6 +162,7 @@ events:
     when: {krampft: true}
     say:
       - Befund: Das Zucken lässt nach und hört auf. Der Anfall hat insgesamt etwa zweieinhalb Minuten gedauert. Jonas ist schläfrig und schnarcht.
+    expect: {any: [atemkontrolle, atemwege_freimachen, seitenlage], label: Nach dem Anfall Atemweg gesichert (Atemkontrolle, Atemwege, Seitenlage)}
     set: {krampft: false}
   - at: 180
     when: {decke: false}

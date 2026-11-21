@@ -251,6 +251,62 @@ def check_key_action(ka: dict[str, Any], run: Run) -> dict[str, Any]:
     return out
 
 
+def _event_text(ev) -> str:
+    """Was das Warnzeichen sagt, ohne Regieanweisungen („(zittert) Mir wird kalt“ → „Mir wird kalt“)."""
+    parts = []
+    for line in ev.variant.say:
+        spoken = re.sub(r"\([^)]*\)", "", line.text).strip()
+        parts.append(spoken or line.text.strip("() "))
+    text = " ".join(parts)
+    return text if len(text) <= 70 else text[:67].rstrip() + "…"
+
+
+def check_warnings(run: Run) -> list[dict[str, Any]]:
+    """Reaktion auf Warnzeichen: Kam nach dem Ereignis (Verschlechterung, „Mir wird kalt“) rechtzeitig eine der
+    erwarteten Maßnahmen? Folgen mehrere Warnzeichen mit derselben Erwartung, zählt das erste, die weiteren
+    stehen als Verlauf in der Notiz."""
+    out: list[dict[str, Any]] = []
+    by_expect: dict[frozenset[str], dict[str, Any]] = {}
+    end_t = run.turns[-1].t if run.turns else 0.0
+    for k, n in run.fired:
+        ev = run.scenario.events[k]
+        if not ev.expect or (run.ended_at is not None and n >= run.ended_at):
+            continue  # nach dem Ende des Einsatzes kann niemand mehr reagieren
+        key = frozenset(ev.expect["any"])
+        if key in by_expect:  # gleiche Erwartung: nur Eskalation desselben Problems
+            by_expect[key]["_later"].append(_event_text(ev))
+            continue
+        text = _event_text(ev)
+        t0 = run.turns[n].t
+        reaction = next((m for m in range(n + 1, len(run.turns))
+                         if any(h.intent in key for h in run.turns[m].hits)), None)
+        item = {"id": "warn", "label": ev.expect["label"] or f"Reaktion auf „{text}“", "short": text,
+                "status": MISSING, "note": "", "quote": "", "at": None, "critical": False, "_later": []}
+        if reaction is not None:
+            delay = run.turns[reaction].t - t0
+            item["at"] = (reaction, 0)
+            item["quote"] = _quote(reaction, run)
+            if delay <= ev.expect["within"]:
+                item["status"] = OK
+            else:
+                item["status"] = PARTIAL
+                item["note"] = f"erst nach {round(delay)} s (Ziel: {round(ev.expect['within'])} s)"
+                item["improve"] = f"Auf „{text}“ schneller reagieren"
+        elif end_t - t0 < ev.expect["within"]:
+            continue  # Protokoll endet, bevor die Reaktionszeit um war – nicht bewerten
+        else:
+            expected = " / ".join(intents()[i].label for i in ev.expect["any"])
+            item["note"] = "keine Reaktion – erwartet: " + expected
+            item["improve"] = ev.expect["label"] or f"Auf „{text}“ reagieren: {expected}"
+        by_expect[key] = item
+        out.append(item)
+    for item in out:
+        later = item.pop("_later")
+        if later and item["status"] != OK:
+            item["note"] += "; danach: " + "; ".join(f"„{x}“" for x in later)
+    return out
+
+
 def _out_of_order(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Schritte, die nicht in die längste korrekt geordnete Folge passen."""
     seq = [(i, it) for i, it in enumerate(items) if it["at"] is not None and it["status"] != NA]
@@ -285,6 +341,11 @@ def evaluate(run: Run, embedder=None) -> dict[str, Any]:
             if run.mode == "full" or ka.get("phase", "minute") == "minute"]
     if keys:
         sections.append({"title": "SCHLÜSSELMASSNAHMEN", "items": keys})
+    # Warnzeichen zählen nicht ins Urteil – die fehlende Maßnahme steht meist schon in Checkliste/Schlüsselmaßnahmen –,
+    # werden aber als Verbesserung vorrangig genannt: Gerade hier korrigiert im Gespräch niemand.
+    warnings = check_warnings(run)
+    if warnings:
+        sections.append({"title": "WARNZEICHEN", "items": warnings})
 
     ordered = sorted((it for it in minute if it["at"] is not None and it["status"] != NA), key=lambda it: it["at"])
     wrong = _out_of_order(minute)
@@ -305,9 +366,10 @@ def evaluate(run: Run, embedder=None) -> dict[str, Any]:
     funk_end = next((t.t for t in run.turns if t.funk and t.funk["ende"]), None)
     time = f"Gesamtzeit {fmt(total)}" + (f", Funkspruch abgeschlossen nach {fmt(funk_end)}" if funk_end is not None else "")
 
-    issues = sorted((it for it in relevant if it["status"] != OK), key=lambda it: (not it.get("critical"), it["status"] != MISSING))
+    issues = sorted((it for it in relevant + warnings if it["status"] != OK),
+                    key=lambda it: (0 if it.get("critical") else 1 if it["id"] == "warn" else 2, it["status"] != MISSING))
     vague = vague_findings(run, embedder)
-    improve = [it["label"] + (f" ({it['note']})" if it["note"] else "") for it in issues][:4]
+    improve = [it.get("improve") or it["label"] + (f" ({it['note']})" if it["note"] else "") for it in issues][:4]
     if vague:
         improve.append("Befunde konkret benennen statt „normal“ (z. B. „Puls regelmäßig, gut tastbar“, „Rekap unter 2 s“)")
     return {
@@ -319,6 +381,7 @@ def evaluate(run: Run, embedder=None) -> dict[str, Any]:
         "praise": [it["label"] for it in relevant if it["status"] == OK][:3],
         "improve": improve,
         "vague": vague,
+        "notes": run.scenario.notes,
     }
 
 
@@ -338,6 +401,8 @@ def as_text(result: dict[str, Any]) -> str:
     lines.append("ZEIT (nachrangig): " + result["time"])
     lines += ["", "GUT GEMACHT: " + ("; ".join(result["praise"]) or "–"),
               "VERBESSERN: " + ("; ".join(result["improve"]) or "nichts Wesentliches")]
+    if result.get("notes"):
+        lines += ["", "WORAUF ES IN DIESEM FALL ANKOMMT: " + " ".join(result["notes"].split())]
     return "\n".join(lines)
 
 
