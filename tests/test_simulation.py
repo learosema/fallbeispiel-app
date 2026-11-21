@@ -875,7 +875,8 @@ def test_colleague_speaks_after_early_radio_end(clf):
     assert not run.ended
 
 
-@pytest.mark.parametrize("text", ["Eva T1 Ende", "E V T 1 Ende", "evt 1 End", "efte eins ende"])
+@pytest.mark.parametrize("text", ["Eva T1 Ende", "E V T 1 Ende", "evt 1 End", "efte eins ende", "Efau Tee eins Ende",
+                                  "E Vau Tee 1 Ende", "evtl. 1 Ende", "eventuell eins ende"])
 def test_misheard_callsign_still_ends_the_call(clf, text):
     run = play(clf, "basis-sturz", ["rotkreuzhamburg von evt eins kommen", "älterer mann gestürzt wir brauchen einen rtw kommen", text])
     assert "funk_ende" in run.first and run.ended
