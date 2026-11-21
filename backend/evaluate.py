@@ -374,6 +374,8 @@ def evaluate(run: Run, embedder=None) -> dict[str, Any]:
     else:
         verdict = "Teilweise erfüllt"
 
+    if run.died_at is not None:
+        verdict = "Nicht erfüllt"
     total = run.turns[-1].t if run.turns else 0
     funk_end = next((t.t for t in run.turns if t.funk and t.funk["ende"]), None)
     time = f"Gesamtzeit {fmt(total)}" + (f", Funkspruch abgeschlossen nach {fmt(funk_end)}" if funk_end is not None else "")
@@ -383,6 +385,19 @@ def evaluate(run: Run, embedder=None) -> dict[str, Any]:
     vague = vague_findings(run, embedder)
     improve = [it.get("improve") or it["label"] + (f" ({it['note']})" if it["note"] else "") for it in issues][:4]
     improve += after_tip
+    alone_s = sum((b if b is not None else total) - a for a, b in run.alone)
+    course = []
+    if run.died_at is not None:
+        course.append(f"Patient verstorben nach {fmt(run.died_at)}")
+    if run.alone:
+        course.append(f"Patient allein gelassen (insgesamt {fmt(alone_s)})")
+    # Das Wichtigste zuerst: Tod und Alleinlassen stehen vor allem anderen
+    front = []
+    if run.died_at is not None:
+        front.append(f"Der Patient ist nach {fmt(run.died_at)} verstorben – die lebensrettenden Maßnahmen kamen nicht rechtzeitig")
+    if run.alone:
+        front.append("Patient nie allein lassen – einer bleibt immer da, Material holt der andere")
+    improve = front + improve
     if vague:
         improve.append("Befunde konkret benennen statt „normal“ (z. B. „Puls regelmäßig, gut tastbar“, „Rekap unter 2 s“)")
     return {
@@ -395,6 +410,8 @@ def evaluate(run: Run, embedder=None) -> dict[str, Any]:
         "improve": improve,
         "vague": vague,
         "notes": run.scenario.notes,
+        "course": course,
+        "died_at": run.died_at,
     }
 
 
@@ -408,6 +425,8 @@ def as_text(result: dict[str, Any]) -> str:
         lines.append("")
     lines.append("TATSÄCHLICHE REIHENFOLGE: " + (" → ".join(result["order"]) or "–"))
     lines.append("ABWEICHUNGEN: " + ("; ".join(result["deviations"]) or "keine"))
+    if result.get("course"):
+        lines.append("VERLAUF: " + "; ".join(result["course"]))
     if result.get("vague"):
         quotes = "; ".join(f"„{q}“" for q in result["vague"][:3])
         lines.append("BEFUNDSPRACHE: ungenau – " + quotes + ". Besser konkret: „Puls regelmäßig, gut/schlecht/nicht tastbar“, „Puls schnell“, „Rekap unter 2 s“ oder „Rekap verzögert“.")

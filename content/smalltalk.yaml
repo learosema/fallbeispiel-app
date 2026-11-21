@@ -22,6 +22,15 @@ fallback:  # nichts erkannt, auch kein Smalltalk
   - Kollege: Das hab ich nicht verstanden – sag es bitte konkreter.
   - Kollege: Was soll passieren? Sag es mir genauer.
 
+silence:  # wacher Patient, wenn 30 s niemand etwas sagt (Fälle können das mit `silence:` ersetzen oder abschalten)
+  - Patient: Hallo? … Was passiert denn jetzt?
+  - Patient: Was ist denn los? Sagen Sie doch was!
+
+alone:  # wacher Patient, wenn das Team weggeht (Fälle: `alone:`)
+  - Patient: Hallo? Wo sind Sie denn?
+  - Patient: (ruft) Hilfe! Bitte, kommen Sie zurück!
+  - Patient: (ruft lauter) Hilfe! Hört mich denn keiner?
+
 rules:
   wiederholen:
     patterns:

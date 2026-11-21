@@ -68,6 +68,17 @@ Antwortsuche je Intent, in dieser Reihenfolge:
 Funkverkehr mit der Leitstelle (Anruf, Meldung, „… Ende“) und das Eintreffen des Rettungsdienstes ~8 Minuten nach
 der Nachforderung übernimmt die Engine selbst. Rufnamen sind in den Einstellungen änderbar.
 
+**Eskalation** (Pilot: Kettensäge, die anderen Fälle folgen nach Leas Durchsicht):
+
+- **Allein lassen:** „Wir holen was aus dem Auto“, „Kollege, komm mit“ → Flag `allein`; wache Patient:innen bzw.
+  Umstehende rufen um Hilfe (nach 10 s, dann alle 15 s, ab dem 4. Ruf alle 45 s). Wer danach etwas am Patienten macht,
+  ist automatisch zurück. „Ich gehe kurz zum Auto“ = nur ich, der Kollege bleibt. Auswertung: „Patient nie allein
+  lassen“ ganz oben, Dauer unter „Verlauf“.
+- **Stille:** 30 s ohne Äußerung → der wache Patient meldet sich einmal je Pause (Fälle: `silence:`).
+- **Bewusstlos im Verlauf** (`set: {bewusstlos: true}`): Patientenzeilen werden zu „(keine Reaktion)“.
+- **Tod** (`set: {verstorben: true}`) nur, wo er in Minuten realistisch ist (Entscheidung Lea, 21.11.2026). Der Einsatz
+  endet, weitere Äußerungen bekommen „(Der Patient ist verstorben.)“, Urteil „Nicht erfüllt“.
+
 ### Auswertung (`backend/evaluate.py`, `content/algorithm.yaml`)
 
 - **Checkliste 1. Minute** (wach oder bewusstlos) und im ganzen Fall zusätzlich **xABCDE** inkl. SAMPLER,

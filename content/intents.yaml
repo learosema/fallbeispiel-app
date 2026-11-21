@@ -41,6 +41,48 @@ smalltalk:
     - Äh, also
     - Weiter geht's
 
+# ---------------------------------------------------------------- Patient allein lassen
+# Das ganze Team geht weg: Der Patient ist allein (Flag `allein`), wache Patient:innen rufen um Hilfe, Fälle können
+# darauf mit schnellerer Verschlechterung reagieren. Wer danach etwas am Patienten macht, ist automatisch wieder da.
+weggehen:
+  label: Patient allein gelassen
+  patterns:
+    - wir (gehen|laufen|holen|müssen) (kurz |mal |schnell |eben )*(\w+ ){0,4}(zum|zu unserem|ans|zurück zum|zurück zu|aus dem|vom) (auto|fahrzeug|wagen|rtw|ktw|einsatzfahrzeug|sanitätszelt|zelt|sanraum)
+    - (kollege|kollegin),? (komm|kommst du) (mal |kurz |bitte )*mit
+    - wir (lassen|lass) (sie|ihn|dich|euch) (kurz |mal |eben )*(allein|alleine)
+    - wir sind (gleich|kurz|sofort) (wieder )?(da|zurück)
+  examples:
+    - Wir holen kurz noch was aus dem Auto
+    - Wir lassen Sie kurz allein
+  default:
+    - say:
+        - Befund: (Ihr lasst den Patienten allein.)
+      set: {allein: true}
+
+kurz_weg:  # nur ich gehe – der Kollege bleibt beim Patienten
+  label: Kurz weg (Kollege bleibt)
+  patterns:
+    - ich (geh|gehe|lauf|laufe|hol|hole) (kurz |mal |schnell |eben )*(\w+ ){0,4}(zum|zu unserem|ans|zurück zum|aus dem|vom) (auto|fahrzeug|wagen|rtw|ktw|einsatzfahrzeug|sanitätszelt|zelt|sanraum)
+  examples:
+    - Ich gehe kurz zum Auto
+  default:
+    - Kollege: Geh ruhig, ich bleibe hier.
+
+zurueck:
+  label: Zurück beim Patienten
+  patterns:
+    - (wir sind|ich bin|bin|sind) (wieder )?(da|zurück)( (bei ihnen|bei dir))?$
+    - so,? (wir sind|ich bin|da sind wir|da bin ich) wieder
+    - da (sind wir|bin ich) wieder
+  examples:
+    - So, wir sind wieder da
+  default:
+    - when: {allein: true}
+      say:
+        - Befund: (Ihr seid wieder beim Patienten.)
+      set: {allein: false}
+    - set: {allein: false}
+
 # ---------------------------------------------------------------- Sicherheit / Lage
 lage_pruefen:
   label: Sicherheit und Lage
