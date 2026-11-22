@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Sani-Training – Fallbeispiel xABCDE</title>
+  <meta name="theme-color" content="#b3261e">
+  <meta name="description" content="Sani-Trainingsplan: rückenschonend arbeiten in Bodennähe, die Woche vor der Prüfung und ein Kraft- und Beweglichkeitsprogramm für mittel- und langfristig.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    html, body { height: auto; min-height: 100%; }
+    main.doc { display: block; width: 100%; max-width: 720px; margin: 0 auto; padding: 8px 16px 48px; }
+    .topbar a.icon-btn { display: grid; place-items: center; text-decoration: none; }
+    .doc > p.lead { margin: 16px 0; max-width: 62ch; }
+    .toc { display: flex; flex-wrap: wrap; gap: 8px; padding: 0; margin: 0 0 16px; list-style: none; }
+    .toc a { display: inline-block; padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--card); color: var(--fg); text-decoration: none; font-size: .9rem; }
+    details.sheet { background: var(--card); border: 1px solid var(--line); border-radius: 14px; margin: 0 0 12px; scroll-margin-top: 12px; }
+    details.sheet > summary { cursor: pointer; padding: 14px 16px; font-weight: 700; font-size: 1.1rem; list-style: none; display: flex; align-items: center; gap: 10px; }
+    details.sheet > summary::-webkit-details-marker { display: none; }
+    details.sheet > summary::after { content: "▸"; margin-left: auto; color: var(--muted); transition: transform .15s; }
+    details.sheet[open] > summary::after { transform: rotate(90deg); }
+    details.sheet > summary small { font-weight: 400; color: var(--muted); font-size: .85rem; }
+    .body { padding: 0 16px 16px; }
+    .body h3 { font-size: 1rem; margin: 18px 0 6px; }
+    .body h3:first-child { margin-top: 0; }
+    .body p, .body li { max-width: 62ch; }
+    .body ul, .body ol { padding-left: 1.2em; margin: 6px 0; }
+    .body li { margin: 3px 0; }
+    .note { background: var(--sys); border-radius: 10px; padding: 10px 12px; color: var(--muted); font-size: .92rem; }
+    .warn { background: var(--sys); border-left: 4px solid var(--accent); border-radius: 10px; padding: 10px 12px; font-size: .95rem; }
+    .flow { list-style: none; padding: 0 !important; display: grid; gap: 8px; counter-reset: s; }
+    .flow > li { counter-increment: s; display: grid; grid-template-columns: 28px 1fr; gap: 10px; align-items: start; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin: 0; }
+    .flow > li::before { content: counter(s); width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: var(--accent-fg); display: grid; place-items: center; font-weight: 700; font-size: .9rem; }
+    .flow > li > div > ul { margin-top: 4px; }
+    .ex { display: grid; gap: 8px; }
+    .ex > div { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+    .ex h4 { margin: 0 0 2px; font-size: 1rem; }
+    .ex .dose { display: inline-block; font-size: .8rem; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
+    .ex p { margin: 4px 0; }
+    .ex .why { color: var(--muted); font-size: .9rem; }
+    .ex .lvl { font-size: .9rem; margin-top: 6px; }
+    .ex .lvl b { color: var(--muted); font-weight: 600; }
+    .split { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+    .split > div { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+    .split h3 { margin-top: 0; }
+    .table-wrap { overflow-x: auto; }
+    table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+    th, td { text-align: left; vertical-align: top; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+    th { white-space: nowrap; color: var(--accent); }
+    footer { color: var(--muted); font-size: .85rem; margin-top: 32px; }
+    @media print {
+      .topbar, .toc { display: none; }
+      details.sheet { break-inside: avoid; border: 0; }
+      details.sheet > summary::after { content: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="icon-btn" href="./" aria-label="Zur App">←</a>
+    <h1>Sani-Training</h1>
+    <span class="icon-btn" aria-hidden="true"></span>
+  </header>
+
+  <main class="doc">
+    <p class="lead">Sanitätsdienst ist körperliche Arbeit: knien, drücken, ziehen, tragen, aufstehen, oft am Boden und oft lange. Hier steht, wie du dabei deinen Rücken schonst, was in der Woche vor einer Prüfung sinnvoll ist und wie du dir mittel- und langfristig Kraft für den Dienst aufbaust.</p>
+
+    <nav aria-label="Abschnitte">
+      <ul class="toc">
+        <li><a href="#technik">Körpertechnik</a></li>
+        <li><a href="#pruefung">Vor der Prüfung</a></li>
+        <li><a href="#programm">Grundprogramm</a></li>
+        <li><a href="#beweglich">Beweglichkeit</a></li>
+        <li><a href="#ausdauer">Ausdauer</a></li>
+        <li><a href="#steigern">Steigern</a></li>
+        <li><a href="#dienst">Rund um den Dienst</a></li>
+        <li><a href="#grenzen">Grenzen</a></li>
+      </ul>
+    </nav>
+
+    <!-- ============================================================ Körpertechnik -->
+    <details class="sheet" id="technik" open>
+      <summary>Körpertechnik im Einsatz <small>rückenschonend in Bodennähe</small></summary>
+      <div class="body">
+        <h3>Grundregeln</h3>
+        <ul>
+          <li><strong>Nah ran:</strong> Je näher du an Patient oder Last bist, desto kürzer der Hebel für deinen Rücken.</li>
+          <li><strong>Aus den Beinen:</strong> Knie und Hüfte beugen, Rücken gerade lassen. Die Kraft kommt aus Beinen und Gesäß.</li>
+          <li><strong>Nicht drehen unter Last:</strong> Füße umsetzen statt den Oberkörper zu verdrehen.</li>
+          <li><strong>Hebeln statt heben:</strong> Wo es geht, ziehen, rollen oder schieben statt anheben.</li>
+          <li><strong>Gemeinsam auf Kommando:</strong> Im Team zählt eine Person an („Achtung – hebt – an“), alle heben gleichzeitig.</li>
+          <li><strong>Hilfe holen:</strong> Allein zu schwer heben ist kein Einsatz, sondern ein zweiter Patient.</li>
+        </ul>
+
+        <h3>Situationen</h3>
+        <ol class="flow">
+          <li><div><strong>Am Boden arbeiten</strong>
+            <ul>
+              <li>Auf ein Knie gehen, den anderen Fuß aufstellen. So bleibt der Rücken gerade und du kommst schnell wieder hoch.</li>
+              <li>Nicht im Stehen mit rundem Rücken über den Patienten beugen.</li>
+              <li>Bei längerem Knien das Knie wechseln. Unterlage oder Knieschoner, wenn vorhanden.</li>
+            </ul></div></li>
+          <li><div><strong>Herzdruckmassage</strong>
+            <ul>
+              <li>Dicht seitlich am Brustkorb knien, Knie etwa hüftbreit.</li>
+              <li>Arme durchgestreckt, Schultern senkrecht über den Händen.</li>
+              <li>Aus der Hüfte drücken, mit dem Körpergewicht – nicht mit der Armkraft. So hältst du deutlich länger durch.</li>
+              <li>Spätestens alle 2 Minuten wechseln, wenn jemand da ist. Ermüdung merkt man selbst zu spät.</li>
+            </ul></div></li>
+          <li><div><strong>Stabile Seitenlage</strong>
+            <ul>
+              <li>Seitlich knien, Patienten über angewinkeltes Bein und Schulter zu dir herziehen. Das Bein ist dein Hebel.</li>
+            </ul></div></li>
+          <li><div><strong>Rautek-Rettungsgriff</strong>
+            <ul>
+              <li>Ganz nah hinter den Patienten, in die Knie gehen, Rücken gerade.</li>
+              <li>Patienten auf deine Oberschenkel ziehen, dann mit kleinen Schritten rückwärts gehen.</li>
+              <li>Ziehen mit den Beinen, nicht mit dem Rücken.</li>
+            </ul></div></li>
+          <li><div><strong>Heben und Tragen</strong>
+            <ul>
+              <li>Rucksack oder Koffer: erst in die Hocke oder Hüftbeuge, nah an die Last, dann aus den Beinen hoch.</li>
+              <li>Last nah am Körper tragen. Lieber zwei leichte Taschen als eine schwere auf einer Seite.</li>
+              <li>Trage: Fußende in Gehrichtung, auf Kommando anheben und absetzen.</li>
+            </ul></div></li>
+          <li><div><strong>Aufstehen</strong>
+            <ul>
+              <li>Aus dem Halbknien über das vordere Bein hochdrücken, Hand auf den Oberschenkel stützen.</li>
+            </ul></div></li>
+        </ol>
+      </div>
+    </details>
+
+    <!-- ============================================================ Prüfung -->
+    <details class="sheet" id="pruefung">
+      <summary>Die Woche vor der Prüfung <small>Technik statt Muskelaufbau</small></summary>
+      <div class="body">
+        <p>In ein paar Tagen baust du keine Muskeln auf, aber du kannst dir Muskelkater holen. Der ist ein bis drei Tage nach ungewohnter Belastung am schlimmsten.</p>
+        <ul>
+          <li><strong>Prüfungsbewegungen üben, locker und oft:</strong> 10× auf ein Knie und wieder hoch, Seitenlage an einer Person aus Familie oder Freundeskreis, Rautek-Griff vorsichtig mit Einverständnis.</li>
+          <li><strong>Herzdruckmassage nur am Phantom oder auf einem festen Kissen,</strong> nie an einem Menschen. 2 Minuten am Stück: Stimmen Position und Tempo noch am Ende?</li>
+          <li><strong>Letzte 3 Tage:</strong> keine neuen oder harten Übungen. Spazieren gehen und Beweglichkeit sind gut.</li>
+          <li><strong>Am Prüfungstag:</strong> bequeme Kleidung, in der du knien kannst. Vorher kurz aufwärmen: ein paar Kniebeugen, Schultern kreisen.</li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ============================================================ Grundprogramm -->
+    <details class="sheet" id="programm">
+      <summary>Grundprogramm <small>2–3× pro Woche, ca. 25 Minuten</small></summary>
+      <div class="body">
+        <p>Ohne Geräte, für zu Hause. Ein Stuhl, eine Wand, ein Rucksack mit Wasserflaschen und eine Unterlage reichen. Zwischen zwei Trainingstagen liegt mindestens ein Tag Pause.</p>
+        <p class="note"><strong>Wie schwer?</strong> Hör jeden Satz auf, wenn du noch 2–3 saubere Wiederholungen schaffen würdest. Saubere Ausführung geht vor Anzahl. 1–2 Minuten Pause zwischen den Sätzen.</p>
+
+        <h3>Aufwärmen (5 Min.)</h3>
+        <ul>
+          <li>Zügig gehen oder auf der Stelle marschieren, 2 Minuten</li>
+          <li>Je 10× Schulterkreisen, Hüftkreisen, halbe Kniebeugen</li>
+        </ul>
+
+        <h3>Beine</h3>
+        <div class="ex">
+          <div>
+            <h4>Aufstehen vom Stuhl</h4>
+            <span class="dose">3 × 8–12</span>
+            <p>Ohne Hände aufstehen, langsam (3 Sekunden) wieder hinsetzen, kurz antippen, wieder hoch. Knie zeigen in Richtung der Zehen.</p>
+            <p class="why">Die Grundbewegung für alles, was vom Boden hochkommt.</p>
+            <p class="lvl"><b>Leichter:</b> Hände auf die Oberschenkel stützen, höherer Stuhl. <b>Schwerer:</b> Rucksack vor der Brust halten, niedrigerer Sitz, ohne Hinsetzen (Kniebeuge).</p>
+          </div>
+          <div>
+            <h4>Ausfallschritt nach hinten</h4>
+            <span class="dose">2–3 × 6–10 pro Seite</span>
+            <p>Ein Bein nach hinten setzen, hinteres Knie Richtung Boden, über das vordere Bein zurück. Oberkörper aufrecht.</p>
+            <p class="why">Fast genau die Bewegung, mit der du vom Patienten aufstehst.</p>
+            <p class="lvl"><b>Leichter:</b> an der Wand festhalten, weniger tief. <b>Schwerer:</b> Rucksack auf, langsamer runter.</p>
+          </div>
+          <div>
+            <h4>Aufstehen aus dem Knien</h4>
+            <span class="dose">2 × 5 pro Seite</span>
+            <p>Beide Knie auf der Unterlage. Ein Bein nach vorn aufstellen (Halbknien), über das vordere Bein hochdrücken. Genauso wieder runter. Führendes Bein abwechseln.</p>
+            <p class="why">Trainiert das Hoch und Runter, das im Dienst ständig vorkommt.</p>
+            <p class="lvl"><b>Leichter:</b> Hand auf einem Stuhl. <b>Schwerer:</b> ohne Hände, mit Rucksack.</p>
+          </div>
+          <div>
+            <h4>Wadenheben</h4>
+            <span class="dose">2 × 15–20</span>
+            <p>Auf eine Stufe stellen, Fersen langsam heben und senken. Festhalten ist okay.</p>
+            <p class="lvl"><b>Schwerer:</b> einbeinig.</p>
+          </div>
+        </div>
+
+        <h3>Rumpf und Rücken</h3>
+        <div class="ex">
+          <div>
+            <h4>Hüftbeuge mit Stab</h4>
+            <span class="dose">2 × 10</span>
+            <p>Stab (Besenstiel) längs am Rücken: Hinterkopf, Brustwirbelsäule und Kreuzbein berühren ihn. Knie leicht gebeugt, Po nach hinten schieben, bis du Zug hinten in den Oberschenkeln spürst. Der Stab bleibt an allen drei Punkten.</p>
+            <p class="why">Lehrt die Bewegung für Heben mit geradem Rücken.</p>
+            <p class="lvl"><b>Danach:</b> Rucksack-Heben, siehe unten.</p>
+          </div>
+          <div>
+            <h4>Rucksack-Heben</h4>
+            <span class="dose">3 × 8</span>
+            <p>Rucksack mit Wasserflaschen zwischen den Füßen. Hüftbeuge wie mit dem Stab, Rücken gerade, Rucksack greifen und aus den Beinen hochkommen. Kontrolliert wieder abstellen.</p>
+            <p class="why">Genau das passiert mit jedem Notfallrucksack.</p>
+            <p class="lvl"><b>Leichter:</b> Rucksack auf einer Kiste oder Stufe. <b>Schwerer:</b> mehr Flaschen.</p>
+          </div>
+          <div>
+            <h4>Hüftheben</h4>
+            <span class="dose">2–3 × 10–15</span>
+            <p>Rückenlage, Füße aufgestellt. Becken heben, bis Knie, Hüfte und Schultern eine Linie bilden, 2 Sekunden halten.</p>
+            <p class="why">Starke Gesäßmuskeln entlasten beim Bücken den unteren Rücken.</p>
+            <p class="lvl"><b>Schwerer:</b> einbeinig, oder oben 10 Sekunden halten.</p>
+          </div>
+          <div>
+            <h4>Vierfüßlerstand diagonal</h4>
+            <span class="dose">2 × 6–8 pro Seite</span>
+            <p>Auf Händen und Knien. Rechten Arm und linkes Bein langsam strecken, 3 Sekunden halten, Rücken bleibt ruhig und gerade. Seite wechseln.</p>
+            <p class="why">Stabilisiert die Wirbelsäule – gut auch an Tagen, an denen der Rücken zwickt.</p>
+            <p class="lvl"><b>Leichter:</b> nur Arm oder nur Bein.</p>
+          </div>
+          <div>
+            <h4>Unterarmstütz</h4>
+            <span class="dose">3 × 20–40 Sek.</span>
+            <p>Auf den Unterarmen, Körper gerade wie ein Brett, Bauch und Po angespannt. Nicht durchhängen.</p>
+            <p class="lvl"><b>Leichter:</b> auf den Knien statt auf den Zehen. <b>Seitlich:</b> Seitstütz, je Seite 15–30 Sek.</p>
+          </div>
+        </div>
+
+        <h3>Tragen und Ziehen</h3>
+        <div class="ex">
+          <div>
+            <h4>Einseitig tragen</h4>
+            <span class="dose">3 × 30 Sek. pro Seite</span>
+            <p>Eine schwere Tasche oder einen Wasserkasten in einer Hand tragen und aufrecht gehen, ohne zur Seite zu kippen.</p>
+            <p class="why">Trainiert den Rumpf für Koffer und Taschen.</p>
+          </div>
+          <div>
+            <h4>Rudern abgestützt</h4>
+            <span class="dose">2–3 × 10 pro Seite</span>
+            <p>Eine Hand und ein Knie auf Stuhl oder Bank, Rücken gerade. Mit der freien Hand den Rucksack zur Hüfte ziehen, langsam ablassen.</p>
+            <p class="why">Rückenmuskeln für Rautek-Griff und Trage.</p>
+            <p class="lvl"><b>Alternativ:</b> Gymnastikband an der Türklinke, im Stehen ziehen.</p>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <!-- ============================================================ Beweglichkeit -->
+    <details class="sheet" id="beweglich">
+      <summary>Beweglichkeit <small>täglich, 5 Minuten</small></summary>
+      <div class="body">
+        <p>Ruhig atmen, nicht wippen. Dehnen soll ziehen, nicht wehtun.</p>
+        <ul>
+          <li><strong>Tiefe Hocke:</strong> an Türrahmen oder Tischbein festhalten, so tief wie es angenehm geht, 30–60 Sekunden. Macht Knien und Hocken leichter.</li>
+          <li><strong>Hüftbeuger:</strong> im Halbknien das Becken leicht nach vorn schieben, Po anspannen, je Seite 30 Sekunden. Gegen langes Sitzen.</li>
+          <li><strong>Oberschenkel hinten:</strong> Ferse auf eine Stufe, Hüftbeuge mit geradem Rücken, je Seite 30 Sekunden.</li>
+          <li><strong>Brustwirbelsäule:</strong> im Vierfüßlerstand eine Hand an den Hinterkopf, Ellbogen Richtung Decke drehen, je Seite 8×.</li>
+          <li><strong>Waden:</strong> Hände an die Wand, ein Bein nach hinten, Ferse am Boden, je Seite 30 Sekunden.</li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ============================================================ Ausdauer -->
+    <details class="sheet" id="ausdauer">
+      <summary>Ausdauer <small>für lange Dienste und Reanimationen</small></summary>
+      <div class="body">
+        <p>Die WHO empfiehlt Erwachsenen <strong>150–300 Minuten pro Woche</strong> moderate Bewegung, dazu an mindestens 2 Tagen Krafttraining. Moderat heißt: du kommst etwas außer Atem, kannst aber noch sprechen.</p>
+        <ul>
+          <li>Zügig gehen, Rad fahren, Schwimmen – was dir Spaß macht, zählt am meisten.</li>
+          <li>Treppe statt Aufzug. Zehn Minuten am Stück zählen schon.</li>
+          <li>Gelenkschonend, wenn Knie oder Gewicht stören: Rad, Ergometer, Schwimmen, Aquafitness.</li>
+        </ul>
+        <p class="note">Wenn du länger keinen Sport gemacht hast: langsam anfangen, z. B. 3× pro Woche 20 Minuten zügig gehen, und jede Woche etwas mehr.</p>
+      </div>
+    </details>
+
+    <!-- ============================================================ Steigern -->
+    <details class="sheet" id="steigern">
+      <summary>Steigern <small>mittel- und langfristig</small></summary>
+      <div class="body">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Zeitraum</th><th>Was</th></tr></thead>
+            <tbody>
+              <tr><td>Woche 1–4</td><td>Grundprogramm 2× pro Woche, leichte Varianten. Bewegungen lernen, Muskelkater klein halten. Täglich Beweglichkeit.</td></tr>
+              <tr><td>Woche 5–8</td><td>3× pro Woche. Wenn alle Sätze einer Übung am oberen Ende der Wiederholungen sauber klappen: nächste Stufe (schwerer, langsamer, einbeinig).</td></tr>
+              <tr><td>Ab Monat 3</td><td>Rucksack schwerer machen oder echte Gewichte (Kettlebell, Kurzhantel). Ein Termin im Fitnessstudio oder Rehasport mit Einweisung lohnt sich jetzt.</td></tr>
+              <tr><td>Dauerhaft</td><td>2–3× Kraft pro Woche, Ausdauer nach WHO, Beweglichkeit täglich. Lieber regelmäßig wenig als selten viel.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>Dranbleiben</h3>
+        <ul>
+          <li>Feste Tage im Kalender, z. B. Montag und Donnerstag.</li>
+          <li>Notiere Übung, Stufe und Wiederholungen. Fortschritt sehen motiviert.</li>
+          <li>Ein schlechter Tag ist kein Grund aufzuhören: dann nur die leichte Variante oder nur Beweglichkeit.</li>
+          <li>Viele Verbände und Krankenkassen bieten Rückenkurse oder Rehasport an, oft bezuschusst.</li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ============================================================ Dienst -->
+    <details class="sheet" id="dienst">
+      <summary>Rund um den Dienst <small>vorher, währenddessen, danach</small></summary>
+      <div class="body">
+        <div class="split">
+          <div>
+            <h3>Vorher</h3>
+            <ul>
+              <li>Ein paar Kniebeugen und Schulterkreisen</li>
+              <li>Feste Schuhe, Kleidung, in der du knien kannst</li>
+              <li>Knieschoner einpacken, wenn du welche hast</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Währenddessen</h3>
+            <ul>
+              <li>Trinken, auch wenn es kalt ist</li>
+              <li>Bei langem Stehen ab und zu Gewicht verlagern, ein paar Schritte gehen</li>
+              <li>Material so ablegen, dass du dich nicht weit strecken musst</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Danach</h3>
+            <ul>
+              <li>5 Minuten Beweglichkeit, vor allem Hüfte und Rücken</li>
+              <li>Ausreichend schlafen – da erholt sich der Körper</li>
+              <li>Zwickt etwas nach einem Einsatz: notieren, was du gemacht hast, und die Technik nachbessern</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <!-- ============================================================ Grenzen -->
+    <details class="sheet" id="grenzen">
+      <summary>Grenzen <small>wann aufhören, wann zum Arzt</small></summary>
+      <div class="body">
+        <p class="warn"><strong>Sofort aufhören</strong> bei Brustschmerz, Druck auf der Brust, ungewöhnlicher Atemnot, Schwindel oder Herzstolpern. Das ist kein Muskelkater – abklären lassen.</p>
+        <ul>
+          <li><strong>Normal:</strong> Muskelkater 1–3 Tage nach dem Training, leichtes Ziehen beim Dehnen.</li>
+          <li><strong>Nicht normal:</strong> stechender Schmerz im Gelenk, Schmerz, der von Training zu Training schlimmer wird, Schwellung.</li>
+          <li><strong>Ärztlich abklären:</strong> Rückenschmerz, der ins Bein ausstrahlt, Taubheit oder Kribbeln, Schwäche im Bein.</li>
+          <li><strong>Vor dem Start mit Arzt oder Ärztin sprechen,</strong> wenn du Herz-Kreislauf-Erkrankungen, Bluthochdruck oder Diabetes hast oder lange gar keinen Sport gemacht hast.</li>
+          <li>Bestehende Knie- oder Rückenprobleme: ein paar Termine Physiotherapie, damit das Programm zu dir passt.</li>
+        </ul>
+      </div>
+    </details>
+
+    <footer>
+      <p>Allgemeine Tipps nach gängigen Prinzipien der Rückenschule und den WHO-Bewegungsempfehlungen (2020). Ersetzt keine ärztliche oder physiotherapeutische Beratung. Für die Einsatztechnik gilt, was deine Ausbildung sagt.</p>
+    </footer>
+  </main>
+
+  <script>
+    // Sprungmarken öffnen den zugehörigen Abschnitt
+    function openFromHash() {
+      const el = location.hash && document.querySelector(location.hash);
+      if (el && el.tagName === "DETAILS") { el.open = true; requestAnimationFrame(() => el.scrollIntoView()); }
+    }
+    window.addEventListener("hashchange", openFromHash);
+    openFromHash();
+  </script>
+</body>
+</html>
