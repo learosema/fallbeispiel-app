@@ -1,0 +1,61 @@
+id: bw-seitenlage
+intro: >
+  Bewusstlos auf der Bank, er atmet normal. Atemwege frei machen, Atemkontrolle, stabile Seitenlage,
+  Absaugbereitschaft, Wärme (6 °C, nass), Nachforderung. Und immer wieder die Atmung kontrollieren.
+steps:
+  - phase: Sicherheit und Lage
+  - say: Ist die Einsatzstelle sicher? Ich schaue mich kurz um.
+  - say: Ich schaue nach einer bedrohlichen Blutung.
+  - phase: Ansprechen
+  - say: Hallo, können Sie mich hören? Ich rüttle an den Schultern.
+  - say: Ich setze einen Schmerzreiz am Trapezmuskel.
+  - phase: Atemwege und Atemkontrolle
+  - say: Ich mache die Atemwege frei, Kopf überstrecken, Kinn anheben.
+    why: Erst die Atemwege frei machen, dann die Atmung kontrollieren – vorher schnarcht er.
+  - say: Atemkontrolle, sehen, hören, fühlen, zehn Sekunden.
+  - say: Atmung normal. Ich bringe ihn in die stabile Seitenlage.
+    why: Bewusstlos mit normaler Atmung – stabile Seitenlage, Mund als tiefster Punkt.
+  - say: Kollege, mach bitte die Absaugpumpe bereit.
+  - say: Wir decken ihn mit der Rettungsdecke zu und legen eine Decke unter.
+  - phase: Funkspruch
+  - say: RotkreuzHamburg von EVT1, kommen.
+  - say: >
+      Wir haben hier einen Patienten, männlich, Ende fünfzig, bewusstlos, Atmung normal, in stabiler Seitenlage,
+      Alkoholgeruch, Verdacht auf Alkoholintoxikation, wir benötigen einen RTW, kommen.
+  - say: EVT1 Ende.
+  - phase: A und B
+  - say: Ich kontrolliere die Atmung noch einmal, sehen, hören, fühlen.
+  - say: Ich zähle die Atemfrequenz.
+  - say: Ich messe die Sättigung.
+  - say: Ich höre die Lunge mit dem Stethoskop ab.
+  - phase: C
+  - say: Ich fühle den Puls am Handgelenk und prüfe die Rekap.
+  - say: Ich schaue mir die Haut an.
+  - say: Ich messe den Blutdruck.
+  - phase: D
+  - say: Ich bestimme den GCS.
+  - say: Ich leuchte mit der Lampe in die Augen.
+  - say: Ich messe den Blutzucker.
+    why: Auch bei Alkoholgeruch – Unterzucker kann dahinterstecken.
+  - phase: E
+  - say: Ich messe die Temperatur im Ohr.
+  - say: Wissen Sie, was passiert ist? Kennen Sie ihn?
+  - say: Wissen Sie, ob er Medikamente nimmt, Allergien oder Vorerkrankungen hat?
+  - say: Wissen Sie, wann er zuletzt etwas gegessen hat?
+  - say: Ich untersuche ihn jetzt einmal von Kopf bis Fuß.
+  - phase: Reevaluation und Betreuung bis zum Eintreffen
+  - say: Reevaluation. Ich kontrolliere die Atmung noch einmal.
+  - wait: Rettungsdienst
+    meanwhile:
+      - Ich kontrolliere noch einmal die Atmung.
+      - Ich messe noch einmal die Sättigung.
+      - Sie haben gut geholfen. Wir bleiben bei ihm, bis der Rettungsdienst da ist.
+      - Ich fühle noch einmal den Puls.
+  - phase: Übergabe
+  - say: Übergabe. Patient männlich, ca. 58 Jahre, Name unbekannt.
+  - say: Ein Passant hat ihn bewusstlos auf der Bank gefunden, Alkoholgeruch, eine leere Flasche lag daneben.
+  - say: GCS 8, Atmung normal mit 14 pro Minute, Sättigung 95 Prozent, Puls 76, Blutdruck 145 zu 90, Blutzucker 96, Temperatur 35,4 Grad.
+  - say: Vorerkrankungen und Medikamente sind nicht bekannt.
+  - say: Maßnahmen haben wir Atemwege frei gemacht, stabile Seitenlage, Absaugbereitschaft und Wärmeerhalt gemacht.
+  - say: Verdacht auf Alkoholintoxikation.
+  - say: Habt ihr noch Fragen?

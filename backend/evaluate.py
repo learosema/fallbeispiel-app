@@ -58,6 +58,10 @@ def check_item(item: dict[str, Any], run: Run) -> dict[str, Any]:
     for cond, extra in (item.get("extra") or {}).items():
         if _applies(cond, run):
             elements += extra
+    # ausgeblendete Punkte gelten auch als Bestandteil anderer Punkte nicht (kein Wärmeerhalt im E, wo `skip: [waerme]`)
+    for skipped, drop in (item.get("unless_skipped") or {}).items():
+        if skipped in run.scenario.skip:
+            elements = [el for el in elements if el not in drop]
     if "any" in item:
         elements = [list(item["any"])]
     need = item.get("min", len(elements))
@@ -138,7 +142,7 @@ def check_funk(run: Run) -> dict[str, Any]:
 # „Puls normal“ sagt nichts aus – besser: „Puls regelmäßig, gut tastbar, schnell“, „Rekap unter 2 s / verzögert“.
 # „Normale Atmung“ bei der Atemkontrolle ist dagegen der Begriff des Algorithmus und wird nicht beanstandet.
 _VAGUE = re.compile(r"\b(normal|unauffällig|ok|okay|in ordnung|passt)\b")
-_VAGUE_TOPICS = re.compile(r"\bpuls|rekap|kapillar|nagelbett|kreislauf|\bhaut|hautfarbe|blutdruck|\brr\b|herzfrequenz|sättigung|spo2|atemfrequenz|\bwerte\b|vital")
+_VAGUE_TOPICS = re.compile(r"\bpuls|rekap|kapillar|nagelbett|kreislauf(?!stillstand)|\bhaut|hautfarbe|blutdruck|\brr\b|herzfrequenz|sättigung|spo2|atemfrequenz|\bwerte\b|vital")
 # Embedding-Weg für Umschreibungen ohne Stichwort („Kreislauf im grünen Bereich“, „Blutdruck im Rahmen“):
 # vage, wenn der Teilsatz den vagen Beispielen ähnlich genug und näher als konkreten Befunden und reinen
 # Handlungen/Fragen ist. Vorher wird das Themenwort durch „wert“ ersetzt – sonst vergleicht das Modell vor
@@ -146,7 +150,11 @@ _VAGUE_TOPICS = re.compile(r"\bpuls|rekap|kapillar|nagelbett|kreislauf|\bhaut|ha
 # (tests/test_embeddings.py): vage ≥ +0,03, konkret/Handlung ≤ −0,03.
 VAGUE_MIN_SIM = 0.55
 VAGUE_MARGIN = 0.0
-_TOPIC_WORDS = re.compile(r"\b(der |die |das |den )?(puls\w*|rekap\w*|kapillar\w*|nagelbett\w*|kreislauf\w*|haut\w*|blutdruck\w*|rr|herzfrequenz|sättigung|spo2|atemfrequenz|werte|vitalwerte|vitalzeichen)\b")
+# Handlungen („ich messe die Sättigung“, „messe den Puls“) und Verdachtsäußerungen teilen keinen Befund mit
+_NOT_A_FINDING = re.compile(r"\b(messe|messen|misst|prüfe|prüfen|kontrolliere|kontrollieren|zähle|zählen|fühle|fühlen|taste|tasten"
+                            r"|schaue|schauen|höre|hören|untersuche|untersuchen|bestimme|bestimmen|lege|legen|leuchte)\b"
+                            r"|\b(verdacht|vermutlich|wahrscheinlich)\b")
+_TOPIC_WORDS = re.compile(r"\b(der |die |das |den )?(puls\w*|rekap\w*|kapillar\w*|nagelbett\w*|kreislauf(?!stillstand)\w*|haut\w*|blutdruck\w*|rr|herzfrequenz|sättigung|spo2|atemfrequenz|werte|vitalwerte|vitalzeichen)\b")
 
 
 def _mask(text: str) -> str:
@@ -177,7 +185,11 @@ def is_vague(clause: str, embedder=None) -> bool:
         return False
     if _VAGUE.search(text):
         return True
-    if embedder is None:
+    if embedder is None or _NOT_A_FINDING.search(text):
+        return False
+    # Für kurze Reste („Puls unregelmäßig“, „auch die Haut“) ist der Embedding-Vergleich nicht verlässlich:
+    # erst ab zwei Inhaltswörtern neben dem Themenwort („Blutdruck im Rahmen“, „Kreislauf im grünen Bereich“)
+    if len([w for w in _mask(text).split() if w not in ("wert", "der", "die", "das", "den", "auch", "noch", "jetzt")]) < 2:
         return False
     protos = _prototypes(embedder)
     if "vague" not in protos:
@@ -201,6 +213,7 @@ def vague_findings(run: Run, embedder=None) -> list[str]:
     return out
 
 
+WRONG_CPR = {"hlw", "hlw_zaehlen", "hlw_30", "schock_ausloesen"}
 REEVAL_INTENTS = ["puls", "spo2", "rr", "af_zaehlen", "atemkontrolle", "gcs", "orientierung", "bz", "rekap", "temperatur"]
 
 
@@ -428,6 +441,11 @@ def evaluate(run: Run, embedder=None) -> dict[str, Any]:
 
     if run.died_at is not None:
         verdict = "Nicht erfüllt"
+    # HLW (oder Schock) bei jemandem, der wach ist bzw. normal atmet: schadet und ist ein schwerer Fehler –
+    # auch wenn der Kollege sie gestoppt hat
+    wrong_cpr = next((t for t in run.turns if WRONG_CPR & set(t.refused)), None)
+    if wrong_cpr is not None:
+        verdict = "Nicht erfüllt"
     total = run.turns[-1].t if run.turns else 0
     funk_end = next((t.t for t in run.turns if t.funk and t.funk["ende"]), None)
     time = f"Gesamtzeit {fmt(total)}" + (f", Funkspruch abgeschlossen nach {fmt(funk_end)}" if funk_end is not None else "")
@@ -441,12 +459,17 @@ def evaluate(run: Run, embedder=None) -> dict[str, Any]:
     course = []
     if run.died_at is not None:
         course.append(f"Patient verstorben nach {fmt(run.died_at)}")
+    if wrong_cpr is not None:
+        course.append(f"HLW bei wacher bzw. normal atmender Person versucht nach {fmt(wrong_cpr.t)} (vom Kollegen gestoppt)")
     if run.alone:
         course.append(f"Patient allein gelassen (insgesamt {fmt(alone_s)})")
     # Das Wichtigste zuerst: Tod und Alleinlassen stehen vor allem anderen
     front = []
     if run.died_at is not None:
         front.append(f"Der Patient ist nach {fmt(run.died_at)} verstorben – die lebensrettenden Maßnahmen kamen nicht rechtzeitig")
+    if wrong_cpr is not None:
+        front.append(f"HLW nur bei Bewusstlosigkeit ohne normale Atmung – hier wurde sie bei jemandem begonnen, der wach ist "
+                     f"oder normal atmet („{_quote(run.turns.index(wrong_cpr), run)}“). Das kann schwer verletzen.")
     if run.alone:
         front.append("Patient nie allein lassen – einer bleibt immer da, Material holt der andere")
     improve = front + improve

@@ -122,7 +122,7 @@ events:
     when: {sauerstoff: false}
     say:
       - Befund: Lena sackt zusammen und reagiert nicht mehr. Nur noch vereinzelte, schnappende Atemzüge.
-    set: {bewusstlos: true}
+    set: {bewusstlos: true, keine_normale_atmung: true}   # Schnappatmung → HLW
     expect: {any: [laut_ansprechen, atemkontrolle, hlw], within: 15, label: Bewusstlosigkeit erkannt (Ansprechen, Atemkontrolle bzw. HLW)}
   - at: 450
     when: {sauerstoff: false, hlw: false}

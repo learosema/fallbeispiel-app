@@ -1,0 +1,83 @@
+id: dom-nase
+intro: >
+  Faustschlag ins Gesicht, starkes Nasenbluten, das Blut läuft in den Rachen, und er ist leicht verwirrt. Eigenschutz
+  und Polizei, sitzen mit vorgebeugtem Oberkörper, Absaugbereitschaft, an SHT und HWS denken und gut aufklären.
+steps:
+  - phase: Sicherheit und Lage
+  - say: Ist die Einsatzstelle sicher? Wir brauchen die Polizei hier.
+    why: Schlägerei – Eigenschutz geht vor.
+  - say: Bitte gehen Sie ein Stück zurück, wir kümmern uns.
+  - say: Ich schaue nach einer bedrohlichen Blutung.
+  - phase: Ansprechen
+  - say: Hallo, wir sind vom DRK. Was ist passiert?
+  - say: Bitte setzen Sie sich und beugen Sie den Oberkörper nach vorne, damit das Blut nach vorne abläuft.
+    why: Blut im Rachen – vornübergebeugt sitzen, damit er es nicht schluckt oder einatmet.
+  - say: Drücken Sie die Nasenflügel fest zusammen. Kollege, leg ihm ein Kühlpack in den Nacken.
+  - say: Kollege, bitte manuelle HWS-Stabilisierung.
+    why: Schlag ins Gesicht mit Verwirrtheit – an die HWS denken.
+  - say: Kollege, mach bitte die Absaugpumpe bereit.
+  - phase: Schnellcheck
+  - say: Bekommen Sie gut Luft? Tut das Atmen weh?
+  - say: Ich schaue auf die Lippenfarbe.
+  - say: Ich schaue mir die Haut an, fühle den Puls am Handgelenk und prüfe die Rekap.
+  - say: Ich taste den Bauch, das Becken und die Oberschenkel ab.
+  - say: >
+      Sie haben einen Schlag gegen den Kopf bekommen. Das sollte im Krankenhaus abgeklärt werden. Wir kümmern uns
+      jetzt erst mal um Sie.
+    why: Er will weiterfeiern – darauf gleich eingehen, auch wenn er erst ablehnt.
+  - say: Ist Ihnen kalt?
+  - say: Ich lege Ihnen eine Decke um.
+  - phase: Teambesprechung
+  - say: >
+      Kurz zusammengefasst: Patient männlich, Ende zwanzig, wach, leicht verwirrt, wiederholt Fragen. Faustschlag ins
+      Gesicht, starkes Nasenbluten mit Blut im Rachen, alkoholisiert. Verdacht auf Schädel-Hirn-Trauma und
+      Nasenbeinbruch. Wir brauchen einen RTW. Siehst du das auch so?
+  - phase: Funkspruch
+  - say: RotkreuzHamburg von EVT1, kommen.
+  - say: >
+      Wir haben hier einen Patienten, männlich, Ende zwanzig, nach Faustschlag ins Gesicht, starkes Nasenbluten, wach,
+      aber leicht verwirrt, Verdacht auf Schädel-Hirn-Trauma, wir benötigen einen RTW, kommen.
+  - say: EVT1 Ende.
+  - phase: A und B
+  - say: Ich schaue in den Mund, ob da etwas drin ist.
+  - say: Ich zähle die Atemfrequenz.
+  - say: Ich messe die Sättigung.
+  - say: Ich höre die Lunge mit dem Stethoskop ab.
+  - phase: C
+  - say: Ich messe den Blutdruck.
+  - phase: D
+  - say: Ich bestimme den GCS.
+    why: GCS 14, er wiederholt Fragen – leichte Verwirrung nach einem Schlag gegen den Kopf.
+  - say: >
+      Sie wiederholen Fragen und sind etwas verwirrt. Nach einem Schlag gegen den Kopf kann das eine Gehirnerschütterung
+      oder eine Blutung sein. Ich würde Ihnen dringend raten, das im Krankenhaus abklären zu lassen.
+    why: Zweiter Anlauf mit dem konkreten Risiko – jetzt willigt er ein.
+  - say: Wie heißen Sie und wissen Sie, wo wir gerade sind und welcher Tag heute ist?
+  - say: Ich leuchte mit der Lampe in die Augen.
+  - say: Ich messe den Blutzucker, das piekst kurz.
+  - say: Können Sie einmal lächeln und beide Arme nach vorne strecken?
+  - phase: E
+  - say: Haben Sie sonst noch Schmerzen?
+  - say: Sind Allergien bekannt?
+  - say: Nehmen Sie regelmäßig Medikamente?
+  - say: Haben Sie Vorerkrankungen?
+  - say: Wann haben Sie zuletzt etwas gegessen, und was haben Sie getrunken?
+  - say: Ich untersuche Sie jetzt einmal von Kopf bis Fuß.
+  - phase: Reevaluation und Betreuung bis zum Eintreffen
+  - say: Reevaluation. Ich kontrolliere noch einmal die Blutung und messe den Puls.
+  - wait: Rettungsdienst
+    meanwhile:
+      - Bleiben Sie bitte so vorgebeugt sitzen. Sie machen das gut.
+      - Ich bestimme noch einmal den GCS.
+      - Wir bleiben bei Ihnen, bis der Rettungsdienst da ist.
+      - Ich messe noch einmal die Sättigung.
+  - phase: Übergabe
+  - say: Übergabe. Das ist Kevin, 28 Jahre.
+  - say: Er hat vor etwa zehn Minuten einen Faustschlag auf die Nase bekommen, kurze Erinnerungslücke.
+  - say: Starkes Nasenbluten, Blut im Rachen, Nase deformiert, ein Zahn locker.
+  - say: GCS 14, er wiederholt Fragen. Atemfrequenz 20, Sättigung 95 Prozent, Puls 100, Blutdruck 135 zu 80.
+  - say: Keine Allergien, keine Medikamente, viel Bier getrunken.
+  - say: Maßnahmen haben wir sitzend vorgebeugt gelagert, Nasenflügel abgedrückt und Kühlpack in den Nacken gemacht.
+  - say: Dazu HWS-Stabilisierung und Absaugbereitschaft. Die Polizei ist informiert.
+  - say: Verdacht auf Schädel-Hirn-Trauma und Nasenbeinbruch.
+  - say: Habt ihr noch Fragen?

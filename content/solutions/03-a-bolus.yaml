@@ -1,0 +1,76 @@
+id: a-bolus
+intro: >
+  Verschluckt im Restaurant, der Husten bringt nichts mehr. Erst zum Husten auffordern, dann sofort fünf Rückenschläge,
+  dann fünf Oberbauchkompressionen im Wechsel. Auch wenn es klappt, muss er ins Krankenhaus.
+steps:
+  - phase: Sicherheit und Lage
+  - say: Ist die Einsatzstelle sicher? Ich schaue mich kurz um.
+  - say: Ich schaue nach einer bedrohlichen Blutung.
+  - phase: Ansprechen
+  - say: Hallo, wir sind vom DRK. Was ist passiert?
+  - say: Versuchen Sie kräftig zu husten!
+    why: Solange er wirksam hustet, unterstützen. Der Husten ist hier aber schwach und ohne Effekt.
+  - phase: A-Problem – Bolus
+  - say: Ich beuge ihn nach vorne und gebe fünf Schläge zwischen die Schulterblätter.
+    why: Husten ineffektiv – sofort Rückenschläge.
+  - say: Ich mache jetzt fünf Oberbauchkompressionen, den Heimlich-Handgriff.
+    why: Rückenschläge allein haben nicht gereicht – jetzt im Wechsel mit Oberbauchkompressionen.
+  - say: Gut so, atmen Sie ruhig weiter. Das haben Sie gut gemacht.
+  - phase: Schnellcheck
+  - say: Bekommen Sie gut Luft? Tut das Atmen weh?
+  - say: Ich schaue auf die Lippenfarbe.
+  - say: Ich schaue mir die Haut an, fühle den Puls am Handgelenk und prüfe die Rekap.
+  - say: Ist Ihnen kalt?
+  - phase: Teambesprechung
+  - say: >
+      Kurz zusammengefasst: Patient männlich, Anfang sechzig, wach, reagiert angemessen. Bolus mit Steak, nach
+      Rückenschlägen und Oberbauchkompressionen gelöst. Verdacht auf A-Problem, jetzt gelöst, aber Verletzung durch die
+      Oberbauchkompressionen möglich. Wir brauchen einen RTW. Siehst du das auch so?
+  - phase: Funkspruch
+  - say: RotkreuzHamburg von EVT1, kommen.
+  - say: >
+      Wir haben hier einen Patienten, männlich, Anfang sechzig, Bolusgeschehen, mit Rückenschlägen und
+      Oberbauchkompressionen gelöst, wach und reagiert angemessen, Verdacht auf A-Problem, wir benötigen einen RTW, kommen.
+  - say: EVT1 Ende.
+  - phase: A und B
+  - say: Ich schaue in den Mund, ob da noch etwas drin ist.
+  - say: Wir lassen Sie aufrecht sitzen.
+  - say: Ich zähle die Atemfrequenz.
+  - say: Ich messe die Sättigung.
+  - say: Ich höre die Lunge mit dem Stethoskop ab.
+  - phase: C
+  - say: Ich messe den Blutdruck.
+  - phase: D
+  - say: Wie heißen Sie und wissen Sie, wo wir gerade sind?
+  - say: Ich bestimme den GCS.
+  - say: Ich leuchte mit der Lampe in die Augen.
+  - say: Ich messe den Blutzucker, das piekst kurz.
+  - say: Können Sie einmal lächeln und beide Arme nach vorne strecken?
+  - phase: E
+  - say: Haben Sie noch Schmerzen?
+  - say: Sind Allergien bekannt?
+  - say: Nehmen Sie regelmäßig Medikamente?
+  - say: Haben Sie Vorerkrankungen?
+  - say: Rauchen Sie, oder gibt es Herzerkrankungen in Ihrer Familie?
+  - say: Ich untersuche Sie jetzt einmal von Kopf bis Fuß.
+  - say: >
+      Herr Weber, nach den Oberbauchkompressionen können innere Verletzungen entstehen, und es können noch Reste in der
+      Lunge sein. Ich würde Ihnen dringend raten, das im Krankenhaus abklären zu lassen.
+    why: Auch bei Erfolg – Nachkontrolle und Transport.
+  - phase: Reevaluation und Betreuung bis zum Eintreffen
+  - say: Reevaluation. Ich messe noch einmal Sättigung, Puls und Blutdruck.
+  - wait: Rettungsdienst
+    meanwhile:
+      - Wir bleiben bei Ihnen, bis der Rettungsdienst da ist. Sagen Sie mir sofort, wenn sich etwas verändert.
+      - Bekommen Sie weiter gut Luft?
+      - Ich messe noch einmal die Sättigung.
+      - Haben Sie gerade Schmerzen?
+      - Sie machen das gut. Der Rettungswagen ist gleich da.
+  - phase: Übergabe
+  - say: Übergabe. Das ist Herr Weber, 62 Jahre.
+  - say: Er hat sich beim Essen an einem Stück Steak verschluckt, Husten war ineffektiv, er wurde zyanotisch.
+  - say: Nach fünf Rückenschlägen und Oberbauchkompressionen hat sich das Fleischstück gelöst.
+  - say: Jetzt Atemfrequenz 22, Sättigung 97 Prozent, Puls 110, Blutdruck 150 zu 90, GCS 15, Druckschmerz im Oberbauch.
+  - say: Er nimmt einen Betablocker wegen Bluthochdruck, keine Allergien.
+  - say: Verdacht auf Verletzung durch die Oberbauchkompressionen, Aspiration nicht ausgeschlossen.
+  - say: Habt ihr noch Fragen?

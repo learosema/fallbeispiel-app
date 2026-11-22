@@ -33,7 +33,10 @@ TEAM_CLOSE_THRESHOLD, TEAM_CLOSE_MARGIN = 0.6, 0.08  # gemessen: Aussagesätze �
 HANDOVER_ACK = Line("Rettungsdienst", "(nickt)")
 HANDOVER_SILENCE = 15  # so lange Stille während der Übergabe, dann übernimmt der Rettungsdienst
 # Abschluss der Übergabe: Rückfragen, Verantwortung abgeben
-HANDOVER_CLOSE = re.compile(r"fragen|rückfrage|übernehmt|übernehmen|das wars|das wäre alles|das war alles|übergabe (beendet|abgeschlossen|fertig)")
+# Abschluss der Übergabe: eine Frage oder ein klares Ende – nicht jedes „Fragen“ („er wiederholt Fragen“ ist ein Befund)
+HANDOVER_CLOSE = re.compile(r"(habt ihr|haben sie|hast du|gibt es|noch|irgendwelche|weitere) (\w+ )?(fragen|rückfragen)|^\W*(fragen|rückfragen)\W*$"
+                            r"|übernehmt|übernehmen sie|(ihr könnt|könnt ihr|wollt ihr|würdet ihr) (\w+ )?übernehmen|wir übergeben"
+                            r"|das wars|das wärs|das wäre alles|das war alles|übergabe (beendet|abgeschlossen|fertig)")
 FUNK_DISCIPLINE = Line("Leitstelle", "{callsign} von {dispatcher}, bitte Funkdisziplin, beenden Sie das Gespräch.")
 FALLBACK = Line("Kollege", "Was genau machst du?")  # erste Rückfrage; weitere Varianten in content/smalltalk.yaml
 TIP_DONE = Line("Kollege", "Von mir aus haben wir alles. Du entscheidest, wie es weitergeht.")
@@ -77,6 +80,7 @@ class Turn:
     team: bool = False       # Teil der Teambesprechung
     team_closed: bool = False  # mit der Abschlussfrage („Siehst du das auch so?“)
     handover: bool = False   # Teil der Übergabe an den Rettungsdienst
+    refused: list[str] = field(default_factory=list)  # abgelehnte Maßnahmen (z. B. HLW bei Wachen) – zählen nicht als erledigt
 
 
 @dataclass
@@ -174,6 +178,14 @@ def pick(variants: list[Variant], state: dict[str, Any]) -> Variant | None:
     return next((v for v in variants if matches(v.when, state)), None)
 
 
+def cpr_indicated(scenario: Scenario, state: dict[str, Any]) -> bool:
+    """HLW nur bei Bewusstlosigkeit ohne normale Atmung: Fall von Anfang an so (`breathing: abnormal`) oder im Verlauf
+    (Flags `kreislaufstillstand`, `keine_normale_atmung` aus den Ereignissen)."""
+    if state.get("kreislaufstillstand") or state.get("keine_normale_atmung"):
+        return True
+    return not scenario.conscious and scenario.breathing == "abnormal"
+
+
 def respond(scenario: Scenario, iid: str, state: dict[str, Any]) -> Variant | None:
     """Antwort auf einen Intent, in dieser Reihenfolge:
     1. Antwort des Falls  2. bei Bewusstlosigkeit die allgemeine Antwort dafür („keine Reaktion“)
@@ -181,6 +193,11 @@ def respond(scenario: Scenario, iid: str, state: dict[str, Any]) -> Variant | No
     cat = intents()
     it = cat[iid]
     unconscious = not scenario.conscious or bool(state.get("bewusstlos"))
+    if it.not_indicated and not cpr_indicated(scenario, state) and not state.get("verstorben"):
+        # HLW & Co. ohne Indikation (wach oder normale Atmung): der Kollege stoppt das, egal was der Fall sonst sagt
+        v = pick(it.not_indicated, state | {"wach": not unconscious})
+        if v is not None:
+            return v
     own = scenario.responses.get(iid, [])
     if state.get("bewusstlos"):
         # im Verlauf bewusstlos geworden: Antworten des Falls für diesen Zustand, sonst „keine Reaktion“ vor den wachen Antworten
@@ -389,6 +406,7 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
         tick = bool(entry.get("tick"))  # Takt ohne Äußerung: nur die Zeit ist fortgeschritten
         lines: list[Line] = []
         unhandled: list[str] = []
+        refused: set[str] = set()
         remind = False  # Funk ohne „… Ende“ verlassen: Die Leitstelle mahnt nach der Antwort
         handover = False
         team_part = False
@@ -455,15 +473,27 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
                     lines.append(HANDOVER_ACK)
                 hits = [h for h in hits if h.intent == "uebergabe"]  # während der Übergabe werden keine Maßnahmen ausgeführt
             for h in hits:
+                if h.intent in refused:
+                    continue
                 if h.source == "implied" or handover or team_part:
                     continue
+                if (h.intent == "reevaluation" and h.intent not in scenario.responses
+                        and any(o.intent != h.intent and o.source != "implied" for o in hits)):
+                    continue  # „Reevaluation: Puls und Blutdruck nochmal“ – sagt schon, was kontrolliert wird
                 v = respond(scenario, h.intent, state)
                 if v is None:
                     unhandled.append(h.intent)
                     lines.append(UNHANDLED)
                     continue
+                if v.refused:
+                    # nicht ausgeführt: auch was dieser Intent impliziert (Zählen → HLW) und andere abgelehnte
+                    # Maßnahmen derselben Äußerung nicht – und die Ablehnung nur einmal sagen
+                    refused |= {h.intent, *catalogue[h.intent].implies}
+                    lines += [l for l in v.say if l not in lines]
+                    continue
                 lines += v.say
                 apply(v, t)
+        hits = [h for h in hits if h.intent not in refused]
         for h in hits:
             state[h.intent] = True
             if h.intent not in first:
@@ -548,7 +578,8 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
         seen: set[Line] = set()
         lines = [Line(l.who, _fill(l.text, settings)) for l in lines]
         lines = [l for l in lines if not (l in seen or seen.add(l))]
-        turns.append(Turn(t, text, hits, lines, info, unhandled, tip=tip, handover=handover, team=team_part, team_closed=team_closed))
+        turns.append(Turn(t, text, hits, lines, info, unhandled, tip=tip, handover=handover, team=team_part, team_closed=team_closed,
+                          refused=sorted(refused)))
 
     now = turns[-1].t if turns else 0.0
     extra: list[float] = []

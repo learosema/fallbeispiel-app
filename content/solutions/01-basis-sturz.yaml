@@ -1,0 +1,84 @@
+id: basis-sturz
+intro: >
+  Sturz mit Kopfanprall bei einem älteren Mann, der Blutverdünner nimmt. Wichtig sind HWS, Wärme und eine gute
+  Aufklärung, denn er will eigentlich nach Hause.
+steps:
+  - phase: Sicherheit und Lage
+  - say: Ist die Einsatzstelle sicher? Ich schaue mich kurz um.
+  - say: Ich schaue nach einer bedrohlichen Blutung.
+  - phase: Ansprechen
+  - say: Hallo, wir sind vom DRK. Was ist passiert?
+  - say: Kollege, bitte manuelle HWS-Stabilisierung. Mein Kollege hält jetzt Ihren Kopf fest, bitte bewegen Sie ihn nicht.
+    why: Sturz mit Kopfanprall und Nackenschmerzen – die HWS kommt vor dem Schnellcheck.
+  - phase: Schnellcheck
+  - say: Bekommen Sie gut Luft? Tut das Atmen weh?
+  - say: Ich schaue auf die Lippenfarbe.
+  - say: Ich schaue mir die Haut an, fühle den Puls am Handgelenk und prüfe die Rekap.
+  - say: Ich taste den Bauch, das Becken und die Oberschenkel ab. Sagen Sie mir, wenn es wehtut.
+  - say: Ist Ihnen kalt?
+  - say: Ich decke Sie mit der Rettungsdecke zu und lege Ihnen etwas unter, damit Sie nicht auf dem kalten Boden sitzen.
+    why: 5 °C, nasse Stufen – ohne Decke kühlt er aus.
+  - say: >
+      Ich verstehe, dass Sie nach Hause möchten. Sie haben sich aber den Kopf gestoßen, das sollte im Krankenhaus
+      abgeklärt werden. Wir kümmern uns jetzt erst mal um Sie.
+    why: Auf „Ich will nach Hause“ gleich eingehen – nicht überhören.
+  - phase: Teambesprechung
+  - say: >
+      Kurz zusammengefasst: Patient männlich, Ende sechzig, wach, reagiert angemessen. Sturz mit Kopfanprall,
+      Nackenschmerzen. Verdacht auf HWS-Trauma und Schädel-Hirn-Trauma. Wir brauchen einen RTW. Siehst du das auch so?
+    why: Nur Probleme und Verdacht – keine Aufzählung der Normalbefunde.
+  - phase: Funkspruch
+  - say: RotkreuzHamburg von EVT1, kommen.
+  - say: >
+      Wir haben hier einen Patienten, männlich, Ende sechzig, nach Sturz auf der Treppe mit Kopfanprall, wach und
+      reagiert angemessen, Verdacht auf HWS-Trauma, wir benötigen einen RTW, kommen.
+  - say: EVT1 Ende.
+  - phase: A und B
+  - say: Die Atemwege sind frei, er spricht in ganzen Sätzen.
+  - say: Ich zähle die Atemfrequenz.
+  - say: Ich messe die Sättigung. Die Klammer am Finger misst den Sauerstoff.
+  - say: Ich höre die Lunge mit dem Stethoskop ab.
+  - phase: C
+  - say: Ich messe den Blutdruck.
+  - phase: D
+  - say: Wie heißen Sie und wissen Sie, wo wir gerade sind und welcher Tag heute ist?
+  - say: Ich bestimme den GCS.
+  - say: Ich leuchte mit der Lampe in die Augen.
+  - say: Ich messe den Blutzucker, das piekst kurz.
+  - say: Können Sie einmal lächeln und beide Arme nach vorne strecken?
+  - phase: E
+  - say: Haben Sie sonst noch Schmerzen?
+  - say: Sind Allergien bekannt?
+  - say: Nehmen Sie regelmäßig Medikamente, zum Beispiel Blutverdünner?
+  - say: >
+      Herr Petersen, Sie nehmen einen Blutverdünner. Nach einem Schlag auf den Kopf kann es dann auch Stunden später
+      noch im Kopf bluten. Ich würde Ihnen dringend raten, das im Krankenhaus abklären zu lassen.
+    why: Zweiter Anlauf mit dem konkreten Risiko – jetzt willigt er ein.
+  - say: Haben Sie Vorerkrankungen?
+  - say: Wann haben Sie zuletzt etwas gegessen?
+  - say: Rauchen Sie, oder gibt es Herzerkrankungen in Ihrer Familie?
+  - say: Ich untersuche Sie jetzt einmal von Kopf bis Fuß.
+  - say: Spüren Sie, wo ich Sie berühre? Bewegen Sie mal die Zehen und die Finger.
+  - say: Ich lege einen Verband auf die Schürfwunde an der Hand.
+  - phase: Reevaluation und Betreuung bis zum Eintreffen
+  - say: Reevaluation. Ich messe noch einmal Puls, Blutdruck und Sättigung.
+    why: Wirken die Maßnahmen, hat sich etwas verändert? Nach E wieder bei A.
+  - say: Ist Ihnen jetzt wärmer?
+  - say: Ein Rettungswagen ist unterwegs. Die bringen Sie ins Krankenhaus, dort wird der Kopf noch einmal genau angeschaut.
+  - say: Möchten Sie, dass wir jemanden für Sie anrufen?
+  - wait: Rettungsdienst
+    meanwhile:
+      - Wir bleiben bei Ihnen, bis der Rettungsdienst da ist. Sagen Sie mir sofort, wenn sich etwas verändert.
+      - Haben Sie gerade Schmerzen?
+      - Ich kontrolliere noch einmal den Puls.
+      - Bekommen Sie weiter gut Luft?
+      - Sie machen das gut. Der Rettungswagen ist gleich da.
+      - Ich messe noch einmal den Blutdruck und die Sättigung.
+  - phase: Übergabe
+  - say: Übergabe. Das ist Herr Petersen, 68 Jahre.
+  - say: Er ist auf der nassen Treppe ausgerutscht und mit der Stirn ans Geländer gestoßen, nicht bewusstlos.
+  - say: Atemwege frei, Atemfrequenz 16, Sättigung 97 Prozent, Puls 78 regelmäßig, Blutdruck 145 zu 85, GCS 15, orientiert, Blutzucker 112.
+  - say: Er nimmt Apixaban als Blutverdünner wegen Vorhofflimmern, keine Allergien.
+  - say: Maßnahmen haben wir manuelle HWS-Stabilisierung und Wärmeerhalt mit Rettungsdecke gemacht.
+  - say: Verdacht auf HWS-Trauma und Schädel-Hirn-Trauma unter Blutverdünner.
+  - say: Habt ihr noch Fragen?

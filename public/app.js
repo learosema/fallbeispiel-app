@@ -380,6 +380,17 @@
       endBusy();
     }
     addMsg(text, "debrief");
+    // Musterlösung erst nach der Auswertung anbieten – in neuem Tab, damit der Einsatz erhalten bleibt
+    const li = document.createElement("li");
+    li.className = "msg sys";
+    const a = document.createElement("a");
+    a.href = "loesungen.html#" + encodeURIComponent(scenario.id);
+    a.target = "_blank";
+    a.rel = "noopener";
+    a.textContent = "Musterlösung zu diesem Fall ansehen";
+    li.appendChild(a);
+    $("log").appendChild(li);
+    scrollLog();
     speak("Algorithmus " + result.verdict + ".");
   }
 

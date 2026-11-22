@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Musterlösungen – Fallbeispiel xABCDE</title>
+  <meta name="theme-color" content="#b3261e">
+  <meta name="description" content="Musterlösungen zu allen Fällen: ein kompletter Einsatz, der in der Auswertung „Erfüllt“ ergibt – mit Begründungen.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    html, body { height: auto; min-height: 100%; }
+    main.doc { display: block; width: 100%; max-width: 760px; margin: 0 auto; padding: 8px 16px 48px; }
+    .topbar a.icon-btn { display: grid; place-items: center; text-decoration: none; }
+    .doc > p, .doc .note { max-width: 62ch; }
+    .note { background: var(--sys); border-radius: 10px; padding: 10px 12px; color: var(--muted); font-size: .92rem; }
+    .controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 12px 0 16px; }
+    .group-title { font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 24px 0 8px; }
+    details.case { background: var(--card); border: 1px solid var(--line); border-radius: 14px; margin: 0 0 10px; scroll-margin-top: 12px; }
+    details.case > summary { cursor: pointer; padding: 12px 16px; list-style: none; display: flex; gap: 12px; align-items: baseline; }
+    details.case > summary::-webkit-details-marker { display: none; }
+    details.case > summary::after { content: "▸"; margin-left: auto; color: var(--muted); transition: transform .15s; }
+    details.case[open] > summary::after { transform: rotate(90deg); }
+    .letter { flex: none; min-width: 2.2em; font-weight: 700; color: var(--accent); }
+    .title strong { display: block; }
+    .title small { color: var(--muted); }
+    .case-body { padding: 0 16px 16px; }
+    .case-body h3 { font-size: 1rem; margin: 18px 0 6px; }
+    .case-body ul { padding-left: 1.2em; margin: 6px 0; }
+    .verdict { display: inline-block; font-size: .8rem; font-weight: 700; padding: 2px 10px; border-radius: 999px; background: var(--sys); }
+    .verdict.ok { background: #e3f3e6; color: #1e5b2a; }
+    @media (prefers-color-scheme: dark) { .verdict.ok { background: #1d3a23; color: #b7e3c0; } }
+    .run { display: flex; flex-direction: column; gap: 8px; margin: 8px 0 0; padding: 0; list-style: none; }
+    .phase { align-self: stretch; text-align: center; font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 12px 0 0; display: flex; align-items: center; gap: 10px; }
+    .phase::before, .phase::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+    .msg .t { float: right; margin-left: 8px; font-size: .72rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .why { align-self: flex-end; max-width: 85%; font-size: .85rem; color: var(--muted); padding: 0 6px; margin-top: -4px; }
+    .why::before { content: "Warum: "; font-weight: 600; }
+    .repeat { align-self: center; font-size: .8rem; color: var(--muted); }
+    .only-me .run .msg:not(.me), .only-me .run .repeat-them { display: none; }
+    .loading { color: var(--muted); }
+    footer { color: var(--muted); font-size: .85rem; margin-top: 32px; }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="icon-btn" href="./" aria-label="Zur App">←</a>
+    <h1>Musterlösungen</h1>
+    <span class="icon-btn" aria-hidden="true"></span>
+  </header>
+
+  <main class="doc">
+    <p>Zu jedem Fall ein kompletter Einsatz bis zur Übergabe, der in der Auswertung <strong>„Erfüllt“</strong> ergibt und den Patienten gut versorgt. Die Antworten stammen aus der Simulation selbst: Die Lösung wird beim Laden durchgespielt, so wie du es in der App tun würdest.</p>
+    <p class="note"><strong>Spoiler:</strong> Spiel den Fall erst selbst. Eine Musterlösung ist ein möglicher Weg, nicht der einzige. Was du anders formulierst, versteht die App meist auch. Die Zeiten sind Nettozeit in Sekunden.</p>
+
+    <div class="controls">
+      <label class="toggle"><input type="checkbox" id="onlyMe"> Nur meine Sätze</label>
+    </div>
+
+    <div id="cases" aria-busy="true"><p class="loading">Fälle werden geladen …</p></div>
+
+    <footer>
+      <p>Alle Fälle sind frei erfunden und dienen nur der Ausbildung. Der Algorithmus folgt dem DRK-SANmemo (2024). Medizinische Details bitte mit der Ausbildung abgleichen.</p>
+    </footer>
+  </main>
+
+  <script>
+    const CLS = { Patient: "them", Kollege: "them kollege", Umstehende: "them", Befund: "sys befund", Leitstelle: "them funk", AED: "them funk", Rettungsdienst: "them kollege" };
+    const $ = (id) => document.getElementById(id);
+    const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+
+    // Verlauf in Blöcke teilen (eigene Äußerung + Antworten), damit sich wiederholende Zyklen
+    // (z. B. „1, 2, … 30“ + zwei Beatmungen bei der HLW) einmal mit „× n“ erscheinen
+    function blocks(entries) {
+      const out = [];
+      let cur = null;
+      for (const e of entries) {
+        if (e.phase) { out.push({ phase: e.phase }); cur = null; continue; }
+        if (e.who === "me") { cur = { me: e, lines: [] }; out.push(cur); continue; }
+        if (!cur) { cur = { me: null, lines: [] }; out.push(cur); }
+        cur.lines.push(e);
+      }
+      const key = (b) => b.phase ? null : JSON.stringify([b.me && b.me.text, b.lines.map((l) => [l.who, l.text])]);
+      const merged = [];
+      for (const b of out) {
+        const prev = merged[merged.length - 1];
+        if (prev && !b.phase && !b.me?.why && key(prev) === key(b)) { prev.count = (prev.count || 1) + 1; continue; }
+        merged.push(b);
+      }
+      return merged;
+    }
+
+    function renderRun(entries) {
+      const ol = el("ol", "run log");
+      ol.setAttribute("aria-label", "Verlauf der Musterlösung");
+      for (const b of blocks(entries)) {
+        if (b.phase) { ol.appendChild(el("li", "phase", b.phase)); continue; }
+        if (b.me) {
+          const li = el("li", "msg me");
+          li.appendChild(el("span", "t", `${b.me.t} s`));
+          li.appendChild(document.createTextNode(b.me.text));
+          ol.appendChild(li);
+          if (b.me.why) ol.appendChild(el("li", "why", b.me.why));
+        }
+        for (const l of b.lines) {
+          const li = el("li", "msg " + (CLS[l.who] || "them"));
+          li.appendChild(el("span", "who", l.who));
+          const sep = el("span", "visually-hidden", ": ");
+          li.append(sep, document.createTextNode(l.text));
+          ol.appendChild(li);
+        }
+        if (b.count > 1) ol.appendChild(el("li", "repeat" + (b.me ? "" : " repeat-them"), `… so ${b.count}-mal hintereinander`));
+      }
+      return ol;
+    }
+
+    async function load(details, id) {
+      const body = details.querySelector(".case-body");
+      if (body.dataset.loaded) return;
+      body.dataset.loaded = "1";
+      body.setAttribute("aria-busy", "true");
+      try {
+        const r = await fetch(`/api/solutions/${encodeURIComponent(id)}`);
+        if (!r.ok) throw new Error((await r.json()).error || r.statusText);
+        const s = await r.json();
+        body.textContent = "";
+        if (s.intro) body.appendChild(el("p", null, s.intro));
+        const v = el("p");
+        v.append("Auswertung dieser Lösung: ", el("span", "verdict" + (s.verdict === "Erfüllt" ? " ok" : ""), s.verdict));
+        body.appendChild(v);
+        if (s.dispatch) { body.appendChild(el("h3", null, "Einsatzmeldung")); body.appendChild(el("p", null, s.dispatch)); }
+        body.appendChild(el("h3", null, "Worauf es ankommt"));
+        body.appendChild(el("p", null, s.notes));
+        if (s.key_actions?.length) {
+          body.appendChild(el("h3", null, "Schlüsselmaßnahmen"));
+          const ul = el("ul");
+          for (const k of s.key_actions) ul.appendChild(el("li", null, k));
+          body.appendChild(ul);
+        }
+        body.appendChild(el("h3", null, "Verlauf"));
+        body.appendChild(renderRun(s.entries));
+      } catch (err) {
+        body.dataset.loaded = "";
+        body.textContent = "Konnte die Lösung nicht laden: " + err.message;
+      } finally {
+        body.removeAttribute("aria-busy");
+      }
+    }
+
+    function openFromHash() {
+      const id = decodeURIComponent(location.hash.slice(1));
+      const d = id && document.getElementById("case-" + id);
+      if (d) { d.open = true; requestAnimationFrame(() => d.scrollIntoView()); }
+    }
+
+    fetch("/api/solutions").then((r) => r.json()).then((list) => {
+      const root = $("cases");
+      root.textContent = "";
+      let group = null;
+      for (const s of list) {
+        if (s.group !== group) { group = s.group; root.appendChild(el("h2", "group-title", group || "Grundlagen")); }
+        const d = el("details", "case");
+        d.id = "case-" + s.id;
+        const sum = el("summary");
+        const title = el("span", "title");
+        title.append(el("strong", null, s.title), el("small", null, s.teaser || ""));
+        sum.append(el("span", "letter", s.letter || ""), title);
+        d.append(sum, el("div", "case-body", "Lösung wird geladen …"));
+        d.addEventListener("toggle", () => { if (d.open) { load(d, s.id); history.replaceState(null, "", "#" + s.id); } });
+        root.appendChild(d);
+      }
+      root.removeAttribute("aria-busy");
+      openFromHash();
+    }).catch(() => { $("cases").textContent = "Die Fälle konnten nicht geladen werden."; });
+
+    window.addEventListener("hashchange", openFromHash);
+    $("onlyMe").addEventListener("change", (e) => document.body.classList.toggle("only-me", e.target.checked));
+  </script>
+</body>
+</html>

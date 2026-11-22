@@ -1,0 +1,71 @@
+id: e-unterkuehlung
+intro: >
+  Stundenlang im nassen Laub bei 3 °C: schwere Unterkühlung. Schonend behandeln, flach liegen lassen, nicht aufstehen,
+  nasse Kleidung raus, von unten isolieren, zudecken, und Notarzt.
+steps:
+  - phase: Sicherheit und Lage
+  - say: Ist die Einsatzstelle sicher? Ich schaue mich kurz um.
+  - say: Ich schaue nach einer bedrohlichen Blutung.
+  - phase: Ansprechen
+  - say: Hallo, wir sind vom DRK. Was ist passiert?
+  - say: Kollege, bitte manuelle HWS-Stabilisierung. Bitte bleiben Sie liegen und stehen Sie nicht auf.
+    why: Gestürzt und lange gelegen. Bei Unterkühlung jede Bewegung schonend, er soll nicht aufstehen.
+  - phase: Schnellcheck
+  - say: Bekommen Sie gut Luft? Tut das Atmen weh?
+  - say: Ich schaue auf die Lippenfarbe.
+  - say: Ich schaue mir die Haut an, fühle den Puls am Handgelenk und prüfe die Rekap.
+    why: Bei Unterkühlung ist der Puls langsam und schwach – lange tasten.
+  - say: Ich taste den Bauch, das Becken und die Oberschenkel ab.
+  - say: Ist Ihnen kalt?
+  - say: Wir schneiden die nasse Kleidung vorsichtig auf.
+    why: Nasse Kleidung kühlt unter der Decke weiter aus.
+  - say: Ich decke ihn mit der Rettungsdecke zu und lege eine Decke unter, damit er nicht auf dem kalten Boden liegt.
+  - phase: Teambesprechung
+  - say: >
+      Kurz zusammengefasst: Patient männlich, Ende sechzig, verlangsamt, reagiert verzögert. Stunden im nassen Laub,
+      Puls langsam, Lippen livide. Verdacht auf schwere Unterkühlung, E-Problem. Wir brauchen RTW und NEF. Siehst du das auch so?
+  - phase: Funkspruch
+  - say: RotkreuzHamburg von EVT1, kommen.
+  - say: >
+      Wir haben hier einen Patienten, männlich, Ende sechzig, mehrere Stunden im nassen Laub gelegen, wach, aber
+      verlangsamt, Verdacht auf schwere Unterkühlung, wir benötigen RTW und NEF, kommen.
+  - say: EVT1 Ende.
+  - phase: A und B
+  - say: Die Atemwege sind frei.
+  - say: Ich zähle die Atemfrequenz.
+  - say: Ich messe die Sättigung.
+  - say: Ich höre die Lunge mit dem Stethoskop ab.
+  - phase: C
+  - say: Ich messe den Blutdruck.
+  - phase: D
+  - say: Wie heißen Sie und wissen Sie, wo wir gerade sind und welcher Tag heute ist?
+  - say: Ich bestimme den GCS.
+  - say: Ich leuchte mit der Lampe in die Augen.
+  - say: Ich messe den Blutzucker, das piekst kurz.
+  - say: Können Sie einmal lächeln und beide Arme nach vorne strecken?
+  - phase: E
+  - say: Ich messe die Temperatur im Ohr.
+    why: 31,8 °C – schwere Unterkühlung. Keine heißen Getränke, kein Alkohol, nicht reiben.
+  - say: Haben Sie Schmerzen?
+  - say: Sind Allergien bekannt?
+  - say: Nehmen Sie regelmäßig Medikamente?
+  - say: Haben Sie Vorerkrankungen?
+  - say: Wann haben Sie zuletzt etwas gegessen?
+  - say: Ich untersuche Sie jetzt einmal von Kopf bis Fuß.
+  - say: Spüren Sie, wo ich Sie berühre? Bewegen Sie mal die Finger.
+  - phase: Reevaluation und Betreuung bis zum Eintreffen
+  - say: Reevaluation. Ich messe noch einmal Puls und Atemfrequenz.
+  - wait: Rettungsdienst
+    meanwhile:
+      - Wir bleiben bei Ihnen. Bitte liegen bleiben, wir wärmen Sie langsam auf.
+      - Ich kontrolliere noch einmal den Puls.
+      - Herr Hartmann, hören Sie mich? Sie machen das gut.
+      - Ich zähle noch einmal die Atemfrequenz.
+  - phase: Übergabe
+  - say: Übergabe. Das ist Herr Hartmann, 68 Jahre.
+  - say: Er ist beim Wandern gestolpert und hat zwei bis drei Stunden im nassen Laub gelegen.
+  - say: Körpertemperatur 31,8 Grad, Puls 52 schwach, Atemfrequenz 10, Blutdruck 105 zu 70, GCS 14, verlangsamt, Sättigung nicht messbar.
+  - say: Prellung linkes Handgelenk und linke Hüfte. Er nimmt Betablocker und Wassertabletten wegen Herzschwäche.
+  - say: Maßnahmen haben wir manuelle HWS-Stabilisierung, nasse Kleidung entfernt, Isolation vom Boden und Wärmeerhalt gemacht.
+  - say: Verdacht auf schwere Unterkühlung.
+  - say: Habt ihr noch Fragen?

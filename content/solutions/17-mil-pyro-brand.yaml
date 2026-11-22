@@ -1,0 +1,77 @@
+id: mil-pyro-brand
+intro: >
+  Verbrennung am Unterarm durch Funkenflug, eine angeschmolzene Jacke, Funken im Auge. Angeschmolzenes nicht abreißen,
+  lauwarm kühlen, aber bei 5 °C an die Auskühlung denken. Das Auge nicht reiben, sondern spülen und abdecken.
+steps:
+  - phase: Sicherheit und Lage
+  - say: Ist die Einsatzstelle sicher? Kollege, schieb den Fackelrest weg und bring ihn ein Stück weg.
+    why: Rest-Pyro qualmt noch – Eigenschutz.
+  - say: Ich schaue nach einer bedrohlichen Blutung.
+  - phase: Ansprechen
+  - say: Hallo, wir sind vom DRK. Was ist passiert?
+  - say: Nicht am Auge reiben. Wir kümmern uns jetzt um Sie.
+  - say: Die angeschmolzene Jacke lassen wir dran, wir schneiden nur drumherum.
+    why: Angeschmolzenes Material klebt auf der Haut – abreißen reißt die Haut mit.
+  - say: Ich kühle den Arm mit lauwarmem Wasser.
+    why: Lauwarm und zeitlich begrenzt – kaltes Wasser und Kühlpacks schaden mehr.
+  - phase: Schnellcheck
+  - say: Bekommen Sie gut Luft? Tut das Atmen weh?
+  - say: Ich schaue in den Mund und in die Nase. Ist da Ruß?
+    why: Heiserkeit nach Funkenflug im Gesicht – an ein Inhalationstrauma denken.
+  - say: Ich schaue auf die Lippenfarbe.
+  - say: Ich schaue mir die Haut an, fühle den Puls am Handgelenk und prüfe die Rekap.
+  - say: Ich taste den Bauch, das Becken und die Oberschenkel ab.
+  - say: Ist Ihnen kalt?
+  - say: Ich lege Ihnen die Rettungsdecke um.
+    why: Kühlen bei 5 °C – der Rest des Körpers muss warm bleiben.
+  - phase: Teambesprechung
+  - say: >
+      Kurz zusammengefasst: Patient männlich, Anfang zwanzig, wach, reagiert angemessen. Verbrennung am linken Unterarm,
+      angeschmolzene Jacke, Funken im linken Auge, leicht heiser. Verdacht auf Verbrennung zweiten Grades und
+      Augenverletzung. Wir brauchen einen RTW. Siehst du das auch so?
+  - phase: Funkspruch
+  - say: RotkreuzHamburg von EVT1, kommen.
+  - say: >
+      Wir haben hier einen Patienten, männlich, Anfang zwanzig, Verbrennung am Unterarm und Funken im Auge durch
+      Pyrotechnik, wach und reagiert angemessen, Verdacht auf Verbrennung zweiten Grades, wir benötigen einen RTW, kommen.
+  - say: EVT1 Ende.
+  - phase: A und B
+  - say: Ich zähle die Atemfrequenz.
+  - say: Ich messe die Sättigung.
+  - say: Ich höre die Lunge mit dem Stethoskop ab.
+  - phase: C
+  - say: Ich messe den Blutdruck.
+  - phase: D
+  - say: Wie heißen Sie und wissen Sie, wo wir gerade sind und welcher Tag heute ist?
+  - say: Ich bestimme den GCS.
+  - say: Ich leuchte mit der Lampe in die Augen.
+  - say: Ich messe den Blutzucker, das piekst kurz.
+  - say: Können Sie einmal lächeln und beide Arme nach vorne strecken?
+  - phase: E
+  - say: Ich spüle das Auge vorsichtig aus. Wie gut sehen Sie auf dem linken Auge?
+    why: Nicht reiben, vorsichtig spülen, abdecken – und das Sehen erfragen.
+  - say: Ich lege eine sterile Brandwundenauflage auf den Arm.
+  - say: Spüren Sie, wo ich Sie berühre? Bewegen Sie mal die Finger.
+  - say: Sind Allergien bekannt?
+  - say: Nehmen Sie regelmäßig Medikamente?
+  - say: Haben Sie Vorerkrankungen, wann war die letzte Tetanusimpfung?
+  - say: Wann haben Sie zuletzt etwas gegessen?
+  - say: Ich untersuche Sie jetzt einmal von Kopf bis Fuß.
+  - phase: Reevaluation und Aufklärung
+  - say: Reevaluation. Ich messe noch einmal Puls und Atemfrequenz.
+  - say: Wegen des Auges und der Verbrennung sollte das im Krankenhaus abgeklärt werden.
+  - wait: Rettungsdienst
+    meanwhile:
+      - Wie stark sind die Schmerzen, von 0 bis 10?
+      - Wir bleiben bei Ihnen, bis der Rettungsdienst da ist.
+      - Ist Ihnen jetzt wärmer?
+      - Ich zähle noch einmal die Atemfrequenz.
+  - phase: Übergabe
+  - say: Übergabe. Das ist Leon, 22 Jahre.
+  - say: Ihm ist eine Fackel aus der Hand gerutscht, Funken auf den linken Arm und ins Gesicht.
+  - say: Verbrennung zweiten Grades am linken Unterarm, etwa 4 bis 5 Prozent, Jacke am Ärmel angeschmolzen, Funken im linken Auge, er sieht verschwommen.
+  - say: Leicht heiser, kein Ruß, Atemfrequenz 20, Sättigung 98 Prozent, Puls 108, GCS 15, Schmerz 8 von 10.
+  - say: Keine Allergien, keine Medikamente, Tetanusschutz unklar.
+  - say: Maßnahmen haben wir lauwarm gekühlt, Kleidung belassen, sterile Brandwundenauflage, Auge gespült und Wärmeerhalt gemacht.
+  - say: Verdacht auf Verbrennung zweiten Grades und Fremdkörper im Auge.
+  - say: Habt ihr noch Fragen?

@@ -100,11 +100,21 @@ rules:
       - ^(oh |ach |na )?(je |jeh |weh )?((das|des) ist|ist das|das war)( ja| aber| wirklich| echt| natürlich| jetzt)* (sehr |total |richtig |ganz schön )?(unglücklich|blöd|bloed|doof|ärgerlich|aergerlich|dumm|übel|uebel|mist|schade|pech|kacke|unschön|unschoen|schlimm)( gelaufen| passiert)?$
       - ^(oh |ach |na )?(je |jeh )?((das|des) ist|das war)( ja| aber| wirklich| echt)* (eine |ne |n )?(blöde|doofe|dumme|unglückliche|ärgerliche|üble) (sache|geschichte|situation)$
       - ^(oh |ach )?(je |jeh )?(das|des) tut mir( aber| wirklich| echt| sehr| so)* leid( für sie| für dich)?$
+      - ^(oh |ach )?(je |jeh )?(das war|das ist)( ja| bestimmt| sicher| wirklich| aber)* (ein|ne|n) (ganz schöner |ganz schoener |grosser |großer |riesen ?)?(schreck|schock)( für sie| für dich)?$
       - ^(oh je|ohje|oje|oh jeh|ach je|ach herrje|herrje|oh weh|ach du armer|ach du arme|sie armer|sie arme|du armer|du arme|sie ärmster|sie ärmste|so ein pech|was für ein pech)( mann| frau| kerl| ding)?$
     say:
       - Patient: (seufzt) Ja, das kann man wohl sagen.
       - Patient: Ja … ausgerechnet heute.
       - Patient: (nickt) Hm.
+    unconscious:
+      - Befund: (keine Reaktion)
+
+  angehoerige:  # an den Patienten: Angebot, jemanden zu informieren – Betreuung, aber keine Maßnahme
+    patterns:
+      - ^(möchten|moechten|wollen|sollen) (sie|wir)( dass wir| dass ich)? (jemanden|jemand|wen|ihre? (frau|mann|familie|partner\w*|tochter|sohn|eltern|angehörigen|angehoerigen)) (\w+ )*(anrufen|informieren|benachrichtigen|bescheid sagen|bescheid geben)$
+      - ^(gibt es|haben sie) (jemanden|jemand),? (den|die) (wir|ich) (anrufen|informieren|benachrichtigen) (sollen|können|koennen|sollten)$
+    say:
+      - Patient: (nickt) Ja … meine Familie, bitte. Die Nummer ist im Handy.
     unconscious:
       - Befund: (keine Reaktion)
 

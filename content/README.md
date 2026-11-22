@@ -20,6 +20,10 @@ Satz, mit `^…$` verankert, damit lange unklare Sätze weiter eine Rückfrage b
 `repeat: true` (wiederholt die letzte Antwort). `fallback` sind die Rückfragen, wenn gar nichts passt. Keine
 fachlichen Tipps, nichts, was sich an Patient:innen richten könnte.
 
+Sonderfall HLW: `hlw`, Zählen und `schock_ausloesen` haben in `intents.yaml` eine `not_indicated`-Antwort. Sie gilt
+immer, wenn keine Indikation besteht (wach oder normale Atmung) – vor allen Antworten der Fälle; die Maßnahme zählt dann
+nicht. Eine Fall-Antwort kann mit `refused: true` ebenfalls „nicht ausgeführt“ bedeuten.
+
 ## `algorithm.yaml` – wie ausgewertet wird
 
 Checklisten für die 1. Minute (wach / bewusstlos) und den ganzen Fall, plus Beispielsätze für die Befundsprache.
@@ -44,6 +48,8 @@ skip: [hws]                  # Checklistenpunkte, die hier nicht gelten („–�
 funk_early: [was_passiert]   # zeitkritisch: Funk früh absetzen – sobald einer dieser Intents erledigt ist, schlägt der
                              # Kollege den Funk vor; früher Funk ist nicht „außer der Reihe“, „… Ende“ beendet die 1. Minute nicht
 state: {geloest: false}      # Anfangszustand eigener Flags
+# Wird jemand im Verlauf bewusstlos ohne normale Atmung: im Ereignis `set: {bewusstlos: true, keine_normale_atmung: true}`
+# (bzw. `kreislaufstillstand: true`) – sonst lässt die App keine HLW zu
 
 responses:                   # Intent → Antwort
   puls:
@@ -130,3 +136,28 @@ und der Browser schickt dann einen „Takt“.
 
 Die Leitstelle (Anruf, Meldung, „Ende“) und das Eintreffen des Rettungsdienstes ca. 8 Minuten nach der
 Nachforderung übernimmt die Engine; `{callsign}` und `{dispatcher}` werden in Texten ersetzt.
+
+## `solutions/*.yaml` – Musterlösungen
+
+Je Fall ein Lauf, der im ganzen Fall und in der 1. Minute „Erfüllt“ ergibt (Seite `loesungen.html`, API
+`/api/solutions`). Es steht nur drin, was die Sanitäter:in sagt; die Antworten erzeugt der Server durch Nachspielen
+(`backend/solutions.py`), sie passen also immer zum aktuellen Fall.
+
+```yaml
+id: basis-sturz
+intro: Ein, zwei Sätze, worum es geht
+react:                      # im ganzen Fall: auf eine Ansage sofort reagieren (jede genau einmal)
+  Schock empfohlen: Schock! Alle weg! Ich löse den Schock aus.
+steps:
+  - phase: Sicherheit und Lage            # Zwischenüberschrift
+  - say: Ist die Einsatzstelle sicher?
+    why: Warum dieser Schritt (optional, wird angezeigt)
+    t: 52                                 # Nettozeit (optional; sonst nach der Sprechdauer des vorigen Satzes)
+  - wait: Rettungsdienst                  # warten, bis jemand spricht (oder `until: 200`)
+    meanwhile: [Betreuung/Kontrollen reihum]
+    pause: 20                             # Sekunden zwischen den meanwhile-Sätzen
+```
+
+`tests/test_solutions.py` spielt jede Lösung mit Regex und mit Embeddings durch: Urteil „Erfüllt“, nichts offen,
+keine vagen Befunde, Patient lebt, nie allein, und kein Satz führt zur Rückfrage des Kollegen. Schlägt der Test nach
+einer Änderung an Fall, Erkennung oder Auswertung an, die Lösung anpassen – oder die Änderung überdenken.

@@ -116,8 +116,10 @@ platz_schaffen:
   label: Platz schaffen / Umstehende lenken
   patterns:
     - platz (machen|schaffen|da|bitte)
+    - (mach|machen|schafft|schaffen) (sie |ihr |mal |bitte )*platz
     - \babstand\b
-    - (bitte )?(treten sie|gehen sie|geht) (bitte )?(zurück|weg|weiter|zur seite)
+    - (bitte )?(treten sie|gehen sie|geht) (bitte )?(\w+ ){0,2}(zurück|weg|weiter|zur seite)
+    - (brauchen|brauche) (\w+ )?platz
     - zurücktreten
     - gaffer|schaulustig
     - absperr
@@ -144,6 +146,7 @@ aus_gefahr_bringen:
     - an die frische luft
     - frische luft
     - in sicherheit bringen
+    - in den schatten
     - (raus|weg) aus dem
     - (weg|raus)bringen
     - (weg|raus)tragen
@@ -261,7 +264,9 @@ was_passiert:
   unconscious:
     - Befund: (keine Reaktion)
   patterns:
-    - was ist (denn )?(passiert|los|geschehen)
+    - was ist (denn |genau |eigentlich |hier |denn genau )?(passiert|los|geschehen)
+    - (wissen|weisst|wisst) (sie|du|ihr),? (was|wie) (\w+ ){0,3}(passiert|geschehen) ist
+    - (hat|haben) (jemand|sie|ihr) (gesehen|mitbekommen),? (was|wie) (\w+ ){0,3}(passiert|umgefallen|gestürzt|zusammengebrochen)
     - was (war|ist) (denn )?los
     - wie ist das passiert
     - was (haben sie|hast du|hat er|hat sie) gemacht
@@ -318,6 +323,7 @@ beschwerden_fragen:
     - wie geht es (ihnen|dir)|wie gehts
     - was fehlt (ihnen|dir)
     - wie fühlen sie sich|wie fühlst du dich
+    - wie stark (sind|ist) (die |der |ihre |deine )?schmerz|schmerz\w* (\w+ ){0,3}(von )?(0|null) bis (10|zehn)
   examples:
     - Wo haben Sie Schmerzen?
     - Wie geht es Ihnen gerade?
@@ -334,6 +340,13 @@ beruhigen:
     - ich erkläre
     - (sie|du) (sind|bist) in guten händen
     - alles wird gut
+    - (sind|bin) (wir |ich )?(jetzt |ja |hier |nun )*für (sie|dich) da
+    - (sagen sie|sag)( (mir|uns|bitte|einfach|sofort|bescheid))*,? (wenn|falls)
+    - (ich bleibe|wir bleiben) (\w+ )?(bei ihnen|bei dir|bei ihm|bei ihr)
+    - (wir lassen|ich lasse) (sie|dich) (\w+ )?nicht allein
+    - (sie machen|du machst) das (sehr |richtig |echt |wirklich )?(gut|super|prima|toll)
+    - (das haben sie|das hast du) (sehr |richtig |echt |wirklich )?(gut|super|prima|toll) gemacht
+    - (kümmern|helfen) wir (uns )?(jetzt |gleich |gut )*(um sie|um dich|ihnen|dir)
   examples:
     - Keine Sorge, wir kümmern uns um Sie
     - Ich erkläre Ihnen kurz, was ich jetzt mache
@@ -350,6 +363,7 @@ atemwege_freimachen:
     - kopf (nach hinten|in den nacken)
     - esmarch
     - atemwege? (frei|prüfen|checken|kontrollieren|sichern|freimachen|offen)
+    - atemwege? (sind|ist) (\w+ )?(frei|offen)\b   # Befund „Atemwege sind frei“
     - (in den |den )?mund(raum)? (schauen|gucken|kontrollieren|inspizieren|öffnen|ausräumen|anschauen)
     - mundraum
     - (schaue|gucke) (in den|ihm in den|ihr in den) mund
@@ -365,6 +379,7 @@ absaugen:
   patterns:
     - absaug
     - sauger
+    - saug\w* (\w+ ){0,3}ab\b
   examples:
     - Mach mal die Absaugpumpe bereit
   default:
@@ -434,6 +449,13 @@ atmung_fragen:
 atmung_beurteilen:
   label: Atmung beurteilt (Frequenz, Atemarbeit, Geräusche)
   fallback: [atemkontrolle, af_zaehlen]   # beim Bewusstlosen = Atemkontrolle
+  unconscious:   # im Verlauf: Schnappatmung bzw. Kreislaufstillstand (Flags aus den Fällen)
+    - when: {kreislaufstillstand: true}
+      say:
+        - Befund: Keine normale Atmung, nur vereinzelte schnappende Atemzüge.
+    - when: {keine_normale_atmung: true}
+      say:
+        - Befund: Keine normale Atmung, nur vereinzelte schnappende Atemzüge.
   patterns:
     - ^\W*(und |die )?atmung\W*$                      # „Atmung?“
     - \b(wie|was) (\w+ ){0,3}(die |der )?atmung\b     # „Wie ist / beurteilst du die Atmung?“
@@ -465,7 +487,7 @@ zyanose:
   fallback: [hautfarbe]
   patterns:
     - zyano
-    - lippe
+    - lippe(?!nbremse)
     - bläulich|blau (angelaufen|verfärbt)
   examples:
     - Ich schaue auf die Lippenfarbe
@@ -474,6 +496,13 @@ zyanose:
 af_zaehlen:
   label: Atemfrequenz
   fallback: [atemkontrolle]
+  unconscious:   # im Verlauf: Schnappatmung bzw. Kreislaufstillstand (Flags aus den Fällen)
+    - when: {kreislaufstillstand: true}
+      say:
+        - Befund: Keine normale Atmung, nur vereinzelte schnappende Atemzüge.
+    - when: {keine_normale_atmung: true}
+      say:
+        - Befund: Keine normale Atmung, nur vereinzelte schnappende Atemzüge.
   patterns:
     - atemfrequenz
     - \baf\b
@@ -491,6 +520,8 @@ spo2:
     - puls ?ox
     - oxymet|oximet
     - fingerclip|clip an
+    - (klammer|clip|klemme) an (den |ihren |deinen |seinen |ihrem |deinem |seinem )?finger
+    - (misst|messe|messen) (\w+ ){0,2}sauerstoff
   examples:
     - Ich messe die Sättigung
     - Leg mal das Pulsoxymeter an
@@ -511,7 +542,7 @@ auskultation:
 sauerstoff:
   label: Sauerstoffgabe
   patterns:
-    - \bsauerstoff\b(?! weg)
+    - (?<!misst den )(?<!messe den )(?<!messen den )\bsauerstoff\b(?! weg)   # „die misst den Sauerstoff“ = SpO2
     - \bo ?2\b(?! weg)
     - sauerstoff(maske|gabe|brille)
     - (maske|nasenbrille) (auf|an)
@@ -524,11 +555,13 @@ sauerstoff:
 oberkoerper_hoch:
   label: Oberkörper hoch / sitzende Lagerung
   patterns:
-    - oberkörper\w* (hoch|erhöht|aufrecht|anheben|hochlagern)
+    - oberkörper\w* (\w+ ){0,2}(hoch|erhöht|aufrecht|anheben|hochlagern)
     - aufrecht
     - (hin|auf)setzen|sitzend\w*|sitzen (lassen|bleiben)
     - kutschersitz
     - (nach )?vorne (beugen|lehnen)|vornüber
+    - (beugen|lehnen) sie (sich |den oberkörper |den kopf )?(\w+ )?nach vorn|beug dich (\w+ )?nach vorn
+    - setzen sie sich|setz dich (hin|auf)?
     - halbsitzend|hochlagern
   examples:
     - Wir lassen sie aufrecht sitzen
@@ -543,6 +576,7 @@ atemanweisung:
     - (ruhig|langsam|tief) (ein- und aus|ein|aus)?atmen
     - atmen sie (\w+ ){0,2}(ruhig|langsam|mit mir|tief)
     - atme (ruhig|langsam|mit mir)
+    - durch (die nase|den mund) (\w+ )?(ein|aus)\b
   examples:
     - Atmen Sie ganz langsam mit mir, durch die Nase ein und durch den Mund aus
   default:
@@ -574,6 +608,10 @@ hautfarbe:
 
 puls:
   label: Puls
+  unconscious:
+    - when: {kreislaufstillstand: true}
+      say:
+        - Befund: Kein Puls tastbar.
   patterns:
     - \bpuls(e|es)?\b(?!ox)
     - herzfrequenz|\bhf\b
@@ -635,6 +673,7 @@ nicht_aufstehen:
   label: Nicht aufstehen lassen
   patterns:
     - nicht (auf)?stehen|nicht aufsetzen
+    - (stehen sie|steh|steht) (bitte |jetzt |noch )*nicht auf
     - (bleiben sie|bleib) (bitte )?(liegen|sitzen|ruhig liegen)
     - liegen bleiben|sitzen bleiben
   examples:
@@ -817,6 +856,8 @@ dms:
     - Befund: (keine Reaktion)
   patterns:
     - \bdms\b
+    - spüren sie,? wo ich|spürst du,? wo ich
+    - drücken sie (mal |bitte )*(meine |beide )*h(a|ä)nd
     - kribbel|taubheit|taub\b
     - (spüren|fühlen) sie (das|meine|mich|hier)
     - bewegen sie (mal |bitte )?(die|ihre) (finger|zehen|füsse|hände|beine)
@@ -834,6 +875,7 @@ frieren_fragen:
   patterns:
     - \bkalt\b|frier|frös?t|zitter
     - warm genug
+    - (ist|wird) (ihnen|dir) (jetzt |schon |wieder |etwas |ein bisschen )*(wärmer|warm)
     - kühl\b
   examples:
     - Ist Ihnen kalt?
@@ -860,7 +902,8 @@ nasse_kleidung:
   label: Nasse Kleidung entfernen
   patterns:
     - nasse? (kleidung|sachen|hose|jacke)
-    - (kleidung|jacke|hose|sachen) (aus|ausziehen|entfernen|aufschneiden|öffnen)
+    - (kleidung|jacke|hose|sachen) (aus|ausziehen|entfernen|aufschneiden|öffne\w*)
+    - (öffne|öffnen|öffnest|mach|machen)\w* (\w+ ){0,3}(jacke|kleidung|hemd|bluse|gürtel|kragen|hose)( auf)?\b
     - ausziehen|aufschneiden|entkleiden|auskleiden
   examples:
     - Wir schneiden die nasse Kleidung auf
@@ -883,7 +926,7 @@ kleidung_belassen:
 kuehlen:
   label: Kühlen
   patterns:
-    - kühlen|kühlung|kühle (ich|den|die|das|wir)
+    - \b(ab)?kühl(en|ung)\b|kühle (ich|den|die|das|wir)   # nicht „auskühlen“, „Unterkühlung“
     - kühlpack|kältepack|coolpack
     - (lauwarm\w*|kalt\w*)? ?wasser (drüber|darüber|laufen|auf)
     - ablöschen
@@ -898,6 +941,8 @@ auge:
     - Befund: Keine Verletzung an den Augen, beide Pupillen seitengleich.
   patterns:
     - auge\w* (spülen|ausspülen|abdecken|anschauen|ansehen|untersuchen|verbinden)
+    - (spüle|spülen|decke)\w* (\w+ ){0,3}auge
+    - wie (gut )?sehen sie (auf|links|rechts|mit)
     - (nicht|bitte nicht) (am auge )?reiben
     - augen ?(spülung|verband|klappe)
     - visus|sehen sie (gut|etwas|was|mich)|können sie sehen
@@ -918,6 +963,8 @@ bodycheck:
     - untersuch\w* (sie|ihn|dich) (komplett|ganz|von oben)
   examples:
     - Ich untersuche Sie jetzt einmal von Kopf bis Fuß
+    - Ich untersuche ihn
+    - Ich untersuche Sie
     - Haben Sie sich sonst noch verletzt?
 
 temperatur:
@@ -968,6 +1015,8 @@ hws_manuell:
     - manuell\w* (fixier|stabilis|immobil)
     - (übernimm|nimm|halt)\w* (\w+ ){0,2}(den )?kopf
     - nicht den kopf bewegen|kopf nicht bewegen
+    - h(ä|a)lt\w* (\w+ ){0,3}kopf (fest|ruhig)
+    - (fixier|stabilisier)\w* (\w+ ){0,2}(den )?kopf
   examples:
     - Kannst du bitte den Kopf festhalten?
     - Kollege, übernimm die Halswirbelsäule
@@ -1047,6 +1096,13 @@ sample_risiko:
 atemkontrolle:
   label: Atemkontrolle (sehen, hören, fühlen)
   fallback: [af_zaehlen, atmung_fragen]   # beim Wachen: Befund zur Atmung
+  unconscious:   # im Verlauf: Schnappatmung bzw. Kreislaufstillstand (Flags aus den Fällen)
+    - when: {kreislaufstillstand: true}
+      say:
+        - Befund: Keine normale Atmung, nur vereinzelte schnappende Atemzüge.
+    - when: {keine_normale_atmung: true}
+      say:
+        - Befund: Keine normale Atmung, nur vereinzelte schnappende Atemzüge.
   patterns:
     - atemkontrolle
     - atmet (er|sie|der|die|das kind)\b
@@ -1071,11 +1127,17 @@ seitenlage:
 
 hlw:
   label: Herzdruckmassage (HLW)
+  not_indicated:   # HLW nur bei Bewusstlosigkeit ohne normale Atmung – sonst stoppt der Kollege, die Maßnahme zählt nicht
+    - when: {wach: true}
+      say:
+        - Kollege: Stopp! Ansprechbar und atmet – keine Herzdruckmassage!
+    - say:
+        - Kollege: Stopp! Da ist noch normale Atmung – keine Herzdruckmassage!
   patterns:
-    - \bhlw\b|\bcpr\b
-    - herzdruck|druckmassage
-    - reanim
-    - wiederbeleb
+    - (?<!keine )(?<!kein )\bhlw\b|\bcpr\b
+    - (?<!keine )(?<!keiner )(?<!ohne )herzdruck|(?<!keine )(?<!herz)druckmassage
+    - (?<!keine )(?<!nicht )(?<!kein )reanim
+    - (?<!keine )(?<!nicht )wiederbeleb
     - 30 ?(zu|:) ?2|dreissig zu zwei
     - thoraxkompression
     - (beginne|beginnen|fange|starte) (\w+ )?(mit dem )?drücken
@@ -1092,6 +1154,12 @@ hlw:
 hlw_zaehlen:
   label: Kompressionen laut gezählt
   # gängig ist die Kurzform „… 10 … 20 … 5, 6, 7, 8, 9, 30“
+  not_indicated:   # HLW nur bei Bewusstlosigkeit ohne normale Atmung – sonst stoppt der Kollege, die Maßnahme zählt nicht
+    - when: {wach: true}
+      say:
+        - Kollege: Stopp! Ansprechbar und atmet – keine Herzdruckmassage!
+    - say:
+        - Kollege: Stopp! Da ist noch normale Atmung – keine Herzdruckmassage!
   patterns:
     - \b\d{1,2}\W+\d{1,2}\W+\d{1,2}\W+\d{1,2}\b
     - \b(eins|zwei|drei|vier|fünf|sechs|sieben|acht|neun|zehn|zwanzig|dreissig)\W+(eins|zwei|drei|vier|fünf|sechs|sieben|acht|neun|zehn|zwanzig|dreissig)\W+(eins|zwei|drei|vier|fünf|sechs|sieben|acht|neun|zehn|zwanzig|dreissig)\W+(eins|zwei|drei|vier|fünf|sechs|sieben|acht|neun|zehn|zwanzig|dreissig)\b
@@ -1101,6 +1169,12 @@ hlw_zaehlen:
 hlw_30:
   label: Bis 30 gezählt (dann 2 Beatmungen)
   implies: [hlw_zaehlen]
+  not_indicated:   # HLW nur bei Bewusstlosigkeit ohne normale Atmung – sonst stoppt der Kollege, die Maßnahme zählt nicht
+    - when: {wach: true}
+      say:
+        - Kollege: Stopp! Ansprechbar und atmet – keine Herzdruckmassage!
+    - say:
+        - Kollege: Stopp! Da ist noch normale Atmung – keine Herzdruckmassage!
   patterns:
     - \b(8|acht|28|achtundzwanzig)\W+(9|neun|29|neunundzwanzig)\W+(30|dreissig)\b   # „28 29 30“ oder Kurzform „8 9 30“
   default:
@@ -1145,6 +1219,12 @@ schock_ausloesen:
   label: Schock ausgelöst
   default:
     - Kollege: Der AED ist gar nicht angeschlossen.
+  not_indicated:
+    - when: {wach: true}
+      say:
+        - Kollege: Stopp! Die Person ist wach – da wird kein Schock ausgelöst!
+    - say:
+        - Kollege: Stopp! Da ist noch normale Atmung – kein Schock!
   patterns:
     - (?<!kein )\bschock\b(?! (empfohlen|wird))   # „Schock! Alle weg!“
     - schock\w* (aus|ab)?lös|lös\w* (den )?schock|schock (aus|ab)geben|schockknopf|schocktaste
@@ -1171,6 +1251,7 @@ helferwechsel:
   patterns:
     - wechsel
     - (abwechseln|ablösen|löse dich ab|übernimm (das|die) drücken)
+    - \bdu drückst\b
   examples:
     - Wechsel, du drückst jetzt
   default:
@@ -1212,8 +1293,8 @@ reevaluation:
     - Kollege: Was genau kontrollierst du?
   patterns:
     - reevalu|re-evalu
-    - (nochmal|noch mal|erneut|wieder) (\w+ ){0,3}(messen|prüfen|kontrollieren|schauen|checken|untersuchen)
-    - (kontrolliere|prüfe|messe|checke) (\w+ ){0,2}(nochmal|noch mal|erneut)
+    - (nochmal|noch mal|noch einmal|erneut|wieder) (\w+ ){0,3}(messen|prüfen|kontrollieren|schauen|checken|untersuchen)
+    - (kontrolliere|prüfe|messe|checke) (\w+ ){0,2}(nochmal|noch mal|noch einmal|erneut)
     - wieder bei a|von vorne (anfangen|beginnen)|zurück zu a
     - verlaufskontrolle
   examples:
@@ -1234,7 +1315,7 @@ aufklaeren:
     - lass\w* (sie |du )?(sich |dich )?(\w+ ){0,2}(untersuchen|anschauen|ansehen|checken|durchchecken)
     - (arzt|ärztin|klinik|krankenhaus|notarzt)\w* (\w+ ){0,4}(ansehen|anschauen|abklären|untersuchen|angucken)
     - muss sich (ein|eine|der|die) (arzt|ärztin)
-    - (stunden|später) (\w+ ){0,4}(bluten|blutung)|nachblut|hirnblutung|im kopf bluten|blutung im kopf
+    - (stunden|später) (\w+ ){0,4}(bluten|blutung)|(kann|könnte|können|droht) (\w+ ){0,5}nachblut\w*|nachblutungsrisiko|hirnblutung|im kopf bluten|blutung im kopf
   examples:
     - Ich würde Ihnen dringend raten, das im Krankenhaus abklären zu lassen
     - Bitte lassen Sie sich untersuchen, das ist sicherer

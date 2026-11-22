@@ -1,0 +1,71 @@
+id: c-gib
+intro: >
+  Schwäche, schwarzer Stuhl, Kaffeesatzerbrechen: Verdacht auf Blutung im Magen-Darm-Trakt mit Schock. Flach lagern,
+  Beine hoch, nicht aufstehen lassen, Wärme und Notarzt.
+steps:
+  - phase: Sicherheit und Lage
+  - say: Ist die Einsatzstelle sicher? Ich schaue mich kurz um.
+  - say: Ich schaue nach einer bedrohlichen Blutung.
+  - phase: Ansprechen
+  - say: Hallo, wir sind vom DRK. Was ist passiert?
+  - say: Bitte bleiben Sie liegen und stehen Sie nicht auf.
+    why: Er war kurz ohnmächtig und ist im Schock – aufstehen könnte ihn wieder umkippen lassen.
+  - phase: Schnellcheck
+  - say: Bekommen Sie gut Luft? Tut das Atmen weh?
+  - say: Ich schaue auf die Lippenfarbe.
+  - say: Ich schaue mir die Haut an, fühle den Puls am Handgelenk und prüfe die Rekap.
+  - say: Wir legen Sie flach hin und machen die Beine hoch.
+    why: Schockzeichen – blass, kaltschweißig, Puls schnell und schlecht tastbar, Rekap verzögert.
+  - say: Ich taste den Bauch ab. Sagen Sie mir, wenn es wehtut.
+  - say: Ist Ihnen kalt?
+  - say: Ich decke Sie mit der Rettungsdecke zu.
+  - phase: Teambesprechung
+  - say: >
+      Kurz zusammengefasst: Patient männlich, Anfang siebzig, wach, etwas verlangsamt. Schwarzer Stuhl,
+      Kaffeesatzerbrechen, Schockzeichen. Verdacht auf Blutung im Magen-Darm-Trakt, C-Problem. Wir brauchen RTW und
+      NEF. Siehst du das auch so?
+  - phase: Funkspruch
+  - say: RotkreuzHamburg von EVT1, kommen.
+  - say: >
+      Wir haben hier einen Patienten, männlich, Anfang siebzig, kurz bewusstlos, jetzt wach und verlangsamt,
+      Schockzeichen, Verdacht auf Magen-Darm-Blutung, wir benötigen RTW und NEF, kommen.
+  - say: EVT1 Ende.
+  - phase: A und B
+  - say: Die Atemwege sind frei.
+  - say: Ich zähle die Atemfrequenz.
+  - say: Ich messe die Sättigung.
+  - say: Ich höre die Lunge mit dem Stethoskop ab.
+  - phase: C
+  - say: Ich messe den Blutdruck.
+  - phase: D
+  - say: Wie heißen Sie und wissen Sie, wo wir gerade sind?
+  - say: Ich bestimme den GCS.
+  - say: Ich leuchte mit der Lampe in die Augen.
+  - say: Ich messe den Blutzucker, das piekst kurz.
+  - say: Können Sie einmal lächeln und beide Arme nach vorne strecken?
+  - phase: E
+  - say: Haben Sie Schmerzen?
+  - say: Sind Allergien bekannt?
+  - say: Nehmen Sie regelmäßig Medikamente, zum Beispiel Blutverdünner oder Schmerzmittel?
+    why: Aspirin und Ibuprofen erhöhen das Blutungsrisiko im Magen.
+  - say: Haben Sie Vorerkrankungen?
+  - say: Wann haben Sie zuletzt etwas gegessen?
+  - say: Trinken Sie Alkohol?
+  - say: Ich untersuche Sie jetzt einmal von Kopf bis Fuß.
+  - phase: Reevaluation und Betreuung bis zum Eintreffen
+  - say: Reevaluation. Ich messe noch einmal Puls und Blutdruck.
+  - wait: Rettungsdienst
+    meanwhile:
+      - Wir bleiben bei Ihnen. Bitte bleiben Sie liegen, der Rettungsdienst ist gleich da.
+      - Ich kontrolliere noch einmal den Puls.
+      - Ist Ihnen jetzt wärmer?
+      - Ich messe noch einmal den Blutdruck.
+      - Sie machen das gut.
+  - phase: Übergabe
+  - say: Übergabe. Das ist Herr Krüger, 71 Jahre.
+  - say: Er ist im Bad kurz ohnmächtig geworden. Seit zwei Tagen schwarzer Stuhl, heute Kaffeesatzerbrechen.
+  - say: Haut blass und kaltschweißig, Puls 116 schlecht tastbar, Blutdruck 90 zu 55, nach Schocklage 100 zu 60, Rekap 4 Sekunden, GCS 15, verlangsamt.
+  - say: Er nimmt Aspirin, Ibuprofen und Blutdrucktabletten, früher ein Magengeschwür, Allergie gegen Penicillin.
+  - say: Maßnahmen haben wir Schocklage und Wärmeerhalt gemacht.
+  - say: Verdacht auf obere Magen-Darm-Blutung mit Volumenmangelschock.
+  - say: Habt ihr noch Fragen?

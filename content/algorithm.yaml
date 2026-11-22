@@ -7,6 +7,7 @@
 #   only: trauma | bleeding | conscious | unconscious | breathing_normal | breathing_abnormal
 #   extra: {trauma: [...]} zusätzliche Elemente, wenn die Bedingung für den Fall gilt
 #   special: funk | reevaluation
+#   unless_skipped: {waerme: [decke]}  Elemente entfallen, wenn der Fall den Punkt per `skip` ausblendet
 #   unordered: true  zählt nicht für die Reihenfolge („außer der Reihe“)
 #   tip: was der Kollege auf Nachfrage sagt, solange der Punkt offen ist („Hast du einen Tipp?“).
 #        Keine verborgenen Befunde verraten.
@@ -61,12 +62,14 @@ full:
     label: "D – Disability (Bewusstsein, Pupillen, Blutzucker; wenn wach: Orientierung, BE-FAST)"
     all: [gcs, pupillen, bz]
     extra: {conscious: [orientierung, fast]}
+    unless_skipped: {bz: [bz]}   # `skip: [bz]`: kein BZ erwartet (während der HLW hat Drücken Vorrang)
     tip: "Dann D: Bewusstsein, Pupillen, Blutzucker – und wenn ansprechbar: Orientierung und BE-FAST?"
   - id: e
     tip: "Fehlt noch E: SAMPLER, Bodycheck, Wärmeerhalt?"
     short: E
     label: E – Exposure/Environment (SAMPLER, Ganzkörperuntersuchung, Wärmeerhalt)
     all: [[sample_allergie, sample_medikamente, sample_vorerkrankung, sample_mahlzeit, sample_risiko, sample], bodycheck, decke]
+    unless_skipped: {waerme: [decke]}   # wach im Warmen bzw. HLW: auch im E keine Decke erwarten
   - id: sample
     tip: "Ist die SAMPLER-Anamnese schon komplett?"
     short: SAMPLER
@@ -127,7 +130,7 @@ handover:
   - label: Patient (Geschlecht, Alter, ggf. Name)
     patterns: [männlich, weiblich, '\bherr\b', '\bfrau\b', '\bmann\b', patient, '\d+ ?jahr', jährig, '\balt\b', älter, jung, mitte (zwanzig|dreißig|vierzig|fünfzig|sechzig|siebzig|achtzig)]
   - label: Ereignis / Situation
-    patterns: [passiert, gestürzt, sturz, gefallen, aufgefunden, gefunden, unfall, hergang, verschluckt, zusammengebrochen, kollabiert, gekrampft, seit, plötzlich, ereignis, situation]
+    patterns: [passiert, gestürzt, sturz, gefallen, ausgerutscht, gestoßen, angeschlagen, abgerutscht, verletzt, gestolpert, getrunken, gerutscht, aufgefunden, gefunden, unfall, hergang, verschluckt, zusammengebrochen, kollabiert, gekrampft, seit, plötzlich, ereignis, situation]
   - label: Befunde (ABCDE, Vitalwerte)
     min: 2
     patterns: [atemweg, atmung, atemfrequenz, '\baf\b', spo2, sättigung, puls, '\brr\b', blutdruck, rekap, gcs, bewusst, '\bbz\b', blutzucker, pupille, temperatur, haut, '\bfast\b', orientiert]
@@ -180,3 +183,5 @@ finding_language:
     - Kannst du bitte den Blutdruck messen?
     - Wie ist der Puls?
     - Wie ist die Hautfarbe?
+    - Ich untersuche Sie von Kopf bis Fuß, auch die Haut, ob Sie einen Ausschlag haben
+    - Ich schaue, ob die Haut gerötet oder geschwollen ist

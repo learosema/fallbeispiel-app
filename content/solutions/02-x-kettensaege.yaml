@@ -1,0 +1,85 @@
+id: x-kettensaege
+intro: >
+  Spritzende Blutung am Oberschenkel: x kommt vor allem anderen. Erst abdrücken und Druckverband, und sobald der
+  durchblutet, das Tourniquet. Dann früh funken, denn das ist zeitkritisch.
+steps:
+  - phase: Sicherheit und Lage
+  - say: Ist die Einsatzstelle sicher? Ist die Säge aus?
+  - phase: x – bedrohliche Blutung
+  - say: Ich schaue nach einer bedrohlichen Blutung.
+  - say: Kollege, drück die Wunde fest ab und dann sofort einen Druckverband.
+    why: Erst abdrücken und Druckverband. Das Tourniquet kommt, wenn das nicht reicht.
+  - say: Druckverband anlegen.
+  - say: Hallo, wir sind vom DRK. Wir kümmern uns jetzt um Ihre Blutung.
+    t: 25
+  - say: Ich lege sofort ein Tourniquet oberhalb der Wunde an.
+    t: 36
+    why: Der Druckverband ist durchgeblutet – jetzt das Tourniquet, ohne zu zögern.
+  - say: Kollege, schreib die Uhrzeit aufs Tourniquet.
+    why: Die Uhrzeit gehört auf das Tourniquet und in die Übergabe.
+  - phase: Früher Funkspruch
+  - say: RotkreuzHamburg von EVT1, kommen.
+    why: Zeitkritisch – sobald die Blutung steht, sofort funken.
+  - say: >
+      Wir haben hier einen Patienten, männlich, Mitte vierzig, Schnittverletzung durch Kettensäge am Oberschenkel mit
+      spritzender Blutung, Tourniquet angelegt, wach, Verdacht auf Volumenmangelschock, wir benötigen RTW und NEF, kommen.
+  - say: EVT1 Ende.
+  - phase: Ansprechen und Schnellcheck
+  - say: Was ist passiert?
+  - say: Bekommen Sie gut Luft? Tut das Atmen weh?
+  - say: Ich schaue auf die Lippenfarbe.
+  - say: Ich schaue mir die Haut an, fühle den Puls am Handgelenk und prüfe die Rekap.
+  - say: Ich taste den Bauch, das Becken und die Oberschenkel ab.
+  - say: Wir legen Sie flach hin und machen die Beine hoch.
+    why: Schockzeichen (blass, kaltschweißig, Puls schnell und schwach, Rekap verzögert) – Schocklage.
+  - say: Ist Ihnen kalt?
+  - say: Ich decke Sie mit der Rettungsdecke zu und isoliere Sie vom Boden.
+  - phase: Teambesprechung
+  - say: >
+      Kurz zusammengefasst: Patient männlich, Mitte vierzig, wach, ängstlich. Spritzende Blutung am Oberschenkel,
+      steht jetzt mit Tourniquet. Schockzeichen. Verdacht auf Volumenmangelschock. RTW und NEF sind alarmiert.
+      Siehst du das auch so?
+  - phase: A und B
+  - say: Die Atemwege sind frei.
+  - say: Ich zähle die Atemfrequenz.
+  - say: Ich messe die Sättigung.
+  - say: Ich höre die Lunge mit dem Stethoskop ab.
+  - phase: C
+  - say: Ich messe den Blutdruck.
+  - say: Ich kontrolliere das Tourniquet. Blutet es nach?
+  - phase: D
+  - say: Wie heißen Sie und wissen Sie, wo wir gerade sind?
+  - say: Ich bestimme den GCS.
+  - say: Ich leuchte mit der Lampe in die Augen.
+  - say: Ich messe den Blutzucker, das piekst kurz.
+  - say: Können Sie einmal lächeln und beide Arme nach vorne strecken?
+  - phase: E
+  - say: Haben Sie sonst noch Schmerzen?
+  - say: Sind Allergien bekannt?
+  - say: Nehmen Sie regelmäßig Medikamente?
+  - say: Haben Sie Vorerkrankungen?
+  - say: Wann haben Sie zuletzt etwas gegessen?
+  - say: Rauchen Sie, oder gibt es Herzerkrankungen in Ihrer Familie?
+  - say: Ich untersuche Sie jetzt einmal von Kopf bis Fuß.
+  - say: Ich lege einen sterilen Verband auf die Wunde.
+  - phase: Reevaluation und Betreuung bis zum Eintreffen
+  - say: Reevaluation. Ich messe noch einmal Puls und Blutdruck.
+    why: Wirkt die Blutstillung? Der Puls wird langsamer, der Blutdruck stabiler.
+  - say: Das Tourniquet tut weh, ich weiß. Es muss dranbleiben, es hat Ihnen gerade das Leben gerettet.
+  - wait: Rettungsdienst
+    meanwhile:
+      - Wir bleiben bei Ihnen. Der Rettungsdienst und der Notarzt sind gleich da.
+      - Ich kontrolliere noch einmal den Puls.
+      - Bekommen Sie weiter gut Luft?
+      - Ich kontrolliere noch einmal das Tourniquet.
+      - Sie machen das gut. Bleiben Sie ganz ruhig liegen.
+      - Ich messe noch einmal den Blutdruck.
+  - phase: Übergabe
+  - say: Übergabe. Das ist Markus, 45 Jahre.
+  - say: Die Kettensäge ist abgerutscht, Schnittverletzung am linken Oberschenkel innen mit spritzender Blutung.
+  - say: Tourniquet angelegt um 10:47, Druckverband war vorher durchgeblutet.
+  - say: Haut blass und kaltschweißig, Puls zuletzt 112, Blutdruck 105 zu 65, Rekap verzögert, Atemfrequenz 24, Sättigung 97 Prozent, GCS 15.
+  - say: Keine Allergien, keine Medikamente, keine Vorerkrankungen.
+  - say: Maßnahmen haben wir Schocklage, Wärmeerhalt mit Rettungsdecke und steriler Verband gemacht.
+  - say: Verdacht auf Volumenmangelschock durch arterielle Blutung.
+  - say: Habt ihr noch Fragen?

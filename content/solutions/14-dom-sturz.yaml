@@ -1,0 +1,76 @@
+id: dom-sturz-fahrgeschaeft
+intro: >
+  Sturz aus vier Metern: Polytrauma. Erst Sicherheit (Not-Aus bestätigt?), dann HWS, Sauerstoff und früh funken. Ab
+  Minute 6 kommt ein Spannungspneumothorax dazu, also B immer wieder neu prüfen.
+react:
+  die Atemnot nimmt zu: Ich höre die Lunge noch einmal ab und schaue mir die Halsvenen an.
+steps:
+  - phase: Sicherheit und Lage
+  - say: Ist die Einsatzstelle sicher? Ist das Fahrgeschäft per Not-Aus gestoppt und gesichert?
+    why: Erst betreten, wenn klar ist, dass sich nichts mehr bewegt.
+  - phase: Früher Funkspruch
+  - say: RotkreuzHamburg von EVT1, kommen.
+    why: Polytrauma ist zeitkritisch – die Nachforderung inklusive Notarzt sofort bestätigen.
+  - say: >
+      Wir haben hier einen Patienten, männlich, Anfang dreißig, Sturz aus etwa vier Metern aus einem Fahrgeschäft,
+      wach, Verdacht auf Polytrauma, wir benötigen RTW und NEF, kommen.
+  - say: EVT1 Ende.
+  - say: Bitte gehen Sie ein Stück zurück, wir brauchen Platz.
+  - say: Ich schaue nach einer bedrohlichen Blutung.
+  - phase: Ansprechen
+  - say: Hallo, wir sind vom DRK. Was ist passiert?
+  - say: Kollege, bitte manuelle HWS-Stabilisierung. Bitte bewegen Sie sich nicht.
+  - phase: Schnellcheck
+  - say: Bekommen Sie gut Luft? Tut das Atmen weh?
+  - say: Ich schaue auf die Lippenfarbe.
+  - say: Ich schaue mir die Haut an, fühle den Puls am Handgelenk und prüfe die Rekap.
+  - say: Ich taste den Bauch, das Becken und die Oberschenkel ab. Das Becken nur einmal und vorsichtig.
+  - say: Ist Ihnen kalt?
+  - say: Ich decke Sie mit der Rettungsdecke zu.
+  - phase: Teambesprechung
+  - say: >
+      Kurz zusammengefasst: Patient männlich, Anfang dreißig, wach, kurze Gedächtnislücke. Sturz aus vier Metern,
+      Atemnot mit Schmerzen rechts, Lippen bläulich, Schockzeichen, Becken und linker Oberschenkel schmerzhaft. Verdacht
+      auf Polytrauma mit B- und C-Problem. RTW und NEF sind alarmiert. Siehst du das auch so?
+  - phase: A und B
+  - say: Die Atemwege sind frei.
+  - say: Ich messe die Sättigung.
+  - say: Ich gebe Ihnen Sauerstoff über die Maske.
+    why: SpO2 88 %, Schmerzen beim Atmen, Lippen bläulich – B-Problem.
+  - say: Ich zähle die Atemfrequenz.
+  - say: Ich höre die Lunge mit dem Stethoskop ab.
+  - say: Sind die Halsvenen gestaut?
+  - phase: C
+  - say: Ich messe den Blutdruck.
+  - phase: D
+  - say: Wie heißen Sie und wissen Sie, wo wir gerade sind?
+  - say: Ich bestimme den GCS.
+  - say: Ich leuchte mit der Lampe in die Augen.
+  - say: Ich messe den Blutzucker, das piekst kurz.
+  - say: Können Sie einmal lächeln und beide Arme nach vorne strecken?
+  - phase: E
+  - say: Sind Allergien bekannt?
+  - say: Nehmen Sie regelmäßig Medikamente?
+  - say: Haben Sie Vorerkrankungen?
+  - say: Wann haben Sie zuletzt etwas gegessen?
+  - say: Ich untersuche Sie jetzt einmal von Kopf bis Fuß.
+  - say: Spüren Sie, wo ich Sie berühre? Bewegen Sie mal die Zehen.
+  - say: Kollege, deck die Kopfwunde mit einer sterilen Kompresse ab.
+  - say: Kollege, bereite Vakuummatratze und Schaufeltrage für eine schonende Rettung vor.
+  - phase: Reevaluation und Betreuung bis zum Eintreffen
+  - say: Reevaluation. Ich messe noch einmal Atemfrequenz, Sättigung und Blutdruck.
+  - wait: Rettungsdienst
+    meanwhile:
+      - Wir bleiben bei Ihnen. Bitte nicht bewegen, der Notarzt ist gleich da.
+      - Ich messe noch einmal die Sättigung.
+      - Ich zähle noch einmal die Atemfrequenz.
+      - Ich messe noch einmal den Blutdruck.
+  - phase: Übergabe
+  - say: Übergabe. Das ist Marco, 31 Jahre.
+  - say: Sturz aus etwa vier Metern aus einer Gondel auf die rechte Seite, kurze Gedächtnislücke.
+  - say: Atemfrequenz 34, rechts abgeschwächtes Atemgeräusch, jetzt gestaute Halsvenen, Sättigung unter Sauerstoff fallend.
+  - say: Puls 126 schwach, Blutdruck 85 zu 55 fallend, Rekap 4 Sekunden, GCS 14.
+  - say: Becken druckschmerzhaft, linker Oberschenkel verformt, Platzwunde am Kopf. Allergie gegen Penicillin.
+  - say: Maßnahmen haben wir HWS-Stabilisierung, Sauerstoff, Wärmeerhalt und Wundversorgung gemacht.
+  - say: Verdacht auf Spannungspneumothorax rechts, Beckenverletzung und Oberschenkelfraktur.
+  - say: Habt ihr noch Fragen?

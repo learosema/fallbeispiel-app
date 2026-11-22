@@ -39,8 +39,6 @@ responses:
         - Befund: Normale Atmung, ca. 14 pro Minute.
   seitenlage:
     - Befund: Er liegt in stabiler Seitenlage, Mund tiefster Punkt, die Atemwege bleiben frei.
-  hlw:
-    - Kollege: Er atmet doch normal.
   puls:
     - Befund: Puls regelmäßig, kräftig tastbar, ca. 70.
   spo2:

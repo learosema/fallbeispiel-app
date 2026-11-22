@@ -16,7 +16,7 @@ conscious: false
 breathing: abnormal
 request: {required: [RTW, NEF]}
 funk_early: [atemkontrolle, atmung_beurteilen]   # keine normale Atmung: Notruf sofort (Kollege), parallel HLW
-skip: [waerme]   # während der HLW stört eine Decke
+skip: [waerme, bz]   # während der HLW stört eine Decke; BZ macht der Rettungsdienst, wir drücken
 state: {aed_kommt: false, aed_dran: false, analyse_offen: false, beatmung_moeglich: false, absaug_bereit: false, o2_bereit: false, guedel: false, rd_da: false}
 
 responses:

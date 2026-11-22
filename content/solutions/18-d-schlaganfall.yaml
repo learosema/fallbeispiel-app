@@ -1,0 +1,75 @@
+id: d-schlaganfall
+intro: >
+  Plötzlich hängender Mundwinkel, schwacher Arm, verwaschene Sprache: Verdacht auf Schlaganfall, jede Minute zählt. Den
+  Symptombeginn erfragen und sofort funken. Dann BE-FAST, Blutzucker, Oberkörper hoch und nichts essen oder trinken.
+steps:
+  - phase: Sicherheit und Lage
+  - say: Ist die Einsatzstelle sicher? Ich schaue mich kurz um.
+  - say: Ich schaue nach einer bedrohlichen Blutung.
+  - phase: Ansprechen
+  - say: Hallo, wir sind vom DRK. Was ist passiert?
+    why: Die Ehefrau beschreibt es – der hängende Mundwinkel fällt schon beim ersten Hallo auf.
+  - say: Seit wann ist das so? Wissen Sie die genaue Uhrzeit?
+    why: Der Symptombeginn entscheidet in der Klinik über die Behandlung.
+  - phase: Früher Funkspruch
+  - say: RotkreuzHamburg von EVT1, kommen.
+    why: Schlaganfall ist zeitkritisch – nicht erst am Ende der 1. Minute funken.
+  - say: >
+      Wir haben hier einen Patienten, männlich, Anfang siebzig, wach, reagiert verzögert, Sprache verwaschen, hängender
+      Mundwinkel, Symptombeginn 10:42 Uhr, Verdacht auf Schlaganfall, wir benötigen einen RTW, kommen.
+  - say: EVT1 Ende.
+  - phase: Schnellcheck
+  - say: Herr Brandt, wir sind vom DRK. Ein Rettungswagen ist unterwegs. Bitte stehen Sie nicht auf.
+    why: Er versteht alles, kann aber schlecht sprechen – ruhig erklären, Ja/Nein-Fragen.
+  - say: Bekommen Sie gut Luft? Tut das Atmen weh?
+  - say: Ich schaue auf die Lippenfarbe.
+  - say: Ich schaue mir die Haut an, fühle den Puls am Handgelenk und prüfe die Rekap.
+  - say: Ist Ihnen kalt?
+  - phase: Teambesprechung
+  - say: >
+      Kurz zusammengefasst: Patient männlich, Anfang siebzig, wach, Sprache verwaschen, reagiert verzögert. Hängender
+      Mundwinkel, Puls unregelmäßig, Symptombeginn 10:42. Verdacht auf Schlaganfall, D-Problem. RTW ist alarmiert.
+      Siehst du das auch so?
+  - phase: A und B
+  - say: Die Atemwege sind frei.
+  - say: Ich zähle die Atemfrequenz.
+  - say: Ich messe die Sättigung.
+  - say: Ich höre die Lunge mit dem Stethoskop ab.
+  - phase: C
+  - say: Ich messe den Blutdruck.
+  - phase: D
+  - say: Können Sie einmal lächeln und beide Arme nach vorne strecken?
+    why: BE-FAST – Gesicht, Arme, Sprache, Zeit.
+  - say: Ich messe den Blutzucker, das piekst kurz.
+    why: Ein Unterzucker kann einen Schlaganfall vortäuschen.
+  - say: Ich bestimme den GCS.
+  - say: Wie heißen Sie und wissen Sie, wo wir gerade sind?
+  - say: Ich leuchte mit der Lampe in die Augen.
+  - say: Wir lagern Ihren Oberkörper etwas hoch. Bitte nichts essen und nichts trinken.
+    why: Etwa 30° Oberkörper hoch. Schluckstörung – nichts in den Mund.
+  - phase: E
+  - say: Hat er Allergien?
+  - say: Nimmt er Medikamente, zum Beispiel einen Blutverdünner?
+  - say: Hat er Vorerkrankungen?
+  - say: Wann hat er zuletzt etwas gegessen?
+  - say: Raucht er, oder gibt es Herzerkrankungen in der Familie?
+  - say: Ich untersuche ihn jetzt einmal von Kopf bis Fuß.
+  - say: Spüren Sie, wo ich Sie berühre? Drücken Sie mal meine Hände.
+  - phase: Reevaluation und Betreuung bis zum Eintreffen
+  - say: Reevaluation. Ich messe noch einmal Blutdruck und Sättigung.
+  - say: Wir bleiben bei Ihnen. Im Krankenhaus gibt es eine Spezialstation für genau das.
+  - wait: Rettungsdienst
+    meanwhile:
+      - Wie geht es Ihnen jetzt? Nicken oder Kopfschütteln reicht.
+      - Ich messe noch einmal den Blutdruck.
+      - Sie machen das gut. Der Rettungswagen ist gleich da.
+      - Ich kontrolliere noch einmal die Sprache. Können Sie einmal lächeln?
+  - phase: Übergabe
+  - say: Übergabe. Das ist Herr Brandt, 72 Jahre.
+  - say: Seit 10:42 Uhr, an der Kasse plötzlich verwaschene Sprache und das Portemonnaie fallen lassen. Die Ehefrau weiß die Zeit genau.
+  - say: Rechter Mundwinkel hängt, rechter Arm sinkt ab, Sprache verwaschen. GCS 14, Blutzucker 118.
+  - say: Blutdruck 190 zu 100, Puls 92 unregelmäßig, Sättigung 96 Prozent.
+  - say: Vorhofflimmern und Bluthochdruck, Apixaban letzte Woche selbst abgesetzt, keine Allergien.
+  - say: Maßnahmen haben wir Oberkörper hoch gelagert und nichts zu trinken gegeben.
+  - say: Verdacht auf Schlaganfall.
+  - say: Habt ihr noch Fragen?

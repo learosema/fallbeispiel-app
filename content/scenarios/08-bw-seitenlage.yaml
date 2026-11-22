@@ -47,8 +47,6 @@ responses:
         - Kollege: Hast du die Atmung schon geprüft?
     - say:
         - Befund: Er liegt in stabiler Seitenlage, Kopf überstreckt, Mund tiefster Punkt. Speichel läuft ab.
-  hlw:
-    - Kollege: Er atmet doch normal.
   puls:
     - Befund: Puls regelmäßig, kräftig tastbar, ca. 76.
   spo2:
