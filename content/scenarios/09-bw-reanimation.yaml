@@ -18,10 +18,11 @@ conscious: false
 breathing: abnormal
 request: {required: [RTW, NEF]}
 funk_early: [atemkontrolle, atmung_beurteilen]   # keine normale Atmung: Notruf sofort (Kollege), parallel HLW
-# Bei der Reanimation gilt das xABCDE-Schema nicht: Zu zweit ist niemand frei, einer drückt, einer beatmet (Rollentausch
-# beim Helferwechsel). Kein ABCDE, kein SAMPLER, keine Decke; die Reevaluation macht der AED alle 2 Minuten. Blutung,
-# Atemwege und Atemkontrolle stehen im Bewusstlos-Zweig der 1. Minute. (Rückmeldung Lea, 22.11.2026)
-skip: [waerme, bz, x, a, b, c, d, e, sample, reevaluation]
+# Bei der Reanimation gilt das ABCDE-Schema nicht: Zu zweit ist niemand frei, einer drückt, einer beatmet (Rollentausch
+# beim Helferwechsel). Kein ABCDE, kein SAMPLER, keine Decke; die Reevaluation macht der AED alle 2 Minuten. Atemwege und
+# Atemkontrolle stehen im Bewusstlos-Zweig der 1. Minute. Das x bleibt: eine kritische Blutung wird immer gestillt,
+# auch bei HLW. (Rückmeldung Lea, 22.11.2026)
+skip: [waerme, bz, a, b, c, d, e, sample, reevaluation]
 state: {kollege_drueckt: false, aed_kommt: false, aed_dran: false, analyse_offen: false, beatmung_moeglich: false, absaug_bereit: false, o2_bereit: false, guedel: false, rd_da: false}
 
 responses:
