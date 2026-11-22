@@ -1,0 +1,71 @@
+id: mil-pyro-asthma
+intro: >
+  Asthmaanfall im Pyro-Rauch, das Spray liegt im Auto. Zuerst raus aus dem Rauch, das ist Eigenschutz und hilft ihr am
+  meisten. Dann aufrecht sitzen, Atemanweisung, Sauerstoff, früh funken und auf Heiserkeit und Ruß achten.
+steps:
+  - phase: Sicherheit und Lage
+  - say: Ist die Einsatzstelle sicher? Wir bringen sie hier raus aus dem Rauch.
+    why: Im Rauch wird es nur schlimmer – für sie und für euch. Erst raus, dann versorgen.
+  - say: Bitte machen Sie Platz, wir kommen durch.
+  - say: Ich schaue nach einer bedrohlichen Blutung.
+  - phase: Ansprechen
+  - say: Hallo, wir sind vom DRK. Was ist passiert?
+  - say: Sie müssen nicht sprechen, nicken reicht. Wir lassen Sie aufrecht sitzen.
+  - phase: Schnellcheck
+  - say: Bekommen Sie gut Luft? Tut das Atmen weh?
+  - say: Ich schaue auf die Lippenfarbe.
+  - phase: Früher Funkspruch
+  - say: RotkreuzHamburg von EVT1, kommen.
+    why: Schwere Atemnot ist zeitkritisch.
+  - say: >
+      Wir haben hier eine Patientin, weiblich, Ende zwanzig, Asthmatikerin, schwere Atemnot nach Pyro-Rauch, kein Spray
+      dabei, wach, Verdacht auf Asthmaanfall und Rauchgasinhalation, wir benötigen RTW und NEF, kommen.
+  - say: EVT1 Ende.
+  - phase: Weiter im Schnellcheck
+  - say: Atmen Sie ganz langsam mit mir, durch die Nase ein und durch den Mund aus, mit der Lippenbremse.
+  - say: Ich schaue in den Mund. Ist die Stimme heiser, ist da Ruß?
+    why: Heiserkeit und Ruß sind Warnzeichen für ein Inhalationstrauma.
+  - say: Ich schaue mir die Haut an, fühle den Puls am Handgelenk und prüfe die Rekap.
+  - say: Ist Ihnen kalt?
+  - say: Ich lege Ihnen eine Decke um.
+  - phase: Teambesprechung
+  - say: >
+      Kurz zusammengefasst: Patientin weiblich, Ende zwanzig, wach, ängstlich. Schwere Atemnot, Giemen, leicht heiser,
+      Ruß am Mund. Verdacht auf Asthmaanfall durch Rauch, Inhalationstrauma möglich, B-Problem. RTW und NEF sind
+      alarmiert. Siehst du das auch so?
+  - phase: A und B
+  - say: Ich messe die Sättigung.
+    why: Messen kommt erst im B. Im Rauch die Sättigung mit Vorsicht deuten.
+  - say: Kollege, bitte Sauerstoff über die Maske.
+  - say: Ich zähle die Atemfrequenz.
+  - say: Ich höre die Lunge mit dem Stethoskop ab.
+  - phase: C
+  - say: Ich messe den Blutdruck.
+  - phase: D
+  - say: Wie heißen Sie und wo sind wir gerade? Kurz reicht.
+  - say: Ich bestimme den GCS.
+  - say: Ich leuchte mit der Lampe in die Augen.
+  - say: Ich messe den Blutzucker, das piekst kurz.
+  - say: Können Sie einmal lächeln und beide Arme nach vorne strecken?
+  - phase: E
+  - say: Sind Allergien bekannt?
+  - say: Welche Medikamente nehmen Sie, haben Sie Ihr Spray dabei?
+  - say: Haben Sie Vorerkrankungen?
+  - say: Wann haben Sie zuletzt etwas gegessen?
+  - say: Ich untersuche Sie jetzt einmal von Kopf bis Fuß.
+  - phase: Reevaluation und Betreuung bis zum Eintreffen
+  - say: Reevaluation. Ich messe noch einmal Atemfrequenz und Sättigung.
+  - wait: Rettungsdienst
+    meanwhile:
+      - Sie machen das gut. Atmen Sie ganz ruhig mit mir ein und aus.
+      - Ich messe noch einmal die Sättigung.
+      - Wir bleiben bei Ihnen. Der Notarzt ist gleich da.
+      - Ich zähle noch einmal die Atemfrequenz.
+  - phase: Übergabe
+  - say: Übergabe. Das ist Sophie, 29 Jahre, Asthmatikerin.
+  - say: Im Block wurde Pyrotechnik gezündet, seitdem schwere Atemnot und Husten. Ihr Spray liegt im Auto.
+  - say: Atemfrequenz zuerst 30, Giemen beidseits, Sättigung 91 Prozent, unter Sauerstoff 94 Prozent, Puls 122, GCS 15.
+  - say: Leichte Heiserkeit und Ruß am Mundwinkel. Keine Allergien, nimmt Salbutamol.
+  - say: Maßnahmen haben wir aus dem Rauch gebracht, sitzende Lagerung, Atemanweisung und Sauerstoff gemacht.
+  - say: Verdacht auf Asthmaanfall durch Rauch, Inhalationstrauma nicht ausgeschlossen.
+  - say: Habt ihr noch Fragen?

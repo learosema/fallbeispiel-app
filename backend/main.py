@@ -23,7 +23,9 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, model_validator
 
-from . import classifier, content, engine, evaluate
+from functools import lru_cache
+
+from . import classifier, content, engine, evaluate, solutions
 
 PUBLIC_DIR = Path(__file__).resolve().parent.parent / "public"
 NO_STORE = {"Cache-Control": "no-store"}
@@ -162,6 +164,29 @@ async def debrief(req: RunRequest):
     run = await run_in_threadpool(_run, req)
     result = evaluate.evaluate(run, classifier.get().embedder)
     return JSONResponse({"result": result, "text": evaluate.as_text(result)}, headers=NO_STORE)
+
+
+@lru_cache
+def _solution(sid: str) -> dict:
+    # deterministisch: einmal nachspielen, dann aus dem Speicher (die Inhalte ändern sich nur mit einem Neustart)
+    return solutions.transcript(sid, classifier.get(), classifier.get().embedder)
+
+
+@app.get("/api/solutions")
+async def list_solutions():
+    """Musterlösungen – bewusst ohne Lösungsinhalt, die gibt es erst pro Fall (Spoiler)."""
+    out = []
+    for sid, s in content.scenarios().items():
+        if sid in solutions.solutions():
+            out.append({k: s.meta.get(k) for k in ("id", "group", "letter", "title", "teaser")})
+    return JSONResponse(out, headers={"Cache-Control": "no-cache"})
+
+
+@app.get("/api/solutions/{sid}")
+async def get_solution(sid: str):
+    if sid not in solutions.solutions() or sid not in content.scenarios():
+        raise HTTPException(404, "Keine Musterlösung zu diesem Fall.")
+    return JSONResponse(await run_in_threadpool(_solution, sid), headers={"Cache-Control": "no-cache"})
 
 
 @app.get("/sw.js", include_in_schema=False)

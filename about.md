@@ -125,6 +125,14 @@ Eintrübung/Bewusstlosigkeit.
   maskiertem Themenwort).
 - **„Worauf es in diesem Fall ankommt“** (`debrief_notes`) erscheint nach der Auswertung, nie vorher.
 
+### Spicker und Musterlösungen
+
+- **Spicker** (`public/spicker.html`, statisch): 1. Minute, xABCDE, Betreuung, Notarzt-Indikation, Sätze, Teambesprechung,
+  Funk, Übergabe, häufige Fehler. Die Beispielsätze unter „Sätze, die funktionieren“ sind in `tests/regressions.yaml` abgesichert.
+- **Musterlösungen** (`public/loesungen.html`, `content/solutions/`, `backend/solutions.py`, `/api/solutions`): je Fall ein
+  „Erfüllt“-Lauf bis zur Übergabe, Antworten durch Nachspielen erzeugt. Verraten bewusst die verborgenen Befunde (Spoiler,
+  zugeklappt); in der App erst nach der Auswertung verlinkt (neuer Tab). Siehe `content/README.md`.
+
 ## Fachliche Regeln aus der Praxis
 
 Diese Punkte kamen aus Rückmeldungen einer erfahrenen Sanitäterin und sind in Inhalten und Tests verankert.
@@ -143,6 +151,10 @@ Bitte nicht „wegoptimieren“ – im Zweifel nachfragen.
   **Orientierung** (Name, Ort, Tag) und **BE-FAST** gehören ins **D** des ABCDE (nur bei Ansprechbaren).
 - **Zeitkritische Fälle** (Schlaganfall, Reanimation, Asthma/Pyro-Asthma, Kettensäge, Polytrauma): Funkspruch so früh
   wie möglich, mit den kritischen Problemen.
+- **Die 1. Minute ist nur ein erstes Bild:** kurz schauen, fragen, tasten (Puls nicht zählen), nichts messen.
+  SpO2, RR, BZ, GCS, Atemfrequenz und Co. kommen erst in den Buchstaben des ABCDE (Rückmeldung Lea, 22.11.2026).
+- **Teambesprechung kurz halten:** nur Probleme (auffällige Befunde) und Verdachtsdiagnose nennen, nicht alles
+  aufzählen, was in der Norm ist (Rückmeldung Lea, 22.11.2026). Patient, Reaktion und Nachforderung gehören trotzdem dazu.
 - **Alter:** ungefähr reicht („älterer Mann“, „Mitte vierzig“); die Lagebeschreibung gibt es her.
 - **SAMPLER** (Symptome, Allergien, Medikamente, Patientenvorgeschichte, Letzte Mahlzeit/Stuhlgang, Ereignis,
   Risikofaktoren) gehört ins **E** des ABCDE, **nicht** in die 1. Minute – z. B. „Blutverdünner erfragt“ ist `phase: full`.
@@ -154,6 +166,12 @@ Bitte nicht „wegoptimieren“ – im Zweifel nachfragen.
 - **Material:** Auf den Rucksäcken sind Kühlpacks (Verbrennungen aber mit lauwarmem Wasser kühlen).
 
 **Reanimation**
+
+- **HLW nur bei Bewusstlosigkeit ohne normale Atmung** (Rückmeldung Lea, 22.11.2026). Sonst stoppt der Kollege
+  („Stopp! Ansprechbar und atmet …“ bzw. „Da ist noch normale Atmung …“), die HLW zählt nicht, und die Auswertung ist
+  „Nicht erfüllt“. Indikation (`engine.cpr_indicated`): Fall `breathing: abnormal` oder Flag `kreislaufstillstand` bzw.
+  `keine_normale_atmung`. **Fälle, in denen jemand im Verlauf Schnappatmung bekommt, müssen eines dieser Flags setzen**
+  (Asthma, Pyro-Asthma, Bolus bei Bewusstlosigkeit, Kettensäge); dann antworten auch Atemkontrolle und Puls passend.
 
 - **Kein ROSC.** Es wird durchreanimiert, bis RTW + NEF übernehmen (die haben z. B. Adrenalin). Ohne Nachforderung
   kommt niemand.

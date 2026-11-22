@@ -1,0 +1,62 @@
+id: bw-sommer
+intro: >
+  Bewusstlos am Strand, er atmet normal, viel Alkohol. Platz schaffen, Atemwege frei, Atemkontrolle, Seitenlage. Und
+  Wärmeerhalt trotz 29 °C, denn er liegt auf feuchtem Sand im Wind.
+steps:
+  - phase: Sicherheit und Lage
+  - say: Ist die Einsatzstelle sicher? Bitte gehen Sie ein Stück zurück, wir brauchen Platz.
+  - say: Ich schaue nach einer bedrohlichen Blutung.
+  - phase: Ansprechen
+  - say: Hallo, können Sie mich hören? Ich rüttle an den Schultern.
+  - say: Ich setze einen Schmerzreiz am Trapezmuskel.
+  - phase: Atemwege und Atemkontrolle
+  - say: Ich mache die Atemwege frei, Kopf überstrecken, Kinn anheben.
+  - say: Atemkontrolle, sehen, hören, fühlen, zehn Sekunden.
+  - say: Atmung normal. Ich bringe ihn in die stabile Seitenlage.
+  - say: Kollege, mach bitte die Absaugpumpe bereit.
+  - say: Wir decken ihn mit der Rettungsdecke zu und legen eine Decke unter.
+    why: Feuchter, kühler Sand, Wind, Alkohol – er kühlt aus, auch im Sommer.
+  - phase: Funkspruch
+  - say: RotkreuzHamburg von EVT1, kommen.
+  - say: >
+      Wir haben hier einen Patienten, männlich, ca. dreißig, bewusstlos, Atmung normal, in stabiler Seitenlage,
+      viel Alkohol getrunken, Verdacht auf Alkoholintoxikation, wir benötigen einen RTW, kommen.
+  - say: EVT1 Ende.
+  - phase: A und B
+  - say: Ich kontrolliere die Atmung noch einmal, sehen, hören, fühlen.
+  - say: Ich zähle die Atemfrequenz.
+  - say: Ich messe die Sättigung.
+  - say: Ich höre die Lunge mit dem Stethoskop ab.
+  - phase: C
+  - say: Ich fühle den Puls am Handgelenk und prüfe die Rekap.
+  - say: Ich schaue mir die Haut an.
+  - say: Ich messe den Blutdruck.
+  - phase: D
+  - say: Ich bestimme den GCS.
+  - say: Ich leuchte mit der Lampe in die Augen.
+  - say: Ich messe den Blutzucker.
+  - phase: E – SAMPLER vom Freund
+  - say: Ich messe die Temperatur im Ohr.
+  - say: Was ist passiert?
+  - say: Hat er Allergien?
+  - say: Nimmt er Medikamente?
+  - say: Hat er Vorerkrankungen?
+  - say: Wann hat er zuletzt etwas gegessen, und was hat er getrunken?
+  - say: Ich untersuche ihn jetzt einmal von Kopf bis Fuß.
+  - phase: Reevaluation und Betreuung bis zum Eintreffen
+  - say: Reevaluation. Ich kontrolliere die Atmung noch einmal.
+  - say: Sie haben gut geholfen. Wir bleiben bei ihm, bis der Rettungsdienst da ist.
+    why: Der Freund ist auch betroffen – Betreuung gilt auch für Umstehende.
+  - wait: Rettungsdienst
+    meanwhile:
+      - Ich kontrolliere noch einmal die Atmung.
+      - Ich messe noch einmal die Sättigung.
+      - Ich fühle noch einmal den Puls.
+  - phase: Übergabe
+  - say: Übergabe. Patient männlich, 30 Jahre.
+  - say: Er hat seit Mittag getrunken, etwa zehn Bier und einige Schnäpse, und ist plötzlich nicht mehr wach geworden.
+  - say: GCS 8, Atmung normal mit 14 pro Minute, Sättigung 94 Prozent, Puls 70, Blutdruck 120 zu 75, Blutzucker 88, Temperatur 35,9 Grad.
+  - say: Keine Allergien, keine Medikamente, keine Vorerkrankungen bekannt.
+  - say: Maßnahmen haben wir Atemwege frei gemacht, stabile Seitenlage, Absaugbereitschaft und Wärmeerhalt gemacht.
+  - say: Verdacht auf Alkoholintoxikation.
+  - say: Habt ihr noch Fragen?

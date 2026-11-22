@@ -210,3 +210,117 @@
 - text: das ist ja doof
   scenario: b-asthma
   reply: keuchend
+
+# ---- Betreuungssätze aus dem Spicker (public/spicker.html)
+- text: Ich taste jetzt Ihren Bauch ab. Sagen Sie mir, wenn es wehtut.
+  expect: [trauma_check, beruhigen]
+  not: [abdruecken, blutung_stillen]
+- text: Mein Kollege hält jetzt Ihren Kopf fest. Bitte bewegen Sie ihn nicht.
+  expect: [hws_manuell]
+  not: [atmung_beurteilen]
+- text: Das war bestimmt ein Schreck. Jetzt sind wir für Sie da.
+  expect: [beruhigen]
+- text: das war bestimmt ein Schreck
+  not: [beruhigen]
+  reply: (seufzt)
+- text: Hallo, ich bin Sam vom DRK, das ist mein Kollege. Wir kümmern uns jetzt um Sie. Was ist passiert?
+  expect: [vorstellen, beruhigen, was_passiert]
+- text: Ich drücke kurz auf Ihren Fingernagel, das tut nicht weh.
+  expect: [rekap]
+  not: [abdruecken]
+- text: Ein Rettungswagen ist unterwegs. Bis er da ist, kümmern wir uns um Sie.
+  expect: [beruhigen]
+  not: [nachforderung]
+- text: Ich lege Ihnen jetzt eine Decke um, damit Sie nicht auskühlen.
+  expect: [decke]
+  not: [kuehlen]
+- text: Verdacht auf Unterkühlung
+  not: [kuehlen]
+- text: Ich kühle den Arm mit lauwarmem Wasser
+  expect: [kuehlen]
+- text: Ich lege Ihnen eine Klammer an den Finger, die misst den Sauerstoff.
+  expect: [spo2]
+  not: [sauerstoff]
+- text: Ich gebe ihr Sauerstoff über die Maske
+  expect: [sauerstoff]
+- text: Ich bleibe bei Ihnen.
+  expect: [beruhigen]
+- text: Wir lassen Sie nicht allein.
+  expect: [beruhigen]
+- text: Das haben Sie gut gemacht.
+  expect: [beruhigen]
+- text: Mein Kollege holt nur die Decke, ich bleibe bei Ihnen.
+  expect: [decke, beruhigen]
+  not: [weggehen]
+- text: Möchten Sie, dass wir jemanden für Sie anrufen?
+  reply: meine Familie
+  no_reply: Was genau
+- text: Die Atemwege sind frei
+  expect: [atemwege_freimachen]
+- text: Reevaluation. Ich messe noch einmal Puls, Blutdruck und Sättigung.
+  expect: [reevaluation, puls, rr, spo2]
+  reply: RR
+  no_reply: Was genau kontrollierst
+- text: Ich kontrolliere jetzt nochmal alle Werte
+  reply: Was genau kontrollierst
+- text: Ist Ihnen jetzt wärmer?
+  expect: [frieren_fragen]
+- text: Ich kontrolliere das Tourniquet. Blutet es nach?
+  not: [aufklaeren]
+- text: Unter dem Blutverdünner kann es auch später noch nachbluten
+  expect: [aufklaeren]
+- text: Was ist genau passiert?
+  expect: [was_passiert]
+- text: Hat jemand gesehen, wie er umgefallen ist?
+  expect: [was_passiert]
+- text: Wissen Sie, was passiert ist?
+  expect: [was_passiert]
+- text: Wir bleiben bei ihm, bis der Rettungsdienst da ist.
+  expect: [beruhigen]
+- text: Bitte setzen Sie sich und beugen Sie den Oberkörper nach vorne, damit das Blut nach vorne abläuft.
+  expect: [oberkoerper_hoch]
+- text: Kollege, stabilisiere dabei den Kopf
+  expect: [hws_manuell]
+- text: Bitte gehen Sie ein Stück zurück, wir brauchen Platz.
+  expect: [platz_schaffen]
+- text: Kollege, saug bitte den Mund ab.
+  expect: [absaugen]
+- text: Kollege, hilf bitte, sie in den Schatten zu bringen.
+  expect: [aus_gefahr_bringen]
+- text: Ist es in Ordnung, wenn ich Ihre Jacke öffne?
+  not: [kleidung_belassen]
+- text: Kollege, öffne bitte die enge Jacke.
+  expect: [nasse_kleidung]
+  not: [kleidung_belassen]
+- text: Wir lagern Ihren Oberkörper etwas hoch.
+  expect: [oberkoerper_hoch]
+- text: Ich spüle das Auge vorsichtig aus.
+  expect: [auge]
+- text: Wie stark sind die Schmerzen, von 0 bis 10?
+  expect: [beschwerden_fragen]
+- text: Spüren Sie, wo ich Sie berühre? Drücken Sie mal meine Hände.
+  expect: [dms]
+- text: Bitte machen Sie Platz, wir kommen durch.
+  expect: [platz_schaffen]
+- text: Ich untersuche Sie jetzt einmal von Kopf bis Fuß, auch die Haut, ob Sie einen Ausschlag oder eine Schwellung haben.
+  expect: [bodycheck]
+  vague: false
+- text: Ich zähle die Atemfrequenz und messe die Sättigung.
+  vague: false
+- text: Hängender Mundwinkel, Puls unregelmäßig.
+  vague: false
+- text: Verdacht auf Kreislaufstillstand durch Kammerflimmern.
+  vague: false
+- text: Ich untersuche ihn jetzt einmal von Kopf bis Fuß.
+  expect: [bodycheck]
+  not: [lage_pruefen]
+- text: Wechsel, du drückst, ich setze den Notruf ab.
+  expect: [helferwechsel, nachforderung]
+  not: [abdruecken]
+- text: Atmen Sie ganz langsam mit mir, durch die Nase ein und durch den Mund aus, mit der Lippenbremse.
+  expect: [atemanweisung]
+  not: [zyanose, atemwege_freimachen]
+- text: Bitte stehen Sie nicht auf.
+  expect: [nicht_aufstehen]
+- text: Er braucht keine Herzdruckmassage, er atmet ja.
+  not: [hlw]

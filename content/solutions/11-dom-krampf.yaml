@@ -1,0 +1,79 @@
+id: dom-krampf
+intro: >
+  Er krampft noch, als ihr ankommt. Während des Anfalls schützen und die Dauer erfassen, nichts in den Mund.
+  Danach Atemwege frei, Atemkontrolle, stabile Seitenlage, HWS bedenken (Kopfanprall), Wärme und BZ.
+steps:
+  - phase: Sicherheit und Lage
+  - say: Ist die Einsatzstelle sicher? Bitte gehen Sie ein Stück zurück, wir brauchen Platz.
+  - say: Ich schaue nach einer bedrohlichen Blutung.
+  - phase: Während des Anfalls
+  - say: Hallo, wir sind vom DRK. Was ist passiert?
+  - say: Seit wann krampft er? Kollege, merk dir die Uhrzeit.
+    why: Die Anfallsdauer ist wichtig – über 5 Minuten ist ein Notfall für sich.
+  - say: Ich lege ihm die Jacke unter den Kopf und räume die Sachen weg. Nichts in den Mund!
+    why: Schützen, nicht festhalten, nichts zwischen die Zähne.
+  - phase: Nach dem Anfall
+  - say: Ich mache die Atemwege frei, Kopf überstrecken, Kinn anheben.
+    t: 52
+  - say: Atemkontrolle, sehen, hören, fühlen.
+  - say: Ich bringe ihn in die stabile Seitenlage, Kollege, stabilisiere dabei den Kopf.
+    why: Nach dem Anfall ist er schläfrig und schnarcht – Seitenlage. Kopfanprall, also die HWS mitdenken.
+  - say: Kollege, mach bitte die Absaugpumpe bereit.
+  - say: Hallo, hören Sie mich? Der Anfall ist vorbei, wir sind vom DRK und bleiben bei Ihnen.
+  - phase: Schnellcheck
+  - say: Bekommen Sie gut Luft? Tut das Atmen weh?
+  - say: Ich schaue auf die Lippenfarbe.
+  - say: Ich schaue mir die Haut an, fühle den Puls am Handgelenk und prüfe die Rekap.
+  - say: Ich taste den Bauch, das Becken und die Oberschenkel ab.
+  - say: Ist Ihnen kalt?
+  - say: Ich decke ihn mit der Rettungsdecke zu und lege eine Decke unter.
+  - phase: Teambesprechung
+  - say: >
+      Kurz zusammengefasst: Patient männlich, Mitte zwanzig, nach dem Anfall schläfrig, reagiert verzögert. Krampfanfall
+      etwa zweieinhalb Minuten, bekannte Epilepsie, Platzwunde am Hinterkopf. Verdacht auf Krampfanfall mit
+      Kopfverletzung, D-Problem. Wir brauchen einen RTW. Siehst du das auch so?
+  - phase: Funkspruch
+  - say: RotkreuzHamburg von EVT1, kommen.
+  - say: >
+      Wir haben hier einen Patienten, männlich, Mitte zwanzig, Krampfanfall von etwa zweieinhalb Minuten, jetzt
+      schläfrig und reagiert verzögert, Platzwunde am Hinterkopf, Verdacht auf epileptischen Anfall, wir benötigen
+      einen RTW, kommen.
+  - say: EVT1 Ende.
+  - phase: A und B
+  - say: Ich zähle die Atemfrequenz.
+  - say: Ich messe die Sättigung.
+  - say: Ich höre die Lunge mit dem Stethoskop ab.
+  - phase: C
+  - say: Ich messe den Blutdruck.
+  - phase: D
+  - say: Ich bestimme den GCS.
+  - say: Wie heißen Sie und wissen Sie, wo wir gerade sind?
+  - say: Ich leuchte mit der Lampe in die Augen.
+  - say: Ich messe den Blutzucker, das piekst kurz.
+  - say: Können Sie einmal lächeln und beide Arme nach vorne strecken?
+  - phase: E
+  - say: Ich messe die Temperatur im Ohr.
+  - say: Hat er Allergien?
+  - say: Nimmt er Medikamente?
+  - say: Hat er Vorerkrankungen?
+  - say: Wann hat er zuletzt etwas gegessen, und hat er etwas getrunken?
+  - say: Ich untersuche ihn jetzt einmal von Kopf bis Fuß.
+  - say: Ich lege einen sterilen Verband auf die Wunde am Hinterkopf.
+  - phase: Reevaluation und Betreuung bis zum Eintreffen
+  - say: Reevaluation. Ich messe noch einmal Sättigung und Puls.
+  - say: Jonas, Sie hatten einen Krampfanfall. Wir sind vom DRK und bleiben bei Ihnen.
+    why: Nach dem Anfall ist er desorientiert – immer wieder sagen, wer ihr seid und was passiert ist.
+  - wait: Rettungsdienst
+    meanwhile:
+      - Wir bleiben bei Ihnen. Der Rettungsdienst ist gleich da.
+      - Ich messe noch einmal die Sättigung.
+      - Ich bestimme noch einmal den GCS.
+      - Ich fühle noch einmal den Puls.
+  - phase: Übergabe
+  - say: Übergabe. Das ist Jonas, 24 Jahre, bekannte Epilepsie.
+  - say: Er ist bei den Autoscootern umgefallen und hat etwa zweieinhalb Minuten gekrampft, dabei mit dem Hinterkopf aufgeschlagen.
+  - say: Jetzt GCS 12 bis 13, desorientiert, Atemfrequenz 22, Sättigung in Seitenlage 96 Prozent, Puls 112, Blutdruck 140 zu 85, Blutzucker 102, Temperatur 35,8 Grad.
+  - say: Er nimmt Levetiracetam, heute vermutlich vergessen, keine Allergien, drei Glühwein.
+  - say: Maßnahmen haben wir Kopf geschützt, stabile Seitenlage, Absaugbereitschaft, Wärmeerhalt und Verband der Platzwunde gemacht.
+  - say: Verdacht auf epileptischen Anfall mit Platzwunde am Hinterkopf.
+  - say: Habt ihr noch Fragen?

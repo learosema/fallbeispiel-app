@@ -11,6 +11,7 @@ conscious: true
 trauma: true
 bleeding: true
 request: {required: [RTW, NEF]}
+skip: [hws]   # Schnitt ins Bein ohne Sturz oder Kopfanprall: kein HWS-Mechanismus (Entscheidung offen, Lea fragen)
 funk_early: [blutung_stillen]   # erst die Blutung stillen, dann sofort nachfordern
 
 responses:

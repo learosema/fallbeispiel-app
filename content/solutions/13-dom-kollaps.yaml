@@ -1,0 +1,76 @@
+id: dom-fahrgeschaeft-kollaps
+intro: >
+  Nach der Achterbahn zusammengesackt, bei Hitze und mit wenig getrunken: vermutlich eine harmlose Ohnmacht. Flach
+  lagern, Beine hoch, nicht aufstehen lassen. Trotzdem gründlich abklären, auch das Herz.
+steps:
+  - phase: Sicherheit und Lage
+  - say: Ist die Einsatzstelle sicher? Ich schaue mich kurz um.
+  - say: Ich schaue nach einer bedrohlichen Blutung.
+  - phase: Ansprechen
+  - say: Hallo, wir sind vom DRK. Was ist passiert?
+  - say: Das muss Ihnen nicht peinlich sein, wir kümmern uns jetzt um Sie.
+    why: Jugendliche, peinlich berührt – ernst nehmen, ohne Drama.
+  - phase: Schnellcheck
+  - say: Bekommen Sie gut Luft? Tut das Atmen weh?
+  - say: Ich schaue auf die Lippenfarbe.
+  - say: Ich schaue mir die Haut an, fühle den Puls am Handgelenk und prüfe die Rekap.
+  - say: Wir legen Sie flach hin und machen die Beine hoch. Bitte bleiben Sie liegen und stehen Sie nicht auf.
+    why: Blass, Puls langsam und schwach, Rekap verzögert – flach lagern, Beine hoch.
+  - say: Ist Ihnen kalt?
+  - say: Kollege, hilf bitte, sie in den Schatten zu bringen.
+    why: 28 °C in der Sonne – Hitze reduzieren.
+  - phase: Teambesprechung
+  - say: >
+      Kurz zusammengefasst: Patientin weiblich, siebzehn, wach, reagiert angemessen. Kurz zusammengesackt nach dem
+      Fahrgeschäft, blass, Puls langsam. Verdacht auf Kreislaufkollaps, C-Problem. Wir brauchen einen RTW zur Abklärung.
+      Siehst du das auch so?
+  - phase: Funkspruch
+  - say: RotkreuzHamburg von EVT1, kommen.
+  - say: >
+      Wir haben hier eine Patientin, weiblich, siebzehn, nach Fahrgeschäft kurz zusammengesackt, jetzt wach und reagiert
+      angemessen, Verdacht auf Kreislaufkollaps, wir benötigen einen RTW, kommen.
+  - say: EVT1 Ende.
+  - phase: A und B
+  - say: Die Atemwege sind frei.
+  - say: Ich zähle die Atemfrequenz.
+  - say: Ich messe die Sättigung.
+  - say: Ich höre die Lunge mit dem Stethoskop ab.
+  - phase: C
+  - say: Ich messe den Blutdruck.
+  - phase: D
+  - say: Wie heißen Sie und wissen Sie, wo wir gerade sind und welcher Tag heute ist?
+  - say: Ich bestimme den GCS.
+  - say: Ich leuchte mit der Lampe in die Augen.
+  - say: Ich messe den Blutzucker, das piekst kurz.
+  - say: Können Sie einmal lächeln und beide Arme nach vorne strecken?
+  - phase: E
+  - say: Haben Sie noch Beschwerden?
+  - say: Sind Allergien bekannt?
+  - say: Nehmen Sie regelmäßig Medikamente?
+  - say: Haben Sie Vorerkrankungen, hatten Sie schon mal Herzrasen oder Brustschmerzen?
+  - say: Gibt es Herzerkrankungen in Ihrer Familie?
+    why: Ohnmacht bei jungen Menschen – an seltene Herzursachen denken, deshalb die Familie fragen.
+  - say: Wann haben Sie zuletzt etwas gegessen und getrunken?
+  - say: Ich gebe Ihnen etwas zu trinken mit Traubenzucker.
+  - say: Ich untersuche Sie jetzt einmal von Kopf bis Fuß.
+  - say: Kollege, öffne bitte die enge Jacke.
+  - phase: Reevaluation und Aufklärung
+  - say: Reevaluation. Ich messe noch einmal Puls und Blutdruck.
+  - say: >
+      Es geht Ihnen schon besser, das ist gut. Eine Ohnmacht sollte trotzdem ein Arzt abklären, auch das Herz.
+      Ich würde Ihnen dringend raten, das im Krankenhaus abklären zu lassen.
+    why: Begründete Entscheidung zur Abklärung – und bei Minderjährigen die Eltern informieren.
+  - say: Möchten Sie, dass wir jemanden für Sie anrufen?
+  - wait: Rettungsdienst
+    meanwhile:
+      - Wie geht es Ihnen jetzt?
+      - Ich kontrolliere noch einmal den Puls.
+      - Wir bleiben bei Ihnen, bis der Rettungsdienst da ist.
+  - phase: Übergabe
+  - say: Übergabe. Das ist Mira, 17 Jahre.
+  - say: Nach der Achterbahn wurde ihr schwarz vor Augen und sie ist zur Seite gesackt, nicht aufgeschlagen.
+  - say: Zuerst blass, Puls 58 schwach, Blutdruck 95 zu 55, Rekap 3 Sekunden. Nach Flachlagerung Puls 76, Blutdruck 110 zu 70.
+  - say: Blutzucker 78, GCS 15. Heute nur ein Energydrink und Zuckerwatte, nimmt die Pille, Onkel mit Herzerkrankung.
+  - say: Maßnahmen haben wir Flachlagerung mit Beinen hoch, Schatten und etwas zu trinken mit Traubenzucker gemacht.
+  - say: Verdacht auf vasovagale Synkope, Herzursache noch nicht ausgeschlossen.
+  - say: Habt ihr noch Fragen?

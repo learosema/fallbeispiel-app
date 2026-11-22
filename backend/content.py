@@ -24,6 +24,7 @@ class Variant:
     say: list[Line]
     when: dict[str, Any] = field(default_factory=dict)
     set: dict[str, Any] = field(default_factory=dict)
+    refused: bool = False   # Maßnahme wird abgelehnt/nicht ausgeführt („Er atmet doch normal“) – zählt nicht als erledigt
 
 
 @dataclass
@@ -37,7 +38,8 @@ class Intent:
     overrides: list[str]
     exclusive: bool = False
     fallback: list[str] = field(default_factory=list)       # hat der Fall keine Antwort, die dieser Intents nehmen
-    unconscious: list[Variant] = field(default_factory=list)  # Antwort, wenn die Person bewusstlos ist   # wird er erkannt, entfallen alle anderen Intents der Äußerung
+    unconscious: list[Variant] = field(default_factory=list)  # Antwort, wenn die Person bewusstlos ist
+    not_indicated: list[Variant] = field(default_factory=list)  # Ablehnung, wenn keine HLW-Indikation besteht – vor allen Fallantworten   # wird er erkannt, entfallen alle anderen Intents der Äußerung
 
 
 @dataclass
@@ -90,15 +92,17 @@ def _lines(raw: Any, where: str) -> list[Line]:
     return out
 
 
-def _variants(raw: Any, where: str) -> list[Variant]:
-    """Akzeptiert entweder eine Liste von Zeilen oder eine Liste von Varianten mit say/when/set."""
+def _variants(raw: Any, where: str, refused: bool = False) -> list[Variant]:
+    """Akzeptiert entweder eine Liste von Zeilen oder eine Liste von Varianten mit say/when/set/refused."""
     if raw is None:
         return []
-    if isinstance(raw, dict) and ("say" in raw or "set" in raw):
+    keys = ("say", "set", "when", "refused")
+    if isinstance(raw, dict) and any(k in raw for k in keys):
         raw = [raw]
-    if isinstance(raw, list) and raw and isinstance(raw[0], dict) and ("say" in raw[0] or "set" in raw[0] or "when" in raw[0]):
-        return [Variant(_lines(v.get("say"), where), dict(v.get("when") or {}), dict(v.get("set") or {})) for v in raw]
-    return [Variant(_lines(raw, where))]
+    if isinstance(raw, list) and raw and isinstance(raw[0], dict) and any(k in raw[0] for k in keys):
+        return [Variant(_lines(v.get("say"), where), dict(v.get("when") or {}), dict(v.get("set") or {}),
+                        bool(v.get("refused", refused))) for v in raw]
+    return [Variant(_lines(raw, where), refused=refused)]
 
 
 @cache
@@ -119,6 +123,7 @@ def intents() -> dict[str, Intent]:
             exclusive=bool(d.get("exclusive", False)),
             fallback=list(d.get("fallback", [])),
             unconscious=_variants(d.get("unconscious"), f"intents.{iid}.unconscious"),
+            not_indicated=_variants(d.get("not_indicated"), f"intents.{iid}.not_indicated", refused=True),
         )
     for i in out.values():
         for ref in i.implies + i.overrides + i.fallback:

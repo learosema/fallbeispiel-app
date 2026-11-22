@@ -1,0 +1,71 @@
+id: d-hypo
+intro: >
+  Verwirrt, kaltschweißig, wirkt betrunken. Bei jeder Bewusstseinsstörung den Blutzucker messen. Glukose nur, wenn sie
+  sicher schlucken kann.
+steps:
+  - phase: Sicherheit und Lage
+  - say: Ist die Einsatzstelle sicher? Ich schaue mich kurz um.
+  - say: Bitte gehen Sie ein Stück zurück, wir kümmern uns.
+    why: Schaulustige wegschicken – Abschirmen ist auch Betreuung.
+  - say: Ich schaue nach einer bedrohlichen Blutung.
+  - phase: Ansprechen
+  - say: Hallo, wir sind vom DRK. Was ist passiert?
+  - say: Keine Sorge, wir kümmern uns um Sie.
+  - phase: Schnellcheck
+  - say: Bekommen Sie gut Luft? Tut das Atmen weh?
+  - say: Ich schaue auf die Lippenfarbe.
+  - say: Ich schaue mir die Haut an, fühle den Puls am Handgelenk und prüfe die Rekap.
+  - say: Ist Ihnen kalt?
+  - say: Ich lege Ihnen eine Decke um, damit Sie nicht auskühlen.
+    why: Sie sitzt draußen, kaltschweißig – Wärmeerhalt gehört in die 1. Minute.
+  - phase: Teambesprechung
+  - say: >
+      Kurz zusammengefasst: Patientin weiblich, Mitte fünfzig, wach, verwirrt, reagiert nicht angemessen.
+      Kaltschweißig. Verdacht auf D-Problem, vielleicht Unterzucker. Wir brauchen einen RTW. Siehst du das auch so?
+    why: Kaltschweißig und verwirrt – an Unterzucker denken, nicht an Alkohol.
+  - phase: Funkspruch
+  - say: RotkreuzHamburg von EVT1, kommen.
+  - say: >
+      Wir haben hier eine Patientin, weiblich, Mitte fünfzig, wach, aber verwirrt, kaltschweißig, Verdacht auf
+      Unterzuckerung, wir benötigen einen RTW, kommen.
+  - say: EVT1 Ende.
+  - phase: A, B, C – zügig
+  - say: Die Atemwege sind frei.
+  - say: Ich zähle die Atemfrequenz und messe die Sättigung.
+  - say: Ich höre die Lunge mit dem Stethoskop ab.
+  - say: Ich messe den Blutdruck.
+  - phase: D
+  - say: Ich messe den Blutzucker, das piekst kurz.
+    why: BZ 38 mg/dl – die Ursache ist gefunden.
+  - say: Ich bestimme den GCS.
+  - say: Können Sie schlucken? Ich gebe Ihnen Traubenzucker und etwas Saft.
+    why: Sie ist wach und kann schlucken – dann Glukose. Bewusstlose bekommen nichts in den Mund.
+  - say: Wie heißen Sie und wissen Sie, wo wir gerade sind und welcher Tag heute ist?
+  - say: Ich leuchte mit der Lampe in die Augen.
+  - say: Können Sie einmal lächeln und beide Arme nach vorne strecken?
+  - phase: E
+  - say: Haben Sie Schmerzen?
+  - say: Sind Allergien bekannt?
+  - say: Nehmen Sie regelmäßig Medikamente?
+  - say: Haben Sie Vorerkrankungen?
+  - say: Wann haben Sie zuletzt etwas gegessen?
+  - say: Rauchen Sie, oder gibt es Herzerkrankungen in Ihrer Familie?
+  - say: Ich untersuche Sie jetzt einmal von Kopf bis Fuß.
+  - phase: Reevaluation und Betreuung bis zum Eintreffen
+  - say: Reevaluation. Ich messe den Blutzucker noch einmal.
+    why: Hat die Glukose gewirkt?
+  - say: Sie hatten eine Unterzuckerung. Wir bleiben bei Ihnen, der Rettungsdienst schaut sich das trotzdem noch einmal an.
+  - wait: Rettungsdienst
+    meanwhile:
+      - Wie geht es Ihnen jetzt?
+      - Ich bestimme noch einmal den GCS.
+      - Wir bleiben bei Ihnen, bis der Rettungsdienst da ist.
+      - Ich kontrolliere noch einmal den Puls.
+  - phase: Übergabe
+  - say: Übergabe. Das ist Frau Demir, 54 Jahre, Diabetes Typ 1.
+  - say: Sie war in der Fußgängerzone plötzlich verwirrt und kaltschweißig, hat heute früh Insulin gespritzt und nichts gegessen.
+  - say: Blutzucker zuerst 38, GCS 13, nach Traubenzucker und Saft Blutzucker 82, GCS 15. Puls 108, Blutdruck 140 zu 85, Sättigung 98 Prozent.
+  - say: Keine Allergien, Insulin.
+  - say: Maßnahmen haben wir Traubenzucker und Saft gegeben, sie konnte sicher schlucken.
+  - say: Verdacht auf Unterzuckerung bei Diabetes Typ 1.
+  - say: Habt ihr noch Fragen?

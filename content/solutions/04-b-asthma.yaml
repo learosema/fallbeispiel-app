@@ -1,0 +1,72 @@
+id: b-asthma
+intro: >
+  Schwerer Asthmaanfall, das Spray wirkt nicht. Aufrecht sitzen lassen, beruhigen, Atemanweisung, Sauerstoff nach
+  Sättigung und früh funken mit Notarzt.
+steps:
+  - phase: Sicherheit und Lage
+  - say: Ist die Einsatzstelle sicher? Ich schaue mich kurz um.
+  - say: Ich schaue nach einer bedrohlichen Blutung.
+  - phase: Ansprechen
+  - say: Hallo, wir sind vom DRK. Was ist passiert?
+  - say: Sie müssen nicht sprechen, nicken reicht. Wir lassen Sie aufrecht sitzen.
+    why: Bei Atemnot nur Ja/Nein-Fragen. Sitzend bekommt sie besser Luft.
+  - phase: Schnellcheck
+  - say: Bekommen Sie gut Luft? Tut das Atmen weh?
+  - say: Ich schaue auf die Lippenfarbe.
+  - phase: Früher Funkspruch
+  - say: RotkreuzHamburg von EVT1, kommen.
+    why: Schwere Atemnot ist zeitkritisch – früh funken, mit Notarzt.
+  - say: >
+      Wir haben hier eine Patientin, weiblich, ca. zwanzig, bekannte Asthmatikerin, schwere Atemnot, Spray ohne
+      Wirkung, wach, Verdacht auf schweren Asthmaanfall, wir benötigen RTW und NEF, kommen.
+  - say: EVT1 Ende.
+  - phase: Weiter im Schnellcheck
+  - say: Atmen Sie ganz langsam mit mir, durch die Nase ein und durch den Mund aus, mit der Lippenbremse.
+  - say: Sie sind nicht allein, wir bleiben bei Ihnen.
+  - say: Ich schaue mir die Haut an, fühle den Puls am Handgelenk und prüfe die Rekap.
+  - say: Ist Ihnen kalt?
+  - phase: Teambesprechung
+  - say: >
+      Kurz zusammengefasst: Patientin weiblich, ca. zwanzig, wach, ängstlich. Schwere Atemnot, Spray ohne Wirkung,
+      Lippen bläulich. Verdacht auf schweren Asthmaanfall, B-Problem. RTW und NEF sind alarmiert. Siehst du das auch so?
+  - phase: A und B
+  - say: Die Atemwege sind frei.
+  - say: Ich messe die Sättigung.
+    why: Messen kommt erst im B – die 1. Minute ist nur ein erstes Bild.
+  - say: Kollege, bitte Sauerstoff über die Maske.
+    why: SpO2 90 % – Sauerstoff. Ohne Sauerstoff erschöpft sie.
+  - say: Ich zähle die Atemfrequenz.
+  - say: Ich höre die Lunge mit dem Stethoskop ab.
+  - say: Sind die Halsvenen gestaut?
+  - phase: C
+  - say: Ich messe den Blutdruck.
+  - phase: D
+  - say: Wie heißen Sie und wo sind wir gerade? Kurz reicht.
+  - say: Ich bestimme den GCS.
+  - say: Ich leuchte mit der Lampe in die Augen.
+  - say: Ich messe den Blutzucker, das piekst kurz.
+  - say: Können Sie einmal lächeln und beide Arme nach vorne strecken?
+  - phase: E
+  - say: Sind Allergien bekannt?
+  - say: Welche Medikamente nehmen Sie, wie oft haben Sie das Spray genommen?
+  - say: Haben Sie Vorerkrankungen?
+  - say: Wann haben Sie zuletzt etwas gegessen?
+  - say: Ich untersuche Sie jetzt einmal von Kopf bis Fuß, auch die Haut, ob Sie einen Ausschlag oder eine Schwellung haben.
+    why: Anaphylaxie ausschließen (Katze!) – Haut, Lippen, Zunge.
+  - say: Ich lege Ihnen eine Decke über die Schultern.
+  - phase: Reevaluation und Betreuung bis zum Eintreffen
+  - say: Reevaluation. Ich messe noch einmal Atemfrequenz und Sättigung.
+  - wait: Rettungsdienst
+    meanwhile:
+      - Sie machen das gut. Atmen Sie ganz ruhig mit mir ein und aus.
+      - Ich messe noch einmal die Sättigung.
+      - Wir bleiben bei Ihnen. Der Notarzt ist gleich da, der hat Medikamente gegen den Anfall.
+      - Ich zähle noch einmal die Atemfrequenz.
+  - phase: Übergabe
+  - say: Übergabe. Das ist Lena, 19 Jahre, bekannte Asthmatikerin.
+  - say: Seit einer halben Stunde zunehmende Atemnot nach Kontakt mit einer Katze, Salbutamol viermal ohne Wirkung.
+  - say: Atemfrequenz zuerst 30, Giemen beidseits, Sättigung 90 Prozent, unter Sauerstoff 94 Prozent, Puls 125, Blutdruck 130 zu 80, GCS 15.
+  - say: Allergie gegen Katzenhaare, nimmt Salbutamol und ein Kortison-Spray.
+  - say: Maßnahmen haben wir sitzende Lagerung, Atemanweisung mit Lippenbremse und Sauerstoff über die Maske gemacht.
+  - say: Kein Ausschlag, keine Schwellung. Verdacht auf schweren Asthmaanfall.
+  - say: Habt ihr noch Fragen?

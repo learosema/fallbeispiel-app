@@ -968,3 +968,72 @@ def test_note_the_time(clf):
     assert key["status"] == evaluate.OK
     run = play(clf, "dom-krampf", ["ich stoppe die zeit"])
     assert "uhrzeit_notieren" in run.first and said(run, "Kollege") != ["(notiert die Uhrzeit)"]
+
+
+@pytest.mark.parametrize("text, closes", [
+    ("Habt ihr noch Fragen?", True),
+    ("Fragen?", True),
+    ("Gibt es Rückfragen", True),
+    ("Übernehmt ihr?", True),
+    ("Das wär's", True),
+    ("Das war alles", True),
+    ("GCS 14, er wiederholt Fragen", False),
+    ("Er hat uns viele Fragen gestellt", False),
+])
+def test_handover_close(text, closes):
+    from backend.classifier import normalize
+    assert bool(engine.HANDOVER_CLOSE.search(normalize(text))) == closes
+
+
+@pytest.mark.parametrize("sid", [s for s, sc in content.scenarios().items() if sc.conscious] + ["bw-seitenlage", "bw-sommer"])
+def test_no_cpr_on_awake_or_normally_breathing_patient(clf, sid):
+    """HLW bei Wachen bzw. normal Atmenden: Der Kollege stoppt, sie zählt nicht, die Auswertung ist „Nicht erfüllt“."""
+    run = play(clf, sid, ["hallo wir sind vom drk", "ich beginne mit der herzdruckmassage", "1 2 3 4 5 6 7 8 9 10 28 29 30"])
+    replies = [l.text for l in run.turns[1].lines]
+    assert any("Stopp" in r for r in replies), replies
+    assert not any("Herzdruckmassage läuft" in l.text for t in run.turns for l in t.lines), "HLW darf nicht laufen"
+    assert "hlw" not in run.first and "hlw" not in run.state or not run.state.get("hlw")
+    res = evaluate.evaluate(run)
+    assert res["verdict"] == "Nicht erfüllt"
+    assert "HLW" in res["improve"][0]
+
+
+@pytest.mark.parametrize("text", ["Er braucht keine Herzdruckmassage, er atmet ja.", "Keine Reanimation nötig, er ist wach.",
+                                  "Wir müssen nicht reanimieren.", "Keine HLW, er atmet normal."])
+def test_negated_cpr_is_not_cpr(clf, text):
+    assert "hlw" not in {h.intent for h in clf.classify(text)}
+
+
+def test_cpr_still_works_when_unconscious_without_breathing(clf):
+    run = play(clf, "bw-reanimation", ["hallo hören sie mich", "atemkontrolle keine normale atmung", "ich beginne mit der herzdruckmassage"])
+    assert "hlw" in run.first
+    assert evaluate.evaluate(run)["course"] == [] or not any("HLW bei" in c for c in evaluate.evaluate(run)["course"])
+
+
+@pytest.mark.parametrize("sid, at, allowed", [
+    ("d-hypo", 245, False), ("c-gib", 335, False), ("e-unterkuehlung", 245, False), ("mil-alkohol", 305, False),
+    ("x-kettensaege", 160, False),            # bewusstlos, atmet noch
+    ("x-kettensaege", 215, True),             # Kreislaufstillstand
+    ("a-bolus", 95, True),                    # bewusstlos mit Fremdkörper: HLW (ERC)
+    ("b-asthma", 365, True), ("mil-pyro-asthma", 335, True),   # Schnappatmung
+])
+def test_cpr_only_when_unconscious_without_normal_breathing(clf, sid, at, allowed):
+    """HLW-Indikation im Verlauf: bewusstlos UND keine normale Atmung – sonst stoppt der Kollege."""
+    s = content.scenarios()[sid]
+    log = [{"t": 2, "text": "hallo wir sind vom drk"}, {"t": at, "text": "", "tick": True},
+           {"t": at + 1, "text": "ich beginne mit der herzdruckmassage"}]
+    run = engine.replay(s, "full", engine.Settings(), log, clf)
+    replies = [l.text for l in run.turns[-1].lines]
+    if allowed:
+        assert "hlw" in run.first and not any("Stopp" in r for r in replies), replies
+    else:
+        assert "hlw" not in run.first and any("normale Atmung" in r for r in replies), replies
+        assert evaluate.evaluate(run)["verdict"] == "Nicht erfüllt"
+
+
+@pytest.mark.parametrize("sid, at", [("b-asthma", 365), ("mil-pyro-asthma", 335), ("x-kettensaege", 215)])
+def test_breathing_check_matches_gasping_state(clf, sid, at):
+    s = content.scenarios()[sid]
+    log = [{"t": 2, "text": "hallo"}, {"t": at, "text": "", "tick": True}, {"t": at + 1, "text": "atemkontrolle sehen hören fühlen"}]
+    run = engine.replay(s, "full", engine.Settings(), log, clf)
+    assert any("Keine normale Atmung" in l.text for l in run.turns[-1].lines)

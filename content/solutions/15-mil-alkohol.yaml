@@ -1,0 +1,74 @@
+id: mil-alkohol
+intro: >
+  Stark betrunken, Erbrochenes im Mund, Kopfanprall auf der Treppe. Atemweg sichern (absaugen, Seitenlage), HWS
+  bedenken, Wärme, und Blutzucker messen. Alkohol darf nicht die einzige Erklärung sein.
+steps:
+  - phase: Sicherheit und Lage
+  - say: Ist die Einsatzstelle sicher? Bitte lenken Sie die Leute um, wir brauchen Platz.
+  - say: Ich schaue nach einer bedrohlichen Blutung.
+  - phase: Ansprechen
+  - say: Hallo, wir sind vom DRK. Was ist passiert?
+  - say: Hallo, können Sie mich hören? Ich rüttle an den Schultern.
+  - say: Kollege, bitte manuelle HWS-Stabilisierung.
+    why: Treppensturz mit Kopfanprall.
+  - phase: Atemweg sichern
+  - say: Ich schaue in den Mund, ob da etwas drin ist.
+  - say: Kollege, saug bitte den Mund ab.
+    why: Erbrochenes im Mund und er schluckt kaum – Aspirationsgefahr.
+  - say: Ich bringe ihn in die stabile Seitenlage, der Kollege hält dabei den Kopf fest.
+  - phase: Schnellcheck
+  - say: Bekommen Sie gut Luft?
+  - say: Tut das Atmen weh?
+  - say: Ich schaue auf die Lippenfarbe.
+  - say: Ich schaue mir die Haut an, fühle den Puls am Handgelenk und prüfe die Rekap.
+  - say: Ich taste den Bauch, das Becken und die Oberschenkel ab.
+  - say: Ist Ihnen kalt?
+  - say: Ich decke ihn mit der Rettungsdecke zu und lege eine Decke unter.
+  - phase: Teambesprechung
+  - say: >
+      Kurz zusammengefasst: Patient männlich, Mitte dreißig, stark eingetrübt, reagiert nur auf lautes Ansprechen.
+      Viel Alkohol, Treppensturz mit Kopfanprall, erbrochen. Verdacht auf Alkoholintoxikation und
+      Schädel-Hirn-Trauma, D-Problem. Wir brauchen einen RTW. Siehst du das auch so?
+  - phase: Funkspruch
+  - say: RotkreuzHamburg von EVT1, kommen.
+  - say: >
+      Wir haben hier einen Patienten, männlich, Mitte dreißig, stark alkoholisiert, Treppensturz mit Kopfanprall,
+      eingetrübt, reagiert nur auf lautes Ansprechen, Verdacht auf Schädel-Hirn-Trauma, wir benötigen einen RTW, kommen.
+  - say: EVT1 Ende.
+  - phase: Zügig zum Blutzucker
+  - say: Ich messe den Blutzucker.
+    why: Eingetrübt und betrunken – Alkohol senkt den Blutzucker. Ohne BZ wird er schläfriger.
+  - say: Kollege, sollen wir ihm Traubenzucker geben?
+    why: Er schluckt kaum – nichts in den Mund. Den niedrigen BZ dem Rettungsdienst melden.
+  - phase: A und B
+  - say: Ich zähle die Atemfrequenz.
+  - say: Ich messe die Sättigung.
+  - say: Ich höre die Lunge mit dem Stethoskop ab.
+  - phase: C
+  - say: Ich messe den Blutdruck.
+  - phase: D
+  - say: Ich bestimme den GCS.
+  - say: Wie heißen Sie und wissen Sie, wo wir gerade sind?
+  - say: Ich leuchte mit der Lampe in die Augen.
+  - say: Können Sie einmal lächeln und beide Arme nach vorne strecken?
+  - phase: E
+  - say: Ich messe die Temperatur im Ohr.
+  - say: Wissen Sie, ob er Allergien hat, Medikamente nimmt oder Vorerkrankungen hat?
+  - say: Wann hat er zuletzt etwas gegessen?
+  - say: Ich untersuche ihn jetzt einmal von Kopf bis Fuß.
+  - phase: Reevaluation und Betreuung bis zum Eintreffen
+  - say: Reevaluation. Ich kontrolliere noch einmal Atmung und GCS.
+  - wait: Rettungsdienst
+    meanwhile:
+      - Ich kontrolliere noch einmal die Atmung.
+      - Torben, hören Sie mich? Wir bleiben bei Ihnen.
+      - Ich messe noch einmal die Sättigung.
+  - phase: Übergabe
+  - say: Übergabe. Das ist Torben, 34 Jahre.
+  - say: Er hat seit Mittag getrunken, ist auf der Treppe gestürzt mit Kopfanprall und hier zusammengesackt.
+  - say: GCS 11, Erbrochenes abgesaugt, jetzt in Seitenlage. Atemfrequenz 12, Sättigung 94 Prozent, Puls 62, Blutdruck 150 zu 90.
+  - say: Blutzucker 52, er schluckt kaum, deshalb keine Glukose gegeben. Hämatom am Hinterkopf, Temperatur 35,6 Grad.
+  - say: Allergien, Medikamente und Vorerkrankungen sind nicht bekannt, gegessen hat er heute nichts.
+  - say: Maßnahmen haben wir Absaugen, Seitenlage mit HWS-Stabilisierung und Wärmeerhalt gemacht.
+  - say: Verdacht auf Alkoholintoxikation mit Unterzucker, Schädel-Hirn-Trauma nicht ausgeschlossen.
+  - say: Habt ihr noch Fragen?

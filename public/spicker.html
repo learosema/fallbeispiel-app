@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Spicker – Fallbeispiel xABCDE</title>
+  <meta name="theme-color" content="#b3261e">
+  <meta name="description" content="Spicker zum Nachschlagen: 1. Minute nach SANmemo, xABCDE, Betreuung und Gesprächsführung, Teambesprechung, Funkspruch und Übergabe.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    html, body { height: auto; min-height: 100%; }
+    main.doc { display: block; width: 100%; max-width: 720px; margin: 0 auto; padding: 8px 16px 48px; }
+    .topbar a.icon-btn { display: grid; place-items: center; text-decoration: none; }
+    .doc > p.lead { margin: 16px 0; }
+    .toc { display: flex; flex-wrap: wrap; gap: 8px; padding: 0; margin: 0 0 16px; list-style: none; }
+    .toc a { display: inline-block; padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--card); color: var(--fg); text-decoration: none; font-size: .9rem; }
+    details.sheet { background: var(--card); border: 1px solid var(--line); border-radius: 14px; margin: 0 0 12px; scroll-margin-top: 12px; }
+    details.sheet > summary { cursor: pointer; padding: 14px 16px; font-weight: 700; font-size: 1.1rem; list-style: none; display: flex; align-items: center; gap: 10px; }
+    details.sheet > summary::-webkit-details-marker { display: none; }
+    details.sheet > summary::after { content: "▸"; margin-left: auto; color: var(--muted); transition: transform .15s; }
+    details.sheet[open] > summary::after { transform: rotate(90deg); }
+    details.sheet > summary small { font-weight: 400; color: var(--muted); font-size: .85rem; }
+    .body { padding: 0 16px 16px; }
+    .body h3 { font-size: 1rem; margin: 18px 0 6px; }
+    .body h3:first-child { margin-top: 0; }
+    .body p, .body li { max-width: 62ch; }
+    .body ul, .body ol { padding-left: 1.2em; margin: 6px 0; }
+    .body li { margin: 3px 0; }
+    .say { display: block; background: var(--me); border-radius: 10px; padding: 8px 12px; margin: 6px 0; font-style: normal; }
+    .say::before { content: "„"; } .say::after { content: "“"; }
+    .avoid { display: block; background: var(--sys); border-radius: 10px; padding: 8px 12px; margin: 6px 0; color: var(--muted); }
+    .avoid s { color: var(--fg); }
+    .note { background: var(--sys); border-radius: 10px; padding: 10px 12px; color: var(--muted); font-size: .92rem; }
+    .flow { list-style: none; padding: 0 !important; display: grid; gap: 8px; counter-reset: s; }
+    .flow > li { counter-increment: s; display: grid; grid-template-columns: 28px 1fr; gap: 10px; align-items: start; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin: 0; }
+    .flow > li::before { content: counter(s); width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: var(--accent-fg); display: grid; place-items: center; font-weight: 700; font-size: .9rem; }
+    .flow > li > div > ul { margin-top: 4px; }
+    .tag { display: inline-block; font-size: .75rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); margin-left: 4px; }
+    .split { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+    .split > div { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+    .split h3 { margin-top: 0; }
+    .abcde { display: grid; gap: 8px; }
+    .abcde > div { display: grid; grid-template-columns: 44px 1fr; gap: 10px; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+    .abcde b.l { font-size: 1.6rem; line-height: 1; color: var(--accent); }
+    .abcde p { margin: 0 0 4px; }
+    .abcde small { color: var(--muted); }
+    .table-wrap { overflow-x: auto; }
+    table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+    th, td { text-align: left; vertical-align: top; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+    th { white-space: nowrap; color: var(--accent); }
+    footer { color: var(--muted); font-size: .85rem; margin-top: 32px; }
+    @media print {
+      .topbar, .toc { display: none; }
+      details.sheet { break-inside: avoid; border: 0; }
+      details.sheet > summary::after { content: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="icon-btn" href="./" aria-label="Zur App">←</a>
+    <h1>Spicker</h1>
+    <span class="icon-btn" aria-hidden="true"></span>
+  </header>
+
+  <main class="doc">
+    <p class="lead">Zum Nachschlagen vor und nach einem Fall. Die 1. Minute und xABCDE folgen dem DRK-SANmemo (2024). Bei allem Fachlichen zählt, was deine Ausbildung sagt.</p>
+
+    <nav aria-label="Abschnitte">
+      <ul class="toc">
+        <li><a href="#minute">1. Minute</a></li>
+        <li><a href="#abcde">xABCDE</a></li>
+        <li><a href="#betreuung">Betreuung</a></li>
+        <li><a href="#notarzt">Notarzt?</a></li>
+        <li><a href="#saetze">Sätze</a></li>
+        <li><a href="#team">Team &amp; Funk</a></li>
+        <li><a href="#uebergabe">Übergabe</a></li>
+        <li><a href="#fehler">Häufige Fehler</a></li>
+        <li><a href="loesungen.html">Musterlösungen →</a></li>
+        <li><a href="training.html">Sani-Training →</a></li>
+      </ul>
+    </nav>
+
+    <!-- ============================================================ 1. Minute -->
+    <details class="sheet" id="minute" open>
+      <summary>1. Minute <small>SANmemo</small></summary>
+      <div class="body">
+        <ol class="flow">
+          <li><div><strong>Sicherheit und Lage</strong>
+            <ul>
+              <li>Akute Gefahr für Einsatzkräfte, Betroffene, andere?</li>
+              <li>Wie viele Betroffene? Hergang erkennbar?</li>
+              <li>Umfeld: Gelände, Wetter, Licht, Uhrzeit</li>
+            </ul></div></li>
+          <li><div><strong>x – Bedrohliche Blutung?</strong>
+            <ul><li>Sofort stillen: abdrücken, Druckverband; Tourniquet, wenn das nicht reicht. Uhrzeit aufs Tourniquet schreiben.</li></ul></div></li>
+          <li><div><strong>Ansprechen</strong>
+            <span class="say">Hallo! Wir sind vom DRK. Was ist passiert?</span>
+            Dann geht es je nach Reaktion links oder rechts weiter.</div></li>
+        </ol>
+
+        <div class="split" style="margin-top:10px">
+          <div>
+            <h3>Wach</h3>
+            <ul>
+              <li><strong>Trauma?</strong> Ggf. manuelle HWS-Immobilisierung</li>
+              <li><strong>A/B:</strong> „Bekommen Sie gut Luft?“, Schmerzen beim Atmen? Zyanose?</li>
+              <li><strong>C:</strong> Hautfarbe blass/gerötet? Puls (nicht zählen)? Rekap-Zeit? Bei Trauma: Bauch, Becken, Oberschenkel abtasten (innere Blutung?)</li>
+              <li><strong>D:</strong> Reaktion angemessen? Verzögert? Gemütslage?</li>
+              <li><strong>E:</strong> Verletzungsmechanismus? Umfeld? Frieren?</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Bewusstlos</h3>
+            <ul>
+              <li>Laut ansprechen, anfassen, ggf. Schmerzreiz</li>
+              <li>Atemwege frei machen (Kopf überstrecken, Kinn anheben)</li>
+              <li>Atemkontrolle: sehen, hören, fühlen, max. 10 s</li>
+              <li>Nicht normal → <strong>HLW 30:2 und AED</strong></li>
+              <li>Eindeutig normal → <strong>stabile Seitenlage</strong></li>
+              <li>Weiter: ggf. Guedel-/Wendl-Tubus, Absaugbereitschaft herstellen</li>
+            </ul>
+          </div>
+        </div>
+
+        <ol class="flow" style="margin-top:10px; counter-reset: s 3" start="4">
+          <li><div><strong>Teambesprechung</strong>
+            Kurz: Lage, nur die Probleme, Verdacht (A-/B-/C-/D-/E-Problem), Notarzt? Abschluss mit Frage an den Kollegen. <a href="#team">Vorlage</a></div></li>
+          <li><div><strong>Funkspruch</strong> an die Leitstelle. Bei zeitkritischen Fällen so früh wie möglich. <a href="#team">Vorlage</a></div></li>
+        </ol>
+        <p class="note"><strong>Nur ein erstes Bild:</strong> In der 1. Minute schaust, fragst und tastest du kurz, den Puls zählst du nicht und du misst nichts. Sättigung, Blutdruck, Blutzucker, GCS und Atemfrequenz kommen erst in den Buchstaben des ABCDE.</p>
+        <p class="note">Wärmeerhalt gehört dazu, wo jemand auskühlen kann: Kälte, Nässe, Schock, Boden. Nachfragen reicht nicht, Decke ansagen oder holen. Während einer HLW nicht.</p>
+      </div>
+    </details>
+
+    <!-- ============================================================ xABCDE -->
+    <details class="sheet" id="abcde">
+      <summary>xABCDE <small>„Immer richtig“ und Problem</small></summary>
+      <div class="body">
+        <div class="abcde">
+          <div><b class="l">x</b><div>
+            <p><strong>Extreme Blutung</strong></p>
+            <p>Abdrücken → Druckverband → ggf. Tourniquet (Uhrzeit notieren).</p>
+          </div></div>
+          <div><b class="l">A</b><div>
+            <p><strong>Immer:</strong> bei Trauma ggf. HWS-Stützkragen</p>
+            <p><strong>Problem:</strong> Oberkörper hoch lagern. Bolus → Rückenschläge, Oberbauchkompressionen. Schwellung in Mund/Rachen → kühlen (Tücher, Getränke).</p>
+          </div></div>
+          <div><b class="l">B</b><div>
+            <p><strong>Immer:</strong> Atmung beurteilen (Frequenz, Atemarbeit, Geräusche), Pulsoximetrie (mind. 94 %), O₂-Gabe erwägen</p>
+            <p><strong>Problem:</strong> Oberkörper hoch, Atemanweisungen. Gestaute Halsvenen, Schockzeichen → Spannungspneu? Brustkorbverletzung → ggf. auf die verletzte Seite lagern.</p>
+          </div></div>
+          <div><b class="l">C</b><div>
+            <p><strong>Immer:</strong> Puls (80–100/min), Rekap-Zeit (max. 2 s), Blutdruck (≈ 120/80 mmHg)</p>
+            <p><strong>Problem:</strong> Ursache bekämpfen. Herz → Oberkörper hoch. Akutes Abdomen → Beine angezogen. Volumenmangel → Schocklage. Ggf. Infusion/Medikamente vorbereiten.</p>
+          </div></div>
+          <div><b class="l">D</b><div>
+            <p><strong>Immer:</strong> Bewusstsein (wach / Ansprache / Schmerzreiz / bewusstlos), orientiert zu Person, Situation, Ort, Zeit? Pupillen, Blutzucker</p>
+            <p><strong>Problem:</strong> i. d. R. Oberkörper hoch. Schlaganfall? <strong>BE-FAST</strong>: Balance, Eyes, Face, Arm, Speech, Time – Symptombeginn genau erfragen.</p>
+          </div></div>
+          <div><b class="l">E</b><div>
+            <p><strong>Immer:</strong> SAMPLER-Anamnese, Ganzkörperuntersuchung inkl. DMS, Wärmeerhalt</p>
+            <p><strong>Problem:</strong> Schaufeltrage, Spineboard, Vakuummatratze. Extremität → Alu-Polster- oder Vakuumschiene. Wunde → (steriler) Verband.</p>
+          </div></div>
+        </div>
+
+        <h3>SAMPLER</h3>
+        <div class="table-wrap"><table>
+          <tr><th>S</th><td>Symptome – „Was haben Sie für Beschwerden?“</td></tr>
+          <tr><th>A</th><td>Allergien – „Sind Allergien bekannt?“</td></tr>
+          <tr><th>M</th><td>Medikamente – „Nehmen Sie regelmäßig Medikamente? Blutverdünner?“</td></tr>
+          <tr><th>P</th><td>Patientenvorgeschichte – „Haben Sie Vorerkrankungen?“</td></tr>
+          <tr><th>L</th><td>Letzte Mahlzeit / Stuhlgang / Wasserlassen</td></tr>
+          <tr><th>E</th><td>Ereignis – Was ist passiert, was ging voraus?</td></tr>
+          <tr><th>R</th><td>Risikofaktoren – Rauchen, Alkohol, Schwangerschaft …</td></tr>
+        </table></div>
+
+        <p class="note">Nach E wieder bei A beginnen: Reevaluation. Wirken die Maßnahmen? Hat sich etwas verändert?</p>
+      </div>
+    </details>
+
+    <!-- ============================================================ Betreuung -->
+    <details class="sheet" id="betreuung">
+      <summary>Betreuung &amp; Gespräch <small>der Mensch hinter dem Befund</small></summary>
+      <div class="body">
+        <p>Wer verletzt oder krank am Boden liegt, hat Angst, Schmerzen und keine Kontrolle mehr. Gute Betreuung gibt ein Stück davon zurück: Die Person weiß, wer du bist, was passiert und was als Nächstes kommt.</p>
+
+        <h3>Vier Grundregeln (Psychische Erste Hilfe nach Lasogga &amp; Gasch)</h3>
+        <ol>
+          <li><strong>Sag, dass du da bist und dass etwas geschieht.</strong> Name, Organisation, was du jetzt tust.</li>
+          <li><strong>Schirm ab.</strong> Schaulustige wegschicken oder beschäftigen, Sichtschutz beim Entkleiden.</li>
+          <li><strong>Such vorsichtig Körperkontakt.</strong> Hand auf Schulter oder Arm, wenn die Person das möchte.</li>
+          <li><strong>Sprich und hör zu.</strong> Ruhig, langsam, in kurzen Sätzen. Ausreden lassen.</li>
+        </ol>
+
+        <h3>Erster Kontakt</h3>
+        <ul>
+          <li>Auf Augenhöhe gehen, nicht von oben herab sprechen.</li>
+          <li>Vorstellen und nach dem Namen fragen. Dann den Namen benutzen: „Herr Petersen, …“</li>
+          <li>Siezen. Bei Kindern und Jugendlichen darf es „du“ sein.</li>
+          <li>Ruhe ausstrahlen, auch wenn du innerlich rennst. Deine Stimme gibt das Tempo vor.</li>
+        </ul>
+
+        <h3>Während der Untersuchung</h3>
+        <ul>
+          <li><strong>Erst ankündigen, dann anfassen.</strong> Was machst du, und warum?</li>
+          <li>Rückmeldung geben, wenn etwas gut ist: „Ihr Puls ist kräftig, das ist gut.“</li>
+          <li>Bei Schmerzen nachfragen: Wo genau? Wie stark, von 0 bis 10? Ernst nehmen, nicht herunterspielen.</li>
+          <li>Bei Atemnot nur Ja/Nein-Fragen, Nicken reicht. Nicht zum Reden bringen.</li>
+          <li>Beim Entkleiden fragen, nur so viel wie nötig, danach wieder zudecken.</li>
+        </ul>
+
+        <h3>Beruhigen – mit Ausblick, ohne leere Versprechen</h3>
+        <ul>
+          <li>„Keine Sorge“ allein beruhigt kaum. Besser: sagen, was jetzt passiert.</li>
+          <li>Nichts versprechen, was du nicht weißt („Das ist bestimmt nichts Schlimmes“).</li>
+          <li>Ehrlich bleiben, aber nicht alles sagen: Verdachtsdiagnosen bespricht man im Team, nicht laut über dem Patienten.</li>
+          <li>Gefühle anerkennen: „Das war bestimmt ein Schreck.“</li>
+        </ul>
+
+        <h3>Nie allein lassen</h3>
+        <ul>
+          <li>Einer bleibt immer beim Patienten. Holt der Kollege Material, bleibst du.</li>
+          <li>Sag Bescheid, wenn du kurz weggehst oder dich wegdrehst: „Ich hole nur die Decke, mein Kollege bleibt bei Ihnen.“</li>
+          <li>Auch während Teambesprechung und Funkspruch: Die Person bekommt mit, dass über sie gesprochen wird. Kurz erklären: „Ich gebe jetzt an die Leitstelle durch, dass ein Rettungswagen kommt.“</li>
+        </ul>
+
+        <h3>Bewusstlose</h3>
+        <p>Mit ihnen sprechen, als ob sie hören. Das Gehör funktioniert oft länger als alles andere. Ankündigen, was du tust, nichts Abwertendes am Patienten sagen.</p>
+
+        <h3>Angehörige und Umstehende</h3>
+        <ul>
+          <li>Sie sind Informationsquelle: Was ist passiert? Seit wann? Vorerkrankungen? Bei Schlaganfall: genaue Uhrzeit.</li>
+          <li>Aufgaben geben hilft gegen Hilflosigkeit: „Können Sie bitte den Rettungswagen an der Straße einweisen?“, „Holen Sie bitte seine Medikamentenliste.“</li>
+          <li>Schaulustige freundlich, aber klar wegschicken.</li>
+        </ul>
+
+        <h3>Wenn jemand nicht mitwill</h3>
+        <ul>
+          <li>Nicht drängen und nicht drohen. Verstehen, warum: Angst, Scham, Termin, Haustier?</li>
+          <li>Konkret erklären, welches Risiko besteht, und das in seinen Worten: „Sie haben sich den Kopf gestoßen und nehmen Blutverdünner. Da kann es auch Stunden später noch innen bluten.“</li>
+          <li>Ein zweiter Anlauf mit neuem Argument wirkt oft. Den Rettungsdienst trotzdem kommen lassen und die Entscheidung dort treffen.</li>
+        </ul>
+
+        <h3>Schwierige Situationen</h3>
+        <ul>
+          <li><strong>Alkohol, Aggression:</strong> Eigenschutz geht vor. Abstand halten, Ausgang im Blick, ruhig und deutlich sprechen, nicht diskutieren. Notfalls zurückziehen und Polizei nachfordern.</li>
+          <li><strong>Panik, Hyperventilation:</strong> Ruhig, langsam vorsprechen, gemeinsam atmen. Trotzdem an organische Ursachen denken.</li>
+          <li><strong>Kinder:</strong> Auf ihre Höhe gehen, eine Bezugsperson dabeilassen, Kuscheltier oder Hand halten, einfache Worte. Erst am Kuscheltier oder an der Mama „vormachen“, dann am Kind.</li>
+          <li><strong>Ältere, Demenz:</strong> Eine Frage auf einmal, kurze Sätze, Zeit zum Antworten lassen. Immer wieder sagen, wer du bist und wo ihr seid. Brille und Hörgerät nicht vergessen.</li>
+          <li><strong>Schwerhörig:</strong> Von vorne ansprechen, Gesicht sichtbar, langsam und deutlich, aber nicht schreien.</li>
+          <li><strong>Andere Sprache:</strong> Einfache Wörter, Gesten, zeigen. Angehörige oder Umstehende übersetzen lassen, für Befunde trotzdem selbst hinschauen.</li>
+          <li><strong>Angehörige bei der Reanimation:</strong> Jemanden aus dem Umfeld oder eine Einsatzkraft zur Betreuung einteilen. Ehrlich, aber behutsam erklären, was ihr macht. Sie dürfen dabei bleiben, wenn sie wollen.</li>
+        </ul>
+
+        <h3>Körpersprache und Stimme</h3>
+        <ul>
+          <li>Hinknien, offene Haltung, Blickkontakt. Wer über dem Patienten steht, wirkt bedrohlich.</li>
+          <li>Langsam und etwas tiefer sprechen als sonst. Hektik überträgt sich, Ruhe auch.</li>
+          <li>Auch im Team ruhig bleiben. Der Patient hört jede Ansage an den Kollegen mit.</li>
+          <li>Keine Fachsprache: nicht „Rekap“ und „SpO₂“, sondern „Ich drücke kurz auf den Fingernagel“, „Die Klammer misst den Sauerstoff im Blut“.</li>
+        </ul>
+
+        <h3>Zuhören</h3>
+        <ul>
+          <li>Offen fragen („Was ist passiert?“), dann gezielt nachfragen („Seit wann?“, „Wo genau?“).</li>
+          <li>Ausreden lassen und Pausen aushalten. Oft kommt das Wichtigste nach der Pause.</li>
+          <li>Kurz zusammenfassen, was du verstanden hast: „Ihnen ist also beim Aufstehen schwarz vor Augen geworden?“ Das zeigt, dass du zuhörst, und vermeidet Missverständnisse.</li>
+          <li>Wiederholt jemand immer dieselbe Frage, ist das ein Befund (Orientierung, D-Problem?). Trotzdem jedes Mal geduldig antworten.</li>
+        </ul>
+
+        <h3>Ein Stück Kontrolle zurückgeben</h3>
+        <ul>
+          <li>Um Erlaubnis fragen, bevor du Kleidung öffnest oder anfasst.</li>
+          <li>Kleine Entscheidungen lassen, wo es medizinisch egal ist: „Möchten Sie die Decke bis zum Hals?“</li>
+          <li>Eine Aufgabe geben: „Sagen Sie mir sofort, wenn es schlimmer wird.“ „Atmen Sie mit mir.“</li>
+          <li>Loben, wenn etwas klappt: „Das haben Sie gut gemacht.“</li>
+        </ul>
+
+        <h3>Informieren, was als Nächstes passiert</h3>
+        <ul>
+          <li>Wer kommt? „Gleich kommt ein Rettungswagen, die schauen sich das genauer an.“</li>
+          <li>Wohin geht es? Ins Krankenhaus, und warum.</li>
+          <li>Wer bleibt? „Wir bleiben bei Ihnen, bis der Rettungsdienst da ist.“</li>
+          <li>Ungewissheit ist oft schlimmer als die schlechte Nachricht. Lieber kurz sagen, was ihr gerade macht, als stumm zu arbeiten.</li>
+        </ul>
+
+        <h3>Würde und Scham</h3>
+        <ul>
+          <li>Erbrochenes, Einnässen, Alkohol, Nacktheit: nicht kommentieren, abdecken, Sichtschutz.</li>
+          <li>Persönliches sichern: Handy, Brille, Schlüssel, Tasche. Bei Übergabe mitgeben oder erwähnen.</li>
+          <li>Anbieten, jemanden zu informieren: „Möchten Sie, dass wir jemanden für Sie anrufen?“</li>
+          <li>Hilfe annehmen fällt vielen schwer. Kein „Das ist doch nicht schlimm“, sondern: „Gut, dass Sie Bescheid gesagt haben.“</li>
+        </ul>
+
+        <h3>Schmerzen</h3>
+        <ul>
+          <li>Schonhaltung zulassen, wenn nichts dagegen spricht. Viele finden selbst die beste Lage.</li>
+          <li>Stärke abfragen (0–10) und später noch einmal: Ist es besser geworden? Das ist auch Reevaluation.</li>
+          <li>Was ihr gegen den Schmerz tun könnt, tun: lagern, ruhigstellen, kühlen, wo es passt. Starke akute Schmerzen sind ein Grund für den Notarzt.</li>
+        </ul>
+
+        <h3>Und du selbst</h3>
+        <p>Belastende Einsätze gehören besprochen: im Team, mit der Gruppenführung oder mit der PSNV-E (Psychosoziale Notfallversorgung für Einsatzkräfte). Das ist kein Zeichen von Schwäche.</p>
+      </div>
+    </details>
+
+    <!-- ============================================================ Notarzt -->
+    <details class="sheet" id="notarzt">
+      <summary>Notarzt: ja oder nein? <small>RTW oder RTW + NEF</small></summary>
+      <div class="body">
+        <p><strong>Faustregel:</strong> Ist eine Vitalfunktion (Bewusstsein, Atmung, Kreislauf) gestört oder droht sie zu kippen, dann RTW <strong>und</strong> NEF. Ist der Patient stabil und es braucht nur Versorgung und Transport, reicht der RTW.</p>
+        <p>Grundlage ist der Indikationskatalog für den Notarzteinsatz der Bundesärztekammer. Leitstellen und Rettungsdienstbereiche haben teils eigene Kataloge.</p>
+
+        <h3>Nach dem Zustand des Patienten</h3>
+        <div class="table-wrap"><table>
+          <tr><th>Bewusstsein</th><td>Reagiert nicht oder nicht angemessen auf Ansprechen und Anfassen</td></tr>
+          <tr><th>Atmung</th><td>Keine normale Atmung, ausgeprägte oder zunehmende Atemnot, Atemstillstand</td></tr>
+          <tr><th>Herz/Kreislauf</th><td>Akuter Brustschmerz, ausgeprägte oder zunehmende Kreislaufschwäche (Schock), Kreislaufstillstand</td></tr>
+          <tr><th>Sonstiges</th><td>Schwere Verletzung, schwere Blutung, starke akute Schmerzen, plötzliche Lähmungen</td></tr>
+        </table></div>
+
+        <h3>Nach dem Ereignis, auch wenn der Patient noch gut aussieht</h3>
+        <ul>
+          <li>Schwerer Verkehrsunfall oder anderer Unfall mit Schwerverletzten</li>
+          <li>Sturz aus großer Höhe (ab etwa 3 m)</li>
+          <li>Einklemmung, Verschüttung</li>
+          <li>Unfall mit Kindern</li>
+          <li>Brand, Rauchgas, Explosion, thermischer oder chemischer Unfall mit Verletzten</li>
+          <li>Strom- oder Blitzunfall</li>
+          <li>Ertrinken, Einbruch ins Eis</li>
+          <li>Schuss-, Stich- oder Hiebverletzung an Kopf, Hals oder Rumpf</li>
+          <li>Vergiftung mit Lebensgefahr</li>
+          <li>Geburt, die gerade stattfindet oder stattgefunden hat</li>
+          <li>Drohender Suizid</li>
+        </ul>
+
+        <h3>Zur Orientierung</h3>
+        <div class="split">
+          <div>
+            <h3>Meist RTW</h3>
+            <ul>
+              <li>Wach, angemessene Reaktion, ABCD stabil</li>
+              <li>Isolierte Verletzung an Arm oder Bein ohne starke Blutung</li>
+              <li>Kollaps, der sich schnell und vollständig erholt</li>
+              <li>Unterzuckerung, die nach Zucker wieder wach und orientiert ist</li>
+            </ul>
+          </div>
+          <div>
+            <h3>RTW + NEF</h3>
+            <ul>
+              <li>Bewusstlos oder zunehmend eingetrübt</li>
+              <li>Reanimation</li>
+              <li>Schwere Atemnot, z. B. Asthma ohne Wirkung des Sprays</li>
+              <li>Starke Blutung, Schockzeichen</li>
+              <li>Akuter Brustschmerz</li>
+              <li>Krampfanfall, der nicht aufhört oder wiederkommt</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3>Im Verlauf nachfordern</h3>
+        <p>Die erste Einschätzung ist nicht endgültig. Verschlechtert sich der Zustand, zum Beispiel wird jemand bewusstlos oder die Atemnot nimmt zu, fordert ihr den NEF über Funk nach:</p>
+        <span class="say">RotkreuzHamburg von EVT1, Patient zunehmend eingetrübt, wir benötigen zusätzlich einen NEF, kommen.</span>
+        <p class="note">Im Zweifel lieber den Notarzt dazu. Die Leitstelle kann ihn abbestellen, wenn er nicht gebraucht wird. Wer zu spät nachfordert, verliert Minuten. Beim Schlaganfall zählt vor allem der schnelle Transport in eine Stroke Unit. Ob der Notarzt mitkommt, regelt oft der Rettungsdienstbereich.</p>
+      </div>
+    </details>
+
+    <!-- ============================================================ Sätze -->
+    <details class="sheet" id="saetze">
+      <summary>Sätze, die funktionieren <small>zum Mitnehmen</small></summary>
+      <div class="body">
+        <p>Diese Sätze erkennt auch die App. Formulier sie gern in deinen eigenen Worten.</p>
+        <h3>Vorstellen</h3>
+        <span class="say">Hallo, ich bin Sam vom DRK, das ist mein Kollege. Wir kümmern uns jetzt um Sie. Was ist passiert?</span>
+        <span class="say">Wie heißen Sie?</span>
+
+        <h3>Ankündigen</h3>
+        <span class="say">Ich fühle jetzt Ihren Puls am Handgelenk.</span>
+        <span class="say">Ich drücke kurz auf Ihren Fingernagel, das tut nicht weh.</span>
+        <span class="say">Ich taste jetzt Ihren Bauch ab. Sagen Sie mir, wenn es wehtut.</span>
+        <span class="say">Mein Kollege hält jetzt Ihren Kopf fest. Bitte bewegen Sie ihn nicht.</span>
+        <span class="say">Ich lege Ihnen eine Klammer an den Finger, die misst den Sauerstoff.</span>
+        <span class="say">Ich messe jetzt Ihren Blutzucker, das piekst kurz.</span>
+        <span class="say">Ich lege Ihnen jetzt eine Decke um, damit Sie nicht auskühlen.</span>
+        <span class="say">Wie stark sind die Schmerzen, von 0 bis 10?</span>
+
+        <h3>Nicht allein lassen</h3>
+        <span class="say">Mein Kollege holt nur die Decke, ich bleibe bei Ihnen.</span>
+        <span class="say">Wir bleiben bei Ihnen, bis der Rettungsdienst da ist.</span>
+        <span class="say">Möchten Sie, dass wir jemanden für Sie anrufen?</span>
+
+        <h3>Beruhigen und ermutigen</h3>
+        <span class="say">Sie sind nicht allein, wir bleiben bei Ihnen.</span>
+        <span class="say">Sie machen das gut. Atmen Sie ganz ruhig mit mir ein und aus.</span>
+        <span class="say">Das haben Sie gut gemacht.</span>
+        <span class="say">Ein Rettungswagen ist unterwegs. Bis er da ist, kümmern wir uns um Sie.</span>
+        <span class="say">Ich erkläre Ihnen kurz, was ich jetzt mache.</span>
+        <span class="say">Das war bestimmt ein Schreck. Jetzt sind wir für Sie da.</span>
+
+        <h3>Lieber nicht</h3>
+        <span class="avoid"><s>Alles wird gut.</s> – das weißt du nicht.</span>
+        <span class="avoid"><s>Das ist bestimmt nichts.</s> – nimmt Beschwerden nicht ernst.</span>
+        <span class="avoid"><s>Stellen Sie sich nicht so an.</s></span>
+        <span class="avoid"><s>Oh, das sieht ja übel aus.</s> – Befunde bewerten wir im Team, nicht laut am Patienten.</span>
+        <span class="avoid"><s>Puls ist normal.</s> – konkret benennen: „Puls regelmäßig, gut tastbar.“</span>
+      </div>
+    </details>
+
+    <!-- ============================================================ Team & Funk -->
+    <details class="sheet" id="team">
+      <summary>Teambesprechung &amp; Funkspruch <small>Vorlagen</small></summary>
+      <div class="body">
+        <h3>Teambesprechung</h3>
+        <p><strong>Kurz halten:</strong> Nur die Probleme und den Verdacht nennen. Was in der Norm ist, zählst du nicht auf. Der Kollege war ja dabei.</p>
+        <ol>
+          <li>Patient (Geschlecht, ungefähres Alter)</li>
+          <li>Reaktion: ein, zwei Wörter („wach, reagiert angemessen“, „verzögert“, „bewusstlos“)</li>
+          <li>Probleme: nur die auffälligen Befunde</li>
+          <li>Verdacht (A-, B-, C-, D- oder E-Problem)</li>
+          <li>Nachforderung (RTW? Notarzt/NEF?)</li>
+          <li>Abschlussfrage an den Kollegen</li>
+        </ol>
+        <span class="say">Kurz zusammengefasst: Patient männlich, Ende sechzig, wach, reagiert angemessen. Kopfanprall, Nackenschmerzen, nimmt Blutverdünner. Verdacht auf HWS-Trauma. Wir brauchen einen RTW. Siehst du das auch so?</span>
+        <span class="avoid"><s>… Atmung unauffällig, keine Schmerzen beim Atmen, keine Zyanose, Haut rosig, Puls gut tastbar, Rekap unter 2 Sekunden …</s> – das ist alles normal und gehört nicht in die Teambesprechung.</span>
+
+        <h3>Funkspruch</h3>
+        <ol>
+          <li>Anruf: <span class="say">RotkreuzHamburg von EVT1, kommen.</span></li>
+          <li>Auf „Hier RotkreuzHamburg“ warten.</li>
+          <li>Meldung: Patient, Reaktion/Bewusstsein, Verdacht, Nachforderung, „kommen“.
+            <span class="say">Wir haben hier eine Patientin, weiblich, ca. 40, wach, reagiert verzögert, Verdacht auf Unterzuckerung, wir benötigen einen RTW, kommen.</span></li>
+          <li>Bestätigung abwarten, dann <span class="say">EVT1 Ende.</span></li>
+        </ol>
+        <p class="note">Rufnamen kannst du in den Einstellungen ändern. Zeitkritisch (Schlaganfall, Reanimation, schwere Atemnot, starke Blutung, Polytrauma): früh funken, mit dem kritischen Problem.</p>
+      </div>
+    </details>
+
+    <!-- ============================================================ Übergabe -->
+    <details class="sheet" id="uebergabe">
+      <summary>Übergabe <small>an den Rettungsdienst</small></summary>
+      <div class="body">
+        <p>Ein festes Schema hilft, nichts zu vergessen, z. B. ISOBAR oder SINNHAFT. Diese Bausteine haben beide gemeinsam:</p>
+        <ol>
+          <li><strong>Patient:</strong> Name, Geschlecht, Alter</li>
+          <li><strong>Ereignis:</strong> Was ist passiert, seit wann?</li>
+          <li><strong>Befunde:</strong> nach ABCDE, mit Werten</li>
+          <li><strong>Anamnese:</strong> SAMPLER, vor allem Allergien, Medikamente, Vorerkrankungen</li>
+          <li><strong>Maßnahmen:</strong> Was habt ihr gemacht? Tourniquet mit Uhrzeit</li>
+          <li><strong>Einschätzung:</strong> Euer Verdacht</li>
+          <li><strong>Rückfragen:</strong> „Habt ihr noch Fragen?“</li>
+        </ol>
+        <p class="note">Betreuung endet nicht mit der Übergabe: Sag der Person, wer jetzt übernimmt, und verabschiede dich.</p>
+      </div>
+    </details>
+
+    <!-- ============================================================ Häufige Fehler -->
+    <details class="sheet" id="fehler">
+      <summary>Häufige Fehler <small>die die Auswertung anmerkt</small></summary>
+      <div class="body">
+        <ul>
+          <li>Lage oder bedrohliche Blutung übersprungen, weil der Patient sofort redet.</li>
+          <li>HWS bei Sturz oder Unfall vergessen.</li>
+          <li>Zyanose oder Hautfarbe nicht angeschaut.</li>
+          <li>Wärmeerhalt nur gefragt, aber keine Decke.</li>
+          <li>Befunde vage („normal“, „passt“) statt konkret.</li>
+          <li>SAMPLER schon in der 1. Minute. Das gehört ins E.</li>
+          <li>Reaktion/Bewusstsein fehlt in Teambesprechung oder Funkspruch.</li>
+          <li>Funkspruch ohne beide Rufnamen oder ohne „Ende“.</li>
+          <li>Patient allein gelassen, um Material zu holen.</li>
+          <li>HLW bei jemandem, der wach ist oder normal atmet. HLW nur bei Bewusstlosigkeit <em>und</em> fehlender normaler Atmung. Die App wertet das als „Nicht erfüllt“.</li>
+          <li>Warnzeichen überhört („Mir wird kalt“, „Mir ist schwindelig“).</li>
+        </ul>
+      </div>
+    </details>
+
+    <footer>
+      <p>Zusammengestellt nach dem DRK-SANmemo „1. Minute – ABCDE“ (2024) und der Praxis beim DRK Hamburg. Ersetzt weder Ausbildung noch Leitlinien.</p>
+    </footer>
+  </main>
+
+  <script>
+    // Sprungmarken öffnen den zugehörigen Abschnitt
+    function openFromHash() {
+      const el = location.hash && document.querySelector(location.hash);
+      if (el && el.tagName === "DETAILS") { el.open = true; requestAnimationFrame(() => el.scrollIntoView()); }
+    }
+    window.addEventListener("hashchange", openFromHash);
+    openFromHash();
+  </script>
+</body>
+</html>
