@@ -99,7 +99,7 @@ def check_funk(run: Run) -> dict[str, Any]:
     if meldung:
         # eine Meldung in mehreren Stücken zählt zusammen
         parts = infos[infos.index(meldung):]
-        meldung = dict(meldung) | {k: any(p[k] for p in parts) for k in ("patient", "alter", "verdacht", "reaktion", "kommen")}
+        meldung = dict(meldung) | {k: any(p.get(k) for p in parts) for k in ("patient", "alter", "verdacht", "reaktion", "kommen", "reanimation")}
     problems: list[str] = []
     if not anruf:
         problems.append("Anruf der Leitstelle fehlt")
@@ -110,13 +110,14 @@ def check_funk(run: Run) -> dict[str, Any]:
     if not meldung:
         problems.append("keine Meldung abgesetzt")
     else:
-        if not (meldung["patient"] and meldung["alter"]):
+        rea = meldung["reanimation"]   # Reanimation: „Person bewusstlos, keine Atmung, Reanimation“ reicht
+        if not (meldung["patient"] and (meldung["alter"] or rea)):
             problems.append("Patient (Geschlecht, ungefähres Alter) fehlt")
-        if not meldung["verdacht"]:
+        if not meldung["verdacht"] and not rea:
             problems.append("Verdachtsdiagnose fehlt")
         if not meldung["reaktion"] and _applies("reaction_abnormal", run):
             problems.append("Auffällige Reaktion nicht genannt (z. B. „reagiert verzögert“, „verwirrt“, „bewusstlos“)")
-        if not meldung["kommen"]:
+        if not meldung["kommen"] and not rea:
             problems.append("Meldung nicht mit „kommen“ abgeschlossen")
     requested = {r.upper() for f in infos for r in f["resources"]}
     s = run.scenario

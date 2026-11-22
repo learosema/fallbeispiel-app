@@ -16,6 +16,7 @@ Aufbau einer Lösung:
         meanwhile: [Sätze reihum, etwa alle `pause` s (Standard PAUSE)]
         pause: 4
         react: {"Schock empfohlen": "…"}  # nur in dieser Wartephase: auf eine Ansage sofort reagieren
+        stop_after_react: true            # Phase endet direkt nach dieser Reaktion (z. B. Helferwechsel)
     react: {"Schock empfohlen": "Schock! Alle weg!"}   # im ganzen Fall: auf jede solche Ansage einmal sofort reagieren
 """
 from __future__ import annotations
@@ -102,13 +103,15 @@ def build_log(scenario, steps: list[dict[str, Any]], clf, mode: str = "full",
                 if "until" in step and t >= step["until"]:
                     break
                 if run.ended:
-                    raise ValueError(f"{scenario.id}: Einsatz endete beim Warten ({step})")
+                    return log, origin   # z. B. 1. Minute vorbei
                 due = reaction(run, local)
                 if due:
                     at = log[-1]["t"] + 1.0
                     log.append({"t": at, "text": due})
                     origin.append({"say": due})
                     t = at + speaking_time(due)
+                    if step.get("stop_after_react") and due in local.values():
+                        break   # z. B. nach dem Helferwechsel: nächste Phase mit anderen Rollen
                     continue
                 nxt = run.next_event_at
                 if care and (nxt is None or nxt > t + pause):

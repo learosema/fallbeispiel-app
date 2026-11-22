@@ -9,64 +9,68 @@ steps:
   - phase: Sicherheit und Lage
   - say: Ist die Einsatzstelle sicher? Bitte gehen Sie ein Stück zurück, wir brauchen Platz.
   - say: Ich schaue nach einer bedrohlichen Blutung.
-  - phase: Ansprechen, Atemwege, Atemkontrolle
+  - phase: Ansprechen
   - say: Hallo, hören Sie mich? Ich rüttle an den Schultern.
-  - say: Ich mache die Atemwege frei, Kopf überstrecken, Kinn anheben.
-  - say: Atemkontrolle, sehen, hören, fühlen, zehn Sekunden.
-    why: Schnappatmung ist keine normale Atmung – das ist ein Kreislaufstillstand.
-  - phase: Sofort HLW und AED
-  - say: Kreislaufstillstand! Kollege, du beginnst sofort mit der Herzdruckmassage.
-    why: Keine Sekunde verlieren. Der Kollege drückt und klebt den AED, du gibst den Schock frei.
-  - say: Ich übernehme jetzt die Herzdruckmassage.
-    t: 50
-    why: Sobald Beutel und Maske dran sind, zählt, wer drückt, laut bis 30 – dann beatmet der Kollege zweimal.
-  - t: 60
-    say: "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30"
-  - phase: Notruf
-  - say: Wechsel, du drückst, ich setze den Notruf ab.
-    why: Funken und drücken gleichzeitig geht nicht – kurz tauschen, bei offenem Funk geht alles an die Leitstelle.
+  - phase: Funken und Atmung prüfen – gleichzeitig
+  - say: Kollege, mach die Atemwege frei und prüf die Atmung, ich funke.
+    why: Einer funkt, der andere prüft die Atmung – so geht keine Zeit verloren.
   - say: RotkreuzHamburg von EVT1, kommen.
-  - say: >
-      Wir haben hier einen Patienten, männlich, Anfang fünfzig, beim Laufen zusammengebrochen, bewusstlos, keine
-      normale Atmung, Verdacht auf Kreislaufstillstand, wir reanimieren, wir benötigen RTW und NEF, kommen.
-  - say: EVT1 Ende.
-  - phase: Reanimation – wer drückt, zählt laut
-  - say: Ich übernehme wieder die Herzdruckmassage.
-  - until: 170
+  - say: Person bewusstlos.
+  - say: Kollege, du drückst!
+    why: Keine normale Atmung, nur Schnappatmung – sofort Herzdruckmassage. Bei einer Reanimation darfst du dafür den Funk kurz unterbrechen.
+  - say: Keine Atmung. Reanimation.
+    why: Mehr braucht die Leitstelle nicht. Sie schickt RTW und NEF und bestätigt kurz.
+  - phase: Erster Schock, dann übernehme ich das Drücken
+  - wait: Rettungsdienst   # oder bis zum nächsten Wechsel (stop_after_react)
+    stop_after_react: true
+    react:
+      Schock empfohlen: Schock! Alle weg! Ich löse den Schock aus. Ich übernehme jetzt die Herzdruckmassage.
+  - phase: Ich drücke und zähle laut, der Kollege beatmet
+  - say: "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30"
+    t: 60
+    why: Sobald Beutel und Maske dran sind, zählt, wer drückt, laut bis 30 – dann beatmet der Kollege zweimal. ABCDE und Anamnese gibt es jetzt nicht, zu zweit ist niemand frei.
+  - say: Kollege, schließ den Sauerstoff an den Beutel an.
+    why: Erst mit Raumluft beatmen, den Sauerstoff schließt der Kollege beim nächsten Beatmungsdurchlauf an den Beutel an.
+  - wait: Rettungsdienst   # oder bis zum nächsten Wechsel (stop_after_react)
+    stop_after_react: true
     pause: 2
     meanwhile:
       - "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30"
-    react:   # bei der nächsten Analyse: Schock und Helferwechsel
-      Schock empfohlen: Schock! Alle weg! Ich löse den Schock aus. Wechsel, du drückst jetzt.
-  - phase: Während der Kollege drückt – Infos sammeln, Befunde
-  - say: Was ist genau passiert, hat jemand gesehen, wie er umgefallen ist?
-    why: Für die Übergabe zählen Zeitpunkt, Hergang und Vorgeschichte.
-  - say: Weiß jemand, ob er Vorerkrankungen hat oder Medikamente nimmt?
-  - say: Sind Allergien bekannt?
-  - say: Wann hat er zuletzt etwas gegessen?
-  - say: Ich leuchte in die Pupillen.
-  - say: Ich bestimme den GCS.
-  - say: Ich fühle den Puls an der Halsschlagader.
-  - say: Ich messe die Sättigung.
-  - say: Ich messe den Blutdruck.
-  - say: Ich prüfe die Rekap.
-  - say: Ich zähle die Atemfrequenz.
-  - say: Ich höre die Lunge mit dem Stethoskop ab.
-  - say: Ich untersuche ihn kurz von Kopf bis Fuß auf Verletzungen.
-  - say: Reevaluation. Ich kontrolliere noch einmal Atmung und Puls.
-  - until: 330
     react:
-      Schock empfohlen: Schock! Alle weg! Ich löse den Schock aus. Ich übernehme wieder die Herzdruckmassage.
+      Schock empfohlen: Schock! Alle weg! Ich löse den Schock aus. Wechsel, du drückst jetzt.
+  - phase: Helferwechsel – der Kollege drückt und zählt, ich beatme
+  - wait: Rettungsdienst   # oder bis zum nächsten Wechsel (stop_after_react)
+    stop_after_react: true
+    pause: 14
+    meanwhile:
+      - "Zwei Beatmungen."
+    react:
+      Schock empfohlen: Schock! Alle weg! Ich löse den Schock aus. Wechsel, ich drücke wieder.
+  - phase: Helferwechsel – ich drücke und zähle
+  - wait: Rettungsdienst   # oder bis zum nächsten Wechsel (stop_after_react)
+    stop_after_react: true
+    pause: 2
+    meanwhile:
+      - "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30"
+    react:
+      Schock empfohlen: Schock! Alle weg! Ich löse den Schock aus. Wechsel, du drückst jetzt.
+  - phase: Helferwechsel – der Kollege drückt und zählt, ich beatme
+  - wait: Rettungsdienst   # oder bis zum nächsten Wechsel (stop_after_react)
+    stop_after_react: true
+    pause: 14
+    meanwhile:
+      - "Zwei Beatmungen."
+    react:
+      Schock empfohlen: Schock! Alle weg! Ich löse den Schock aus. Wechsel, ich drücke wieder.
   - phase: Durchdrücken, bis der Rettungsdienst übernimmt
   - wait: Rettungsdienst
     pause: 2
     meanwhile:
       - "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30"
-  - phase: Übergabe
+  - phase: Übergabe – weiterdrücken, bis der Rettungsdienst übernimmt
   - say: Übergabe, wir drücken weiter. Patient männlich, ca. 52 Jahre.
-  - say: Er ist beim Laufen plötzlich zusammengebrochen, Schnappatmung, kein Puls. Wir haben sofort mit der HLW begonnen.
-  - say: AED nach 15 Sekunden dran, bei jeder Analyse Schock empfohlen und abgegeben. Beatmung mit Beutel und Maske, Sauerstoff, Guedel-Tubus.
-  - say: Befunde GCS 3, Pupillen weit, keine eigene Atmung, kein Puls tastbar.
-  - say: Laut einem Freund heute Morgen Brustschmerzen, er nimmt etwas gegen Bluthochdruck.
-  - say: Verdacht auf Kreislaufstillstand durch Kammerflimmern, vermutlich Herzinfarkt.
+  - say: Er ist beim Laufen plötzlich zusammengebrochen, Schnappatmung, bewusstlos, kein Puls. Wir haben sofort mit der HLW begonnen.
+  - say: AED nach 15 Sekunden dran, bei jeder Analyse Schock empfohlen und abgegeben. Beatmung mit Beutel und Maske mit Sauerstoff, Guedel-Tubus.
+  - say: Vorerkrankungen und Medikamente sind unbekannt.
+  - say: Verdacht auf Kreislaufstillstand mit Kammerflimmern.
   - say: Habt ihr noch Fragen?

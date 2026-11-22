@@ -324,3 +324,8 @@
   expect: [nicht_aufstehen]
 - text: Er braucht keine Herzdruckmassage, er atmet ja.
   not: [hlw]
+- text: Kollege, mach die Atemwege frei und prüf die Atmung, ich funke.
+  expect: [atemwege_freimachen, atemkontrolle]
+- text: Kollege, schließ den Sauerstoff an den Beutel an.
+  expect: [sauerstoff]
+  not: [beatmen]
