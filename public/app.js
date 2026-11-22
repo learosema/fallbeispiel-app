@@ -4,7 +4,7 @@
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
   // ---------- Einstellungen ----------
-  const DEFAULTS = { rate: 1, speak: true, handsfree: false, mode: "minute", callsign: "EVT1", dispatcher: "RotkreuzHamburg", tips: true };
+  const DEFAULTS = { rate: 1, speak: true, handsfree: false, mode: "minute", callsign: "EVT1", dispatcher: "RotkreuzHamburg", tips: true, keepAwake: true };
   let settings = { ...DEFAULTS };
   try {
     settings = { ...DEFAULTS, ...JSON.parse(localStorage.getItem("settings") || "{}") };
@@ -49,6 +49,21 @@
     }
     turn({ tick: true });
   }, 500);
+
+  // ---------- Display anlassen ----------
+  // Während eines Falls darf das Display nicht ausgehen, sonst hält Android Mikrofon, Vorlesen und Takt an.
+  // Der Browser gibt die Sperre selbst frei, wenn die Seite in den Hintergrund geht; bei Rückkehr neu anfordern.
+  let wakeLock = null;
+  async function keepAwake() {
+    if (!settings.keepAwake || !scenario || wakeLock || !("wakeLock" in navigator) || document.visibilityState !== "visible") return;
+    try {
+      wakeLock = await navigator.wakeLock.request("screen");
+      wakeLock.addEventListener("release", () => { wakeLock = null; });
+      if (!scenario || !settings.keepAwake) releaseAwake(); // inzwischen zurück zur Auswahl
+    } catch { wakeLock = null; /* z. B. Energiesparmodus: dann eben ohne */ }
+  }
+  function releaseAwake() { if (wakeLock) { wakeLock.release().catch(() => {}); wakeLock = null; } }
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") keepAwake(); });
 
   // ---------- UI ----------
   const APP_TITLE = "Fallbeispiel xABCDE";
@@ -97,6 +112,7 @@
   function showHome() {
     stopAll();
     scenario = null;
+    releaseAwake();
     $("home").hidden = false;
     $("session").hidden = true;
     $("backBtn").hidden = true;
@@ -177,6 +193,7 @@
     setTitle(hideTitle ? "Zufälliger Fall" : s.title);
     $("title").focus(); // Screenreader: neuer Fall wird angesagt
     $("handsfree").checked = settings.handsfree;
+    keepAwake();
     const dispatch = s.dispatch.replace(/^Einsatzmeldung:\s*/, "Einsatzmeldung: ");
     const intro = mode === "minute"
       ? `Du triffst mit deinem Kollegen ein (Funkrufname ${settings.callsign}, Leitstelle ${settings.dispatcher}). Übe die 1. Minute nach SANmemo bis zum Funkspruch.`
@@ -372,6 +389,7 @@
     $("rateOut").textContent = Number(settings.rate).toFixed(2);
     $("speak").checked = settings.speak;
     $("tips").checked = settings.tips !== false;
+    $("keepAwake").checked = settings.keepAwake !== false;
     $("callsign").value = settings.callsign;
     $("dispatcher").value = settings.dispatcher;
     $("settings").showModal();
@@ -385,9 +403,11 @@
       settings.rate = $("rate").value;
       settings.speak = $("speak").checked;
       settings.tips = $("tips").checked;
+      settings.keepAwake = $("keepAwake").checked;
       settings.callsign = $("callsign").value.trim() || DEFAULTS.callsign;
       settings.dispatcher = $("dispatcher").value.trim() || DEFAULTS.dispatcher;
       saveSettings();
+      if (settings.keepAwake) keepAwake(); else releaseAwake();
     }
   });
   document.querySelectorAll('input[name="mode"]').forEach((r) => {
