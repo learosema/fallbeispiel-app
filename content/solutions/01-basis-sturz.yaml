@@ -24,14 +24,15 @@ steps:
     why: Auf „Ich will nach Hause“ gleich eingehen – nicht überhören.
   - phase: Teambesprechung
   - say: >
-      Kurz zusammengefasst: Patient männlich, Ende sechzig, wach, reagiert angemessen. Sturz mit Kopfanprall,
+      Kurz zusammengefasst: Patient männlich, Ende sechzig. Sturz mit Kopfanprall,
       Nackenschmerzen. Verdacht auf HWS-Trauma und Schädel-Hirn-Trauma. Wir brauchen einen RTW. Siehst du das auch so?
     why: Nur Probleme und Verdacht – keine Aufzählung der Normalbefunde.
   - phase: Funkspruch
   - say: RotkreuzHamburg von EVT1, kommen.
   - say: >
-      Wir haben hier einen Patienten, männlich, Ende sechzig, nach Sturz auf der Treppe mit Kopfanprall, wach und
-      reagiert angemessen, Verdacht auf HWS-Trauma, wir benötigen einen RTW, kommen.
+      Wir haben hier einen Patienten, männlich, Ende sechzig, nach Sturz auf der Treppe mit Kopfanprall und
+      Nackenschmerzen, Verdacht auf HWS-Trauma, wir benötigen einen RTW, kommen.
+    why: Kurz und nur Auffälliges – die Leitstelle braucht Patient, Problem, Verdacht und was ihr braucht.
   - say: EVT1 Ende.
   - phase: A und B
   - say: Die Atemwege sind frei, er spricht in ganzen Sätzen.

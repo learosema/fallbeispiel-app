@@ -616,13 +616,47 @@ def test_reaction_counts_when_named_in_team_talk_or_radio(clf):
     assert items["neuro"]["status"] == evaluate.OK
 
 
-def test_reaction_missing_in_team_talk_and_radio_is_noted(clf):
+def test_normal_reaction_need_not_be_named(clf):
+    """Unauffällige Reaktion: gehört nicht in Teambesprechung/Funk (nur Auffälliges), Neurologie gilt mit dem Ansprechen."""
     lines = [l.replace(" wach reagiert angemessen", "").replace(" wach und ansprechbar", "") for l in GOOD_MINUTE]
     res = evaluate.evaluate(play(clf, "basis-sturz", lines))
+    items = {it["id"]: it for it in res["sections"][0]["items"]}
+    assert items["team"]["status"] == evaluate.OK, items["team"]["note"]
+    assert "Reaktion" not in items["funk"]["note"]
+    assert items["neuro"]["status"] == evaluate.OK
+
+
+ABNORMAL_MINUTE = [
+    "ist die lage sicher", "keine bedrohliche blutung", "hallo wir sind vom drk was ist passiert",
+    "bekommen sie gut luft tut das atmen weh", "ich schaue auf die lippen", "hautfarbe puls rekap", "ist ihnen kalt",
+    "wir legen eine decke um",
+    "kurz zusammengefasst patientin weiblich mitte fünfzig kaltschweißig verdacht auf unterzucker wir brauchen einen rtw siehst du das auch so",
+    "rotkreuzhamburg von evt eins kommen",
+    "wir haben hier eine patientin weiblich mitte fünfzig verdacht auf unterzucker wir benötigen einen rtw kommen",
+    "evt eins ende",
+]
+
+
+def test_abnormal_reaction_missing_in_team_talk_and_radio_is_noted(clf):
+    res = evaluate.evaluate(play(clf, "d-hypo", ABNORMAL_MINUTE))
     items = {it["id"]: it for it in res["sections"][0]["items"]}
     assert items["team"]["status"] == evaluate.PARTIAL and "Reaktion" in items["team"]["note"]
     assert "Reaktion" in items["funk"]["note"]
     assert items["neuro"]["status"] == evaluate.MISSING
+
+
+@pytest.mark.parametrize("sid, text", [
+    ("basis-sturz", "Kurz zusammengefasst: Patient männlich, Ende sechzig. Sturz mit Kopfanprall, Nackenschmerzen. "
+                    "Verdacht auf HWS-Trauma. Wir brauchen einen RTW. Siehst du das auch so?"),
+    ("d-hypo", "Kurz zusammengefasst: Patientin weiblich, Mitte fünfzig, verwirrt, kaltschweißig. Verdacht auf Unterzucker. "
+               "Wir brauchen einen RTW, ich messe gleich den Blutzucker. Siehst du das auch so?"),
+])
+def test_cheat_sheet_team_talk_examples_are_complete(clf, sid, text):
+    """Die Beispiele im Spicker (public/spicker.html) ergeben eine vollständige Teambesprechung."""
+    run = play(clf, sid, ["hallo wir sind vom drk", text])
+    team = next(it for it in evaluate.evaluate(run)["sections"][0]["items"] if it["id"] == "team")
+    assert team["status"] == evaluate.OK, team["note"]
+    assert "bz" not in run.first   # während der Besprechung wird nichts ausgeführt
 
 
 def test_orientation_is_not_part_of_the_first_minute():
@@ -848,7 +882,7 @@ def test_team_talk_in_several_parts(clf):
     assert said(run, "Kollege")[-1] in {l.text for l in content.smalltalk().team_agree}
     assert "nachforderung" not in run.first and "puls" not in run.first  # Besprechung, keine Handlung
     team = next(it for it in evaluate.evaluate(run)["sections"][0]["items"] if it["id"] == "team")
-    assert "Reaktion" in team["note"] and "Abschlussfrage" not in team["note"]
+    assert "Reaktion" not in team["note"] and "Abschlussfrage" not in team["note"]   # Reaktion unauffällig: nicht nötig
 
 
 @pytest.mark.parametrize("question", [

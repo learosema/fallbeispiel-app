@@ -19,7 +19,7 @@ steps:
     why: Schwere Atemnot ist zeitkritisch.
   - say: >
       Wir haben hier eine Patientin, weiblich, Ende zwanzig, Asthmatikerin, schwere Atemnot nach Pyro-Rauch, kein Spray
-      dabei, wach, Verdacht auf Asthmaanfall und Rauchgasinhalation, wir benötigen RTW und NEF, kommen.
+      dabei, Verdacht auf Asthmaanfall und Rauchgasinhalation, wir benötigen RTW und NEF, kommen.
   - say: EVT1 Ende.
   - phase: Weiter im Schnellcheck
   - say: Atmen Sie ganz langsam mit mir, durch die Nase ein und durch den Mund aus, mit der Lippenbremse.
@@ -30,7 +30,7 @@ steps:
   - say: Ich lege Ihnen eine Decke um.
   - phase: Teambesprechung
   - say: >
-      Kurz zusammengefasst: Patientin weiblich, Ende zwanzig, wach, ängstlich. Schwere Atemnot, Giemen, leicht heiser,
+      Kurz zusammengefasst: Patientin weiblich, Ende zwanzig. Schwere Atemnot, Giemen, leicht heiser,
       Ruß am Mund. Verdacht auf Asthmaanfall durch Rauch, Inhalationstrauma möglich, B-Problem. RTW und NEF sind
       alarmiert. Siehst du das auch so?
   - phase: A und B

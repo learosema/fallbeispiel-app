@@ -10,6 +10,7 @@ debrief_notes: >
   Seitenlage bzw. Atemweg frei halten, Absaugbereitschaft, HWS bedenken (Kopfanprall), BZ, GCS/Orientierung, Wärmeerhalt (2 °C, nass),
   Wunde versorgen, SAMPLER, Rettungsdienst nachfordern.
 
+reaction: abnormal      # Reaktion beim Ansprechen auffällig → in Teambesprechung und Funkspruch nennen
 conscious: true
 trauma: true
 request: {required: [RTW], optional: [NEF]}

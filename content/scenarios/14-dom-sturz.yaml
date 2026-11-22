@@ -10,6 +10,7 @@ debrief_notes: >
   manuelle HWS-Stabilisierung, B-Problem erkennen, O2, Pulsoxi, Schockzeichen, Trauma-Check (Becken nur einmal vorsichtig),
   Wärmeerhalt, schonende Rettung, Reevaluation, strukturierte Übergabe.
 
+reaction: abnormal      # Reaktion beim Ansprechen auffällig → in Teambesprechung und Funkspruch nennen
 conscious: true
 trauma: true
 request: {required: [RTW, NEF]}

@@ -50,7 +50,7 @@ RESOURCES = [  # (Kürzel, Muster) in der Reihenfolge, in der die Leitstelle sie
     ("Polizei", r"polizei|streife"),
     ("Feuerwehr", r"feuerwehr|\bhlf\b"),
 ]
-# Reaktion/Bewusstsein in Teambesprechung oder Funkspruch genannt („wach, reagiert angemessen“, „bewusstlos“)
+# Reaktion/Bewusstsein in Teambesprechung oder Funkspruch genannt („reagiert verzögert“, „bewusstlos“) – Pflicht nur bei auffälliger Reaktion
 REACTION = re.compile(r"reagiert|reaktion|ansprechbar|\bwach\b|bewusstlos|bewusstsein|orientiert|verwirrt|somnolent"
                       r"|eingetrübt|eingetruebt|\bgcs\b|avpu|adäquat|adaequat|angemessen")
 _NUMBERS = {"null": "0", "eins": "1", "zwei": "2", "drei": "3", "vier": "4", "fünf": "5", "fuenf": "5",
@@ -321,6 +321,8 @@ def applies(cond: str | None, s: Scenario) -> bool:
         "unconscious": not s.conscious,
         "breathing_normal": not s.conscious and s.breathing == "normal",
         "breathing_abnormal": not s.conscious and s.breathing != "normal",
+        "reaction_abnormal": s.reaction == "abnormal",
+        "reaction_normal": s.reaction != "abnormal",
     }[cond]
 
 

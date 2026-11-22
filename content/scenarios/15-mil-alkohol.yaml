@@ -9,6 +9,7 @@ debrief_notes: >
   Erwartet: Eigenschutz/Gedränge, Ansprache/Schmerzreiz, Atemwege frei, Seitenlage/Absaugbereitschaft, Messwerte, GCS/Pupillen,
   BZ messen (Alkohol nicht als alleinige Erklärung), HWS bei Kopfanprall bedenken, Wärmeerhalt, SAMPLER, Rettungsdienst, nicht allein lassen.
 
+reaction: abnormal      # Reaktion beim Ansprechen auffällig → in Teambesprechung und Funkspruch nennen
 conscious: true
 trauma: true
 request: {required: [RTW], optional: [NEF]}
