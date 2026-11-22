@@ -245,9 +245,9 @@ def test_reanimation_runs_until_rescue_service(clf):
     run = replay_log(clf, "bw-reanimation", log)
     setup = [x for x in said(run, "Kollege") if x in (
         "AED ist dran.", "Beutel mit Maske ist dran, Beatmung mit Raumluft möglich.", "Absaugbereitschaft hergestellt.",
-        "Sauerstoff ist angeschlossen.", "Guedel-Tubus liegt.")]
+        "Sauerstoff ist am Beutel angeschlossen.", "Guedel-Tubus liegt.")]
     assert setup == ["AED ist dran.", "Beutel mit Maske ist dran, Beatmung mit Raumluft möglich.",
-                     "Absaugbereitschaft hergestellt.", "Sauerstoff ist angeschlossen.", "Guedel-Tubus liegt."]
+                     "Absaugbereitschaft hergestellt.", "Sauerstoff ist am Beutel angeschlossen.", "Guedel-Tubus liegt."]
 
     # Schock, dann alle 2 Minuten erneut Analyse – kein ROSC
     log.append({"t": 72, "text": "Schock! Alle weg!"})
@@ -265,7 +265,7 @@ def test_reanimation_runs_until_rescue_service(clf):
     assert "weiter" in said(run, "Rettungsdienst")[-1]  # „… ihr drückt bitte weiter, bis wir so weit sind“
     assert run.ended and run.next_event_at is None
 
-    res = evaluate.evaluate(run)
+    res = evaluate.evaluate(replay_log(clf, "bw-reanimation", log, mode="full"))  # Zählen gehört zum ganzen Fall
     keys = {it["label"]: it for it in keys_of(res)}
     assert keys["Sicherheit beim Schock („Schock! Alle weg!“)"]["status"] == evaluate.OK
     assert keys["Sobald beatmet werden kann, laut bis 30 gezählt, dann 2 Beatmungen"]["status"] == evaluate.OK
@@ -290,7 +290,7 @@ def test_numbers_are_not_counting(clf, text):
 def test_counting_only_before_ventilation_is_not_enough(clf):
     log = [{"t": 5, "text": "ich beginne mit der herzdruckmassage"}, {"t": 10, "text": COUNT_TO_30},
            {"t": 20, "text": "", "tick": True}, {"t": 30, "text": "", "tick": True}, {"t": 60, "text": "ich drücke weiter"}]
-    res = evaluate.evaluate(replay_log(clf, "bw-reanimation", log))
+    res = evaluate.evaluate(replay_log(clf, "bw-reanimation", log, mode="full"))
     key = next(it for it in keys_of(res) if "bis 30 gezählt" in it["label"])
     assert key["status"] == evaluate.MISSING
 

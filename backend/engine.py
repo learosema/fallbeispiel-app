@@ -225,7 +225,7 @@ ADDRESS = re.compile(r"\b(ich|sie|du|ihr|ihnen|dir|dich|kollege|kollegin|hallo|k
 # nur eine Anforderung ist eine Nachforderung – „RTW ist schon alarmiert“ erwähnt ihn nur
 REQUEST = re.compile(r"brauch|bräucht|benötig|anforder|nachforder|forder\w* (\w+ ){0,3}an\b|schick|bitte|\beinmal\b|\beinen\b|\bein\b"
                      r"|kommen lassen|hätten gern|zusätzlich|dazu")
-MELDUNG = re.compile(r"verdacht|patient|männlich|weiblich|\bmann\b|\bfrau\b|jahre|\bjahrig")
+MELDUNG = re.compile(r"verdacht|patient|männlich|weiblich|\bmann\b|\bfrau\b|jahre|\bjahrig|reanim")
 
 
 def funk(text: str, s: Settings, state: dict[str, Any], mode: str,
@@ -257,6 +257,8 @@ def funk(text: str, s: Settings, state: dict[str, Any], mode: str,
                                 r"|\bält|\balt\b|\bjung|jugendlich|mittleren alters|senior|kind|säugling|erwachsen", t)),
         "verdacht": bool(re.search(r"verdacht|vermutlich|wahrscheinlich|\bv\s?a\b", t)),
         "reaktion": bool(REACTION.search(t)),
+        # „Person bewusstlos, keine Atmung, Reanimation“: so kurz wie möglich – Alter und Verdacht sind dann nicht nötig
+        "reanimation": bool(re.search(r"reanim", t)),
     }
     hits: list[Hit] = []
     lines: list[Line] = []
@@ -267,7 +269,15 @@ def funk(text: str, s: Settings, state: dict[str, Any], mode: str,
         hits.append(Hit("funk_meldung", 1, 1.0, "funk"))
         if info["reaktion"]:
             hits.append(Hit("reaktion", 1, 1.0, "implied"))
-        if resources:
+        if info["reanimation"] and not resources:
+            # „Keine Atmung. Reanimation.“ – die Leitstelle schickt RTW und NEF, ohne dass man es eigens anfordert,
+            # bestätigt kurz und beendet das Gespräch (wer reanimiert, sagt nicht noch „… Ende“)
+            resources = info["resources"] = ["RTW", "NEF"]
+            hits.append(Hit("nachforderung", 2, 1.0, "funk"))
+            lines.append(Line("Leitstelle", "Verstanden, RTW und NEF kommen."))
+            state["funk_offen"] = False
+            info["ende"] = info["ende_mit_rufname"] = True
+        elif resources:
             hits.append(Hit("nachforderung", 2, 1.0, "funk"))
             lines.append(Line("Leitstelle", " ".join(resources) + " kommt, verstanden."))
         else:
@@ -421,6 +431,8 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
             # dann hat man den Funk (ohne „… Ende“) verlassen
             if MELDUNG.search(normalize(text)) or not ADDRESS.search(normalize(text)) or not clf.classify(text):
                 f = funk(text, settings, state, mode, end_minute=not scenario.funk_early, force=True)
+            elif cpr_indicated(scenario, state):
+                pass  # Reanimation: Absprachen vor Ort („Kollege, du drückst!“) sind nötig – Funk bleibt offen, keine Mahnung
             else:
                 state["funk_offen"] = False
                 state["funk_ermahnt"] = True
@@ -437,6 +449,11 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
             state["team_offen"] = False
         else:
             hits, info = clf.classify(text), None
+            if "hlw" not in first and any(h.intent == "helferwechsel" for h in hits):
+                # „Kollege, du drückst!“ bevor jemand drückt: das ist der HLW-Beginn, kein Wechsel
+                hits = [h for h in hits if h.intent != "helferwechsel"]
+                if not any(h.intent == "hlw" for h in hits):
+                    hits.append(Hit("hlw", 0, 1.0, "regex"))
             if state.get("allein") and any(h.intent not in ("weggehen", "kurz_weg") and h.source != "implied" for h in hits):
                 state["allein"] = False  # wer etwas am Patienten macht, ist wieder da
                 lines.append(BACK)

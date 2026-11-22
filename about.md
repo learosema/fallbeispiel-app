@@ -170,6 +170,14 @@ Bitte nicht „wegoptimieren“ – im Zweifel nachfragen.
 
 **Reanimation**
 
+- **Ablauf zu zweit** (Rückmeldung Lea, 22.11.2026): Person bewusstlos aufgefunden → einer funkt („RotkreuzHamburg
+  von EVT1, kommen“ – „Person bewusstlos“), der andere macht Atemwege frei und prüft die Atmung, sagt „keine Atmung“ und
+  drückt. Dann per Funk: „Keine Atmung. Reanimation.“ → Leitstelle: „Verstanden, RTW und NEF kommen.“ (ohne eigene
+  Anforderung, ohne „kommen“/„… Ende“). Absprachen vor Ort bei offenem Funk sind dann erlaubt, keine Funkdisziplin-Mahnung.
+- **Während der HLW gibt es kein xABCDE und keine Anamnese:** Einer drückt und zählt, der andere beatmet; beim
+  Helferwechsel (bei jeder Analyse) tauschen die Rollen (Flag `kollege_drueckt`). Im Fall ist x–E, SAMPLER und
+  Reevaluation ausgeblendet. Sauerstoff kommt beim nächsten Beatmungsdurchlauf an den Beutel.
+
 - **HLW nur bei Bewusstlosigkeit ohne normale Atmung** (Rückmeldung Lea, 22.11.2026). Sonst stoppt der Kollege
   („Stopp! Ansprechbar und atmet …“ bzw. „Da ist noch normale Atmung …“), die HLW zählt nicht, und die Auswertung ist
   „Nicht erfüllt“. Indikation (`engine.cpr_indicated`): Fall `breathing: abnormal` oder Flag `kreislaufstillstand` bzw.

@@ -1108,6 +1108,7 @@ atemkontrolle:
     - atmet (er|sie|der|die|das kind)\b
     - (sehen|schauen),? hören,? fühlen
     - atmung (prüfen|kontrollieren|checken|überprüfen)|prüfe (die )?atmung
+    - (prüf|check|kontrollier)\w* (\w+ ){0,2}atmung
     - (hebt|senkt) sich (der )?brustkorb|brustkorb (hebt|bewegt)
     - schnappatmung
     - keine (normale )?atmung|atmet nicht
@@ -1198,7 +1199,7 @@ beatmen:
   label: Beatmung
   patterns:
     - beatm
-    - beutel
+    - (?<!an den )(?<!am )(?<!an )beutel   # „Sauerstoff an den Beutel“ ist keine Beatmung
     - (zwei|2) (atemspenden|beatmungen)|atemspende
   examples:
     - Jetzt zwei Beatmungen mit dem Beutel

@@ -10,14 +10,19 @@ debrief_notes: >
   niemand). Der Kollege baut nacheinander an: AED, Beatmung (Beutel + Maske, Raumluft), Absaugbereitschaft, Sauerstoff, ggf. Guedel-Tubus. Der AED analysiert alle 2 Minuten und empfiehlt jedes Mal einen Schock;
   beim Schock „Schock! Alle weg!“. Durchgehend reanimieren mit minimalen Pausen und Helferwechsel bei der Analyse, bis RTW und NEF
   übernehmen – ein Wiedererlangen des Kreislaufs ist ohne erweiterte Maßnahmen (z. B. Adrenalin) nicht zu erwarten und wird nicht gespielt.
-  Am Ende strukturierte Übergabe: Zeitpunkt des Kollaps, Beginn der HLW, Anzahl der Schocks, Vorgeschichte (Brustschmerz am Morgen).
+  Am Ende strukturierte Übergabe: Zeitpunkt des Kollaps, Beginn der HLW, Anzahl der Schocks, Vorgeschichte, soweit Umstehende etwas wissen.
+  Zu zweit ist während der HLW niemand frei für Anamnese oder weitere Untersuchungen: einer drückt, einer beatmet,
+  beim Helferwechsel tauschen die Rollen.
 
 conscious: false
 breathing: abnormal
 request: {required: [RTW, NEF]}
 funk_early: [atemkontrolle, atmung_beurteilen]   # keine normale Atmung: Notruf sofort (Kollege), parallel HLW
-skip: [waerme, bz]   # während der HLW stört eine Decke; BZ macht der Rettungsdienst, wir drücken
-state: {aed_kommt: false, aed_dran: false, analyse_offen: false, beatmung_moeglich: false, absaug_bereit: false, o2_bereit: false, guedel: false, rd_da: false}
+# Bei der Reanimation gilt das xABCDE-Schema nicht: Zu zweit ist niemand frei, einer drückt, einer beatmet (Rollentausch
+# beim Helferwechsel). Kein ABCDE, kein SAMPLER, keine Decke; die Reevaluation macht der AED alle 2 Minuten. Blutung,
+# Atemwege und Atemkontrolle stehen im Bewusstlos-Zweig der 1. Minute. (Rückmeldung Lea, 22.11.2026)
+skip: [waerme, bz, x, a, b, c, d, e, sample, reevaluation]
+state: {kollege_drueckt: false, aed_kommt: false, aed_dran: false, analyse_offen: false, beatmung_moeglich: false, absaug_bereit: false, o2_bereit: false, guedel: false, rd_da: false}
 
 responses:
   rekap:
@@ -61,11 +66,14 @@ responses:
     - when: {aed_kommt: false}
       say:
         - Befund: (Herzdruckmassage läuft)
-        - Kollege: (holt den AED, schaltet ihn ein und klebt die Elektroden rechts unter dem Schlüsselbein und links seitlich unter der Achsel)
+        - Befund: (Der AED wird eingeschaltet, die Elektroden kommen rechts unter das Schlüsselbein und links seitlich unter die Achsel.)
       set: {aed_kommt: true}
     - say:
         - Befund: (Herzdruckmassage läuft)
   beatmen:
+    - when: {beatmung_moeglich: true, kollege_drueckt: true}   # nach dem Helferwechsel beatmest du
+      say:
+        - Befund: (zwei Beatmungen mit dem Beutel – der Brustkorb hebt sich zweimal)
     - when: {beatmung_moeglich: true}
       say:
         - Kollege: (gibt zwei Beatmungen mit dem Beutel)
@@ -100,13 +108,12 @@ responses:
     - say:
         - Kollege: Absaugbereitschaft hergestellt.
       set: {absaug_bereit: true}
-  sauerstoff:
+  sauerstoff:   # wird beim nächsten Beatmungsdurchlauf an den Beutel angeschlossen (Ereignis „Sauerstoff ist am Beutel …“)
     - when: {o2_bereit: true}
       say:
-        - Kollege: Ist angeschlossen.
+        - Kollege: Ist am Beutel angeschlossen.
     - say:
-        - Kollege: Sauerstoff ist angeschlossen.
-      set: {o2_bereit: true}
+        - Kollege: Mach ich beim nächsten Beatmen.
   schock_warnung:   # „Schock! Alle weg!“ – zählt für die Auswertung, braucht keine eigene Antwort
     - say: []
   schock_ausloesen:
@@ -118,8 +125,14 @@ responses:
       set: {analyse_offen: false}
     - say:
         - Kollege: Der AED hat keinen Schock freigegeben.
-  helferwechsel:
-    - Kollege: (übernimmt die Herzdruckmassage)
+  helferwechsel:   # Rollentausch: wer drückt, zählt laut; der andere beatmet
+    - when: {kollege_drueckt: false}
+      say:
+        - Kollege: (übernimmt die Herzdruckmassage und zählt laut)
+      set: {kollege_drueckt: true}
+    - say:
+        - Kollege: (übernimmt wieder Beutel und Maske)
+      set: {kollege_drueckt: false}
   platz_schaffen:
     - Umstehende: (die Zuschauer weichen zurück)
   seitenlage:
@@ -193,7 +206,7 @@ events:
     since: hlw
     when: {o2_bereit: false}
     say:
-      - Kollege: Sauerstoff ist angeschlossen.
+      - Kollege: Sauerstoff ist am Beutel angeschlossen.
     set: {o2_bereit: true}
   - at: 55
     since: hlw
@@ -246,6 +259,7 @@ key_actions:
   - label: Sobald beatmet werden kann, laut bis 30 gezählt, dann 2 Beatmungen
     all: [hlw_zaehlen, hlw_30]
     after: beatmung_moeglich
+    phase: full   # die 1. Minute endet mit dem frühen Funkspruch, vor dem ersten Beatmungszyklus
   - label: Sicherheit beim Schock („Schock! Alle weg!“)
     any: [schock_warnung]
     before: [schock_ausloesen]
