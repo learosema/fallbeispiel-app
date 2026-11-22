@@ -21,14 +21,14 @@ steps:
     why: 28 °C in der Sonne – Hitze reduzieren.
   - phase: Teambesprechung
   - say: >
-      Kurz zusammengefasst: Patientin weiblich, siebzehn, wach, reagiert angemessen. Kurz zusammengesackt nach dem
+      Kurz zusammengefasst: Patientin weiblich, siebzehn. Kurz zusammengesackt nach dem
       Fahrgeschäft, blass, Puls langsam. Verdacht auf Kreislaufkollaps, C-Problem. Wir brauchen einen RTW zur Abklärung.
       Siehst du das auch so?
   - phase: Funkspruch
   - say: RotkreuzHamburg von EVT1, kommen.
   - say: >
-      Wir haben hier eine Patientin, weiblich, siebzehn, nach Fahrgeschäft kurz zusammengesackt, jetzt wach und reagiert
-      angemessen, Verdacht auf Kreislaufkollaps, wir benötigen einen RTW, kommen.
+      Wir haben hier eine Patientin, weiblich, siebzehn, nach Fahrgeschäft kurz zusammengesackt, Verdacht auf
+      Kreislaufkollaps, wir benötigen einen RTW, kommen.
   - say: EVT1 Ende.
   - phase: A und B
   - say: Die Atemwege sind frei.

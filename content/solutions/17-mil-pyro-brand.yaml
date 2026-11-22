@@ -26,14 +26,14 @@ steps:
     why: Kühlen bei 5 °C – der Rest des Körpers muss warm bleiben.
   - phase: Teambesprechung
   - say: >
-      Kurz zusammengefasst: Patient männlich, Anfang zwanzig, wach, reagiert angemessen. Verbrennung am linken Unterarm,
+      Kurz zusammengefasst: Patient männlich, Anfang zwanzig. Verbrennung am linken Unterarm,
       angeschmolzene Jacke, Funken im linken Auge, leicht heiser. Verdacht auf Verbrennung zweiten Grades und
       Augenverletzung. Wir brauchen einen RTW. Siehst du das auch so?
   - phase: Funkspruch
   - say: RotkreuzHamburg von EVT1, kommen.
   - say: >
       Wir haben hier einen Patienten, männlich, Anfang zwanzig, Verbrennung am Unterarm und Funken im Auge durch
-      Pyrotechnik, wach und reagiert angemessen, Verdacht auf Verbrennung zweiten Grades, wir benötigen einen RTW, kommen.
+      Pyrotechnik, Verdacht auf Verbrennung zweiten Grades, wir benötigen einen RTW, kommen.
   - say: EVT1 Ende.
   - phase: A und B
   - say: Ich zähle die Atemfrequenz.

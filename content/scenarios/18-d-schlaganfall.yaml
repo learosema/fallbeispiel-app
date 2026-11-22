@@ -11,6 +11,7 @@ debrief_notes: >
   nicht erst am Ende der 1. Minute. Im D: BE-FAST und Blutzucker (Unterzucker kann einen Schlaganfall vortäuschen),
   Oberkörper etwa 30° hoch, nichts essen und trinken (Schluckstörung). Ohne Nachforderung verschlechtert er sich.
 
+reaction: abnormal      # Reaktion beim Ansprechen auffällig → in Teambesprechung und Funkspruch nennen
 conscious: true
 trauma: false
 request: {required: [RTW], optional: [NEF]}

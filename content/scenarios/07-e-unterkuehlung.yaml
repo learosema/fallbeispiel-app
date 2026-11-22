@@ -8,6 +8,7 @@ debrief_notes: >
   horizontal lagern, nicht aufstehen lassen, nasse Kleidung entfernen, Isolation von unten, Wärmeerhalt, Temperatur messen,
   Vitalzeichen länger prüfen, Notarzt, Transport. Keine heißen Getränke, kein Alkohol, keine aktive Bewegung.
 
+reaction: abnormal      # Reaktion beim Ansprechen auffällig → in Teambesprechung und Funkspruch nennen
 conscious: true
 trauma: true
 request: {required: [RTW, NEF]}

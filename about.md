@@ -146,8 +146,11 @@ Bitte nicht „wegoptimieren“ – im Zweifel nachfragen.
   „Normale Atmung“ bei der Atemkontrolle Bewusstloser ist der Begriff des Algorithmus und auch in Ordnung.
 - **Atmung beurteilen ≠ Patienten fragen:** „Atmung?“ liefert einen Befund (Frequenz, Atemarbeit, Geräusche);
   „Bekommen Sie gut Luft?“ beantwortet der Patient.
-- **Neurologie in der 1. Minute = nur „Reaktion angemessen?“.** Fällt schon beim ersten „Hallo“ auf, muss aber in
-  **Teambesprechung und Funkspruch** genannt werden (sonst ⚠️ dort). Kein eigener Schritt für die Reihenfolge.
+- **Neurologie in der 1. Minute = nur „Reaktion angemessen?“.** Fällt schon beim ersten „Hallo“ auf. In
+  **Teambesprechung und Funkspruch** wird sie nur genannt, wenn sie **auffällig** ist (Fall: `reaction: abnormal`,
+  Bewusstlose immer) – sonst ⚠️ dort. Eine unauffällige Reaktion („wach, reagiert angemessen“) muss nicht genannt werden
+  (Rückmeldung Lea, 22.11.2026, nach Recherche „10 für 10“: Problem, Fakten, Plan, Verteilen – keine Befundliste).
+  Auch im Funk nur Auffälliges; bei Zustandsänderung (bewusstlos, reanimationspflichtig) erneut funken. Kein eigener Schritt für die Reihenfolge.
   **Orientierung** (Name, Ort, Tag) und **BE-FAST** gehören ins **D** des ABCDE (nur bei Ansprechbaren).
 - **Zeitkritische Fälle** (Schlaganfall, Reanimation, Asthma/Pyro-Asthma, Kettensäge, Polytrauma): Funkspruch so früh
   wie möglich, mit den kritischen Problemen.

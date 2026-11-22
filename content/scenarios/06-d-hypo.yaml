@@ -8,6 +8,7 @@ debrief_notes: >
   GCS, Pupillen, FAST, Beruhigung/Eigenschutz, Glukose nur bei erhaltenen Schutzreflexen, Notruf, Reevaluation.
   Wird kein BZ gemessen, bleibt die Ursache unklar.
 
+reaction: abnormal      # Reaktion beim Ansprechen auffällig → in Teambesprechung und Funkspruch nennen
 conscious: true
 trauma: false
 request: {required: [RTW], optional: [NEF]}

@@ -3,6 +3,7 @@
 # Je Punkt:
 #   all: [a, b, [c, d]]   alle Elemente nötig (ein Element in [] = eines davon reicht); teilweise → ⚠️
 #   any: [a, b]           eines reicht
+#   any_extra: {cond: [c]} weitere Elemente für `any`, wenn die Bedingung gilt
 #   min: n + of: [...]    mindestens n Elemente
 #   only: trauma | bleeding | conscious | unconscious | breathing_normal | breathing_abnormal
 #   extra: {trauma: [...]} zusätzliche Elemente, wenn die Bedingung für den Fall gilt
@@ -27,10 +28,11 @@ minute_conscious:
     extra: {trauma: [trauma_check]}
   - id: neuro
     short: Reaktion
-    label: "Neurologie: Reaktion angemessen? (fällt beim Ansprechen auf; in Teambesprechung und Funkspruch nennen)"
+    label: "Neurologie: Reaktion angemessen? (fällt beim Ansprechen auf; wenn auffällig, in Teambesprechung und Funkspruch nennen)"
     any: [reaktion, gcs]
+    any_extra: {reaction_normal: [vorstellen, laut_ansprechen]}   # unauffällig: mit dem Ansprechen erledigt, nicht extra nennen
     unordered: true   # kein eigener Schritt: gilt auch, wenn die Reaktion in Teambesprechung oder Funkspruch genannt wird
-    tip: "Wie reagiert die Person – angemessen? Das gehört auch in Teambesprechung und Funkspruch."
+    tip: "Wie reagiert die Person – angemessen? Wenn nicht, gehört das in Teambesprechung und Funkspruch."
   - {id: umfeld, short: Umfeld, label: "Umfeld (Verletzungsmechanismus, Frieren)", any: [frieren_fragen, decke], tip: "Und das Umfeld? Friert die Person?"}
   - {id: waerme, short: Wärme, label: "Wärmeerhalt (Decke, Isolation vom Boden)", any: [decke], tip: "Denk an den Wärmeerhalt."}
   - id: team
@@ -86,7 +88,8 @@ full:
 team_talk:
   - label: Patient (Geschlecht, ungefähres Alter)
     patterns: [männlich, weiblich, '\bherr\b', '\bfrau\b', '\bmann\b', patient, '\d+', jahr, jährig, '\balt\b', älter, jung, mitte, anfang, ende]
-  - label: Reaktion (angemessen?)
+  - label: Reaktion (auffällig?)
+    only: reaction_abnormal   # nur Auffälliges nennen (10-für-10: Problem, Fakten, Plan) – „reagiert angemessen“ muss nicht sein
     patterns: [reagiert, reaktion, ansprechbar, '\bwach\b', bewusstlos, bewusstsein, orientiert, verwirrt, somnolent, eingetrübt, '\bgcs\b', adäquat, angemessen]
   - label: Verdacht
     patterns: [verdacht, vermutlich, wahrscheinlich, '\bv ?a\b', problem, gehe von .* aus]

@@ -10,6 +10,7 @@ debrief_notes: >
   Nasenbluten stillen (Nasenflügel, Kühlen), Aspirationsrisiko; GCS, an SHT/HWS denken; Alkohol als Fehlerquelle;
   Rettungsdienst; Ablehnung/Einwilligung sauber klären.
 
+reaction: abnormal      # Reaktion beim Ansprechen auffällig → in Teambesprechung und Funkspruch nennen
 conscious: true
 trauma: true
 request: {required: [RTW], optional: [NEF, Polizei]}

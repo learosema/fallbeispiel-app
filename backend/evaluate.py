@@ -63,7 +63,11 @@ def check_item(item: dict[str, Any], run: Run) -> dict[str, Any]:
         if skipped in run.scenario.skip:
             elements = [el for el in elements if el not in drop]
     if "any" in item:
-        elements = [list(item["any"])]
+        anys = list(item["any"])
+        for cond, more in (item.get("any_extra") or {}).items():
+            if _applies(cond, run):
+                anys += more
+        elements = [anys]
     need = item.get("min", len(elements))
 
     firsts = [(el, _first(el, run)) for el in elements]
@@ -110,8 +114,8 @@ def check_funk(run: Run) -> dict[str, Any]:
             problems.append("Patient (Geschlecht, ungefähres Alter) fehlt")
         if not meldung["verdacht"]:
             problems.append("Verdachtsdiagnose fehlt")
-        if not meldung["reaktion"]:
-            problems.append("Reaktion/Bewusstsein nicht genannt (z. B. „wach, reagiert angemessen“)")
+        if not meldung["reaktion"] and _applies("reaction_abnormal", run):
+            problems.append("Auffällige Reaktion nicht genannt (z. B. „reagiert verzögert“, „verwirrt“, „bewusstlos“)")
         if not meldung["kommen"]:
             problems.append("Meldung nicht mit „kommen“ abgeschlossen")
     requested = {r.upper() for f in infos for r in f["resources"]}
@@ -223,6 +227,8 @@ def _blocks(text: str, blocks: list[dict[str, Any]], run: Run | None = None) -> 
     for block in blocks:
         if block.get("if_intent") and (run is None or block["if_intent"] not in run.first):
             continue
+        if block.get("only") and (run is None or not _applies(block["only"], run)):
+            continue
         found = {p for p in block["patterns"] if re.search(p.replace("ß", "ss"), text)}
         if len(found) < block.get("min", 1):
             missing.append(block["label"])
@@ -234,7 +240,7 @@ def check_team(run: Run) -> dict[str, Any]:
     parts = [n for n, t in enumerate(run.turns) if t.team]
     if not parts:
         return {"status": MISSING, "note": ""}
-    missing = _blocks(normalize(" ".join(run.turns[n].text for n in parts)), algorithm().get("team_talk", []))
+    missing = _blocks(normalize(" ".join(run.turns[n].text for n in parts)), algorithm().get("team_talk", []), run)
     if not any(run.turns[n].team_closed for n in parts):
         missing.append("Abschlussfrage an den Kollegen („Siehst du das auch so?“)")
     return {"status": OK if not missing else PARTIAL, "note": ("Fehlt: " + "; ".join(missing)) if missing else "",

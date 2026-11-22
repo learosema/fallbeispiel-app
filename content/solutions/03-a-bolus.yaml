@@ -23,14 +23,14 @@ steps:
   - say: Ist Ihnen kalt?
   - phase: Teambesprechung
   - say: >
-      Kurz zusammengefasst: Patient männlich, Anfang sechzig, wach, reagiert angemessen. Bolus mit Steak, nach
+      Kurz zusammengefasst: Patient männlich, Anfang sechzig. Bolus mit Steak, nach
       Rückenschlägen und Oberbauchkompressionen gelöst. Verdacht auf A-Problem, jetzt gelöst, aber Verletzung durch die
       Oberbauchkompressionen möglich. Wir brauchen einen RTW. Siehst du das auch so?
   - phase: Funkspruch
   - say: RotkreuzHamburg von EVT1, kommen.
   - say: >
       Wir haben hier einen Patienten, männlich, Anfang sechzig, Bolusgeschehen, mit Rückenschlägen und
-      Oberbauchkompressionen gelöst, wach und reagiert angemessen, Verdacht auf A-Problem, wir benötigen einen RTW, kommen.
+      Oberbauchkompressionen gelöst, Verdacht auf A-Problem, wir benötigen einen RTW, kommen.
   - say: EVT1 Ende.
   - phase: A und B
   - say: Ich schaue in den Mund, ob da noch etwas drin ist.

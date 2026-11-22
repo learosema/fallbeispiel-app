@@ -18,7 +18,7 @@ steps:
     why: Schwere Atemnot ist zeitkritisch – früh funken, mit Notarzt.
   - say: >
       Wir haben hier eine Patientin, weiblich, ca. zwanzig, bekannte Asthmatikerin, schwere Atemnot, Spray ohne
-      Wirkung, wach, Verdacht auf schweren Asthmaanfall, wir benötigen RTW und NEF, kommen.
+      Wirkung, Verdacht auf schweren Asthmaanfall, wir benötigen RTW und NEF, kommen.
   - say: EVT1 Ende.
   - phase: Weiter im Schnellcheck
   - say: Atmen Sie ganz langsam mit mir, durch die Nase ein und durch den Mund aus, mit der Lippenbremse.
@@ -27,7 +27,7 @@ steps:
   - say: Ist Ihnen kalt?
   - phase: Teambesprechung
   - say: >
-      Kurz zusammengefasst: Patientin weiblich, ca. zwanzig, wach, ängstlich. Schwere Atemnot, Spray ohne Wirkung,
+      Kurz zusammengefasst: Patientin weiblich, ca. zwanzig. Schwere Atemnot, Spray ohne Wirkung,
       Lippen bläulich. Verdacht auf schweren Asthmaanfall, B-Problem. RTW und NEF sind alarmiert. Siehst du das auch so?
   - phase: A und B
   - say: Die Atemwege sind frei.

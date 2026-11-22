@@ -22,7 +22,7 @@ steps:
     why: Zeitkritisch – sobald die Blutung steht, sofort funken.
   - say: >
       Wir haben hier einen Patienten, männlich, Mitte vierzig, Schnittverletzung durch Kettensäge am Oberschenkel mit
-      spritzender Blutung, Tourniquet angelegt, wach, Verdacht auf Volumenmangelschock, wir benötigen RTW und NEF, kommen.
+      spritzender Blutung, Tourniquet angelegt, Verdacht auf Volumenmangelschock, wir benötigen RTW und NEF, kommen.
   - say: EVT1 Ende.
   - phase: Ansprechen und Schnellcheck
   - say: Was ist passiert?
@@ -36,7 +36,7 @@ steps:
   - say: Ich decke Sie mit der Rettungsdecke zu und isoliere Sie vom Boden.
   - phase: Teambesprechung
   - say: >
-      Kurz zusammengefasst: Patient männlich, Mitte vierzig, wach, ängstlich. Spritzende Blutung am Oberschenkel,
+      Kurz zusammengefasst: Patient männlich, Mitte vierzig. Spritzende Blutung am Oberschenkel,
       steht jetzt mit Tourniquet. Schockzeichen. Verdacht auf Volumenmangelschock. RTW und NEF sind alarmiert.
       Siehst du das auch so?
   - phase: A und B

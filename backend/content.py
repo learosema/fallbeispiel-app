@@ -61,6 +61,8 @@ class Scenario:
     trauma: bool
     bleeding: bool
     breathing: str              # "normal" | "abnormal" (nur bei Bewusstlosigkeit relevant)
+    reaction: str               # "normal" | "abnormal" – Reaktion beim Ansprechen auffällig? Nur dann gehört sie in
+                                # Teambesprechung und Funkspruch (Bewusstlose: immer auffällig)
     request_required: list[str]
     request_optional: list[str]
     state: dict[str, Any]
@@ -269,6 +271,7 @@ def _load_scenario(path: Path) -> Scenario:
         trauma=bool(d.get("trauma", False)),
         bleeding=bool(d.get("bleeding", False)),
         breathing=d.get("breathing", "normal"),
+        reaction=d.get("reaction", "normal" if d.get("conscious", True) else "abnormal"),
         request_required=[r.upper() for r in req.get("required", ["RTW"])],
         request_optional=[r.upper() for r in req.get("optional", [])],
         state=dict(d.get("state") or {}),
