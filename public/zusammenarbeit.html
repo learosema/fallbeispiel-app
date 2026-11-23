@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Zusammenarbeit – Fallbeispiel xABCDE</title>
+  <meta name="theme-color" content="#b3261e">
+  <meta name="description" content="Zusammenarbeit im Sanitätstrupp: wer macht was in welcher Phase, klare Aufträge mit Rückmeldung, Bedenken ansprechen und was hilft, wenn es im Team hakt.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    html, body { height: auto; min-height: 100%; }
+    main.doc { display: block; width: 100%; max-width: 720px; margin: 0 auto; padding: 8px 16px 48px; }
+    .topbar a.icon-btn { display: grid; place-items: center; text-decoration: none; }
+    .doc > p.lead { margin: 16px 0; max-width: 62ch; }
+    .toc { display: flex; flex-wrap: wrap; gap: 8px; padding: 0; margin: 0 0 16px; list-style: none; }
+    .toc a { display: inline-block; padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--card); color: var(--fg); text-decoration: none; font-size: .9rem; }
+    details.sheet { background: var(--card); border: 1px solid var(--line); border-radius: 14px; margin: 0 0 12px; scroll-margin-top: 12px; }
+    details.sheet > summary { cursor: pointer; padding: 14px 16px; font-weight: 700; font-size: 1.1rem; list-style: none; display: flex; align-items: center; gap: 10px; }
+    details.sheet > summary::-webkit-details-marker { display: none; }
+    details.sheet > summary::after { content: "▸"; margin-left: auto; color: var(--muted); transition: transform .15s; }
+    details.sheet[open] > summary::after { transform: rotate(90deg); }
+    details.sheet > summary small { font-weight: 400; color: var(--muted); font-size: .85rem; }
+    .body { padding: 0 16px 16px; }
+    .body h3 { font-size: 1rem; margin: 18px 0 6px; }
+    .body h3:first-child { margin-top: 0; }
+    .body p, .body li { max-width: 62ch; }
+    .body ul, .body ol { padding-left: 1.2em; margin: 6px 0; }
+    .body li { margin: 3px 0; }
+    .note { background: var(--sys); border-radius: 10px; padding: 10px 12px; color: var(--muted); font-size: .92rem; }
+    .warn { background: var(--sys); border-left: 4px solid var(--accent); border-radius: 10px; padding: 10px 12px; font-size: .95rem; }
+    .say { display: block; background: var(--me); border-radius: 10px; padding: 8px 12px; margin: 6px 0; font-style: normal; }
+    .say::before { content: "„"; } .say::after { content: "“"; }
+    .say b { font-weight: 600; color: var(--muted); font-size: .85rem; margin-right: 4px; }
+    .say b::after { content: ":"; }
+    .avoid { display: block; background: var(--sys); border-radius: 10px; padding: 8px 12px; margin: 6px 0; color: var(--muted); }
+    .avoid s { color: var(--fg); }
+    .flow { list-style: none; padding: 0 !important; display: grid; gap: 8px; counter-reset: s; }
+    .flow > li { counter-increment: s; display: grid; grid-template-columns: 28px 1fr; gap: 10px; align-items: start; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin: 0; }
+    .flow > li::before { content: counter(s); width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: var(--accent-fg); display: grid; place-items: center; font-weight: 700; font-size: .9rem; }
+    .split { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+    .split > div { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+    .split h3 { margin-top: 0; }
+    .table-wrap { overflow-x: auto; }
+    table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+    th, td { text-align: left; vertical-align: top; padding: 8px; border-bottom: 1px solid var(--line); }
+    th { color: var(--accent); }
+    td:first-child { font-weight: 600; white-space: nowrap; }
+    td ul { padding-left: 1.1em !important; margin: 0 !important; }
+    .case { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin: 8px 0; }
+    .case h4 { margin: 0 0 4px; font-size: 1rem; }
+    .case p { margin: 4px 0; }
+    footer { color: var(--muted); font-size: .85rem; margin-top: 32px; }
+    @media print {
+      .topbar, .toc { display: none; }
+      details.sheet { break-inside: avoid; border: 0; }
+      details.sheet > summary::after { content: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="icon-btn" href="./" aria-label="Zur App">←</a>
+    <h1>Zusammenarbeit</h1>
+    <span class="icon-btn" aria-hidden="true"></span>
+  </header>
+
+  <main class="doc">
+    <p class="lead">Zu zweit am Patienten geht vieles schneller, aber nur, wenn klar ist, wer was macht. Hier steht eine übliche Aufteilung für jede Phase, wie Aufträge sicher ankommen und was hilft, wenn es im Team hakt. Wie dein Verband die Rollen genau verteilt, sagt deine Ausbildung, und das gilt.</p>
+
+    <nav aria-label="Abschnitte">
+      <ul class="toc">
+        <li><a href="#rollen">Rollen</a></li>
+        <li><a href="#phasen">Wer macht was</a></li>
+        <li><a href="#auftraege">Aufträge</a></li>
+        <li><a href="#bedenken">Bedenken sagen</a></li>
+        <li><a href="#hakt">Wenn's hakt</a></li>
+        <li><a href="#briefing">Vorher absprechen</a></li>
+        <li><a href="#pruefung">In der Prüfung</a></li>
+        <li><a href="#danach">Danach</a></li>
+        <li><a href="spicker.html#team">10 für 10 &amp; Funk →</a></li>
+      </ul>
+    </nav>
+
+    <!-- ============================================================ Rollen -->
+    <details class="sheet" id="rollen" open>
+      <summary>Zwei Rollen <small>eine führt, eine unterstützt</small></summary>
+      <div class="body">
+        <p>Auch zu zweit braucht es eine Person, die den Überblick hat und entscheidet. Das ist keine Rangfrage, sondern verhindert, dass beide dasselbe machen und etwas anderes liegen bleibt.</p>
+        <div class="split">
+          <div>
+            <h3>Person A – führt</h3>
+            <ul>
+              <li>Spricht mit dem Patienten, ist die „eine Stimme“</li>
+              <li>Geht 1. Minute und xABCDE durch</li>
+              <li>Verteilt Aufgaben, entscheidet über RTW/Notarzt</li>
+              <li>Macht Teambesprechung und Übergabe</li>
+              <li>Behält den Überblick, statt sich in einer Aufgabe zu verlieren</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Person B – unterstützt</h3>
+            <ul>
+              <li>Behält Umfeld und Sicherheit im Blick</li>
+              <li>Material: ablegen, anreichen, vorbereiten</li>
+              <li>Hände: Blutung stillen, Kopf halten, messen</li>
+              <li>Meldet Werte laut zurück, notiert sie</li>
+              <li>Denkt mit und sagt, was auffällt</li>
+            </ul>
+          </div>
+        </div>
+        <p class="note"><strong>Die Rollen sind nicht starr.</strong> Wer gerade die Hände frei hat, übernimmt den Funk. Wer etwas Gefährliches sieht, sagt es sofort, egal in welcher Rolle. Und wenn A merkt, dass B den Fall besser kennt, kann man tauschen – aber laut: „Übernimmst du die Führung?“</p>
+      </div>
+    </details>
+
+    <!-- ============================================================ Phasen -->
+    <details class="sheet" id="phasen">
+      <summary>Wer macht was <small>Phase für Phase</small></summary>
+      <div class="body">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Phase</th><th>A – führt</th><th>B – unterstützt</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>Anfahrt</td>
+                <td>Kurz sagen, wer führt</td>
+                <td>Material greifen, Eigenschutz (Handschuhe für beide)</td>
+              </tr>
+              <tr>
+                <td>Ankunft</td>
+                <td>Sicherheit und Lage beurteilen, Patient ansprechen, vorstellen</td>
+                <td>Mit beurteilen, Material in Reichweite ablegen, Umstehende im Blick</td>
+              </tr>
+              <tr>
+                <td>x</td>
+                <td>Bedrohliche Blutung ansagen</td>
+                <td>Abdrücken, Druckverband, ggf. Tourniquet mit Uhrzeit. Oft macht das sofort, wer näher dran ist.</td>
+              </tr>
+              <tr>
+                <td>Trauma</td>
+                <td>Weiter mit der 1. Minute</td>
+                <td>Kopf manuell halten, bleibt dort, bis abgelöst</td>
+              </tr>
+              <tr>
+                <td>1. Minute</td>
+                <td>Schauen, fragen, tasten, laut ansagen, was auffällt</td>
+                <td>Zuhören, mitdenken, Auffälliges ergänzen</td>
+              </tr>
+              <tr>
+                <td>Bespre&shy;chung</td>
+                <td>Lage, Probleme, Verdacht, Plan, „Siehst du das auch so?“</td>
+                <td>Bestätigen oder ergänzen: „Ja. Mir ist noch aufgefallen …“</td>
+              </tr>
+              <tr>
+                <td>Funk</td>
+                <td colspan="2">Vorher klären, wer funkt. Meist die Person, die gerade die Hände frei hat, damit die andere beim Patienten bleibt. Die andere hört mit, was gemeldet wird.</td>
+              </tr>
+              <tr>
+                <td>ABCDE</td>
+                <td>Untersucht Buchstabe für Buchstabe, gibt Messaufträge</td>
+                <td>Misst auf Auftrag (SpO₂, Blutdruck, Blutzucker, …), meldet den Wert laut, notiert</td>
+              </tr>
+              <tr>
+                <td>Maß&shy;nahmen</td>
+                <td>Entscheidet, erklärt sie dem Patienten</td>
+                <td>Bereitet vor: Sauerstoff, Decke, Lagerung. Bei Lagerung zählt eine Person an.</td>
+              </tr>
+              <tr>
+                <td>SAMPLER</td>
+                <td>Fragt den Patienten</td>
+                <td>Notiert, fragt ggf. Angehörige parallel (nicht gleichzeitig mit A beim Patienten)</td>
+              </tr>
+              <tr>
+                <td>Verlauf</td>
+                <td>Erneut beurteilen, bei Änderung 10 für 10 und erneut funken</td>
+                <td>Werte im Blick, meldet Schwellen („Sättigung jetzt 91 %“)</td>
+              </tr>
+              <tr>
+                <td>Übergabe</td>
+                <td>Übergibt an den Rettungsdienst</td>
+                <td>Reicht Notizen, ergänzt am Ende, hilft dann auf Auftrag des RD</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Reanimation</h3>
+        <ol class="flow">
+          <li><div><strong>Sofort aufteilen:</strong> Eine Person funkt kurz an die Leitstelle, die andere prüft die Atmung und fängt an zu drücken.</div></li>
+          <li><div><strong>Dann:</strong> Eine Person drückt und zählt laut, die andere beatmet, bringt den AED an und hängt Sauerstoff an den Beutel.</div></li>
+          <li><div><strong>Bei jeder Analyse:</strong> „Schock! Alle weg!“ – und Helferwechsel. Wer gedrückt hat, beatmet jetzt. Ermüdung merkt man selbst zu spät.</div></li>
+          <li><div><strong>Kein ABCDE, keine Anamnese</strong> während der HLW. Nur eine kritische Blutung wird auch jetzt gestillt.</div></li>
+        </ol>
+
+        <h3>Grundregeln für alle Phasen</h3>
+        <ul>
+          <li><strong>Einer bleibt immer beim Patienten.</strong> Holt B Material, bleibt A – und umgekehrt.</li>
+          <li><strong>Eine Stimme zum Patienten.</strong> Zwei Personen, die gleichzeitig Fragen stellen, verwirren und stressen.</li>
+          <li><strong>Verdacht wird im Team besprochen,</strong> nicht laut über dem Patienten bewertet.</li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ============================================================ Aufträge -->
+    <details class="sheet" id="auftraege">
+      <summary>Klare Aufträge <small>mit Rückmeldung</small></summary>
+      <div class="body">
+        <p>Die meisten Pannen im Team sind keine Wissenslücken, sondern Aufträge, die nicht ankommen. Dagegen hilft eine geschlossene Schleife („Closed Loop“): Auftrag, Wiederholen, Erledigt melden.</p>
+        <ol class="flow">
+          <li><div><strong>Auftrag</strong> – mit Ansprache und konkret
+            <span class="say"><b>A</b>Kannst du bitte den Blutzucker messen?</span></div></li>
+          <li><div><strong>Wiederholen</strong> – zeigt, dass es angekommen ist
+            <span class="say"><b>B</b>Ich messe den Blutzucker.</span></div></li>
+          <li><div><strong>Erledigt melden</strong> – mit Wert
+            <span class="say"><b>B</b>Blutzucker ist 48.</span></div></li>
+          <li><div><strong>Bestätigen</strong>
+            <span class="say"><b>A</b>Danke, 48, also zu niedrig.</span></div></li>
+        </ol>
+
+        <h3>So kommen Aufträge an</h3>
+        <ul>
+          <li><strong>Eine Person, eine Aufgabe.</strong> Nicht in den Raum sprechen.</li>
+          <li><strong>Konkret statt vage.</strong> „Häng bitte Sauerstoff an, 10 Liter, Maske“ statt „Vielleicht mal Sauerstoff?“</li>
+          <li><strong>Mit Schwelle,</strong> wenn etwas beobachtet werden soll: „Behalte die Sättigung im Blick und sag mir, wenn sie unter 94 % fällt.“</li>
+          <li><strong>Nicht stapeln.</strong> Lieber zwei Aufträge nacheinander als fünf auf einmal.</li>
+          <li><strong>Laut ansagen, was du selbst tust:</strong> „Ich taste jetzt den Bauch ab.“ Dann weiß B, wo du bist, und kann mitdenken.</li>
+        </ul>
+        <span class="avoid"><s>„Kann mal jemand …?“</s> – in einem Trupp heißt das: niemand fühlt sich gemeint, oder beide.</span>
+        <span class="avoid"><s>„Okay.“</s> als Antwort – unklar, ob es angekommen ist. Besser: wiederholen.</span>
+
+        <h3>Als Person B</h3>
+        <ul>
+          <li><strong>Anbieten statt warten:</strong> „Soll ich schon den Blutdruck messen?“</li>
+          <li><strong>Werte immer laut melden,</strong> auch normale. In der Teambesprechung und im Funk nennt A dann nur das Auffällige.</li>
+          <li><strong>Nicht verstanden? Nachfragen.</strong> „Meinst du die Decke oder die Rettungsdecke?“ kostet zwei Sekunden.</li>
+          <li><strong>Erledigt melden, auch wenn's nicht geklappt hat:</strong> „Blutdruck ging nicht, Arm zu kalt. Ich versuche es am anderen.“</li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ============================================================ Bedenken -->
+    <details class="sheet" id="bedenken">
+      <summary>Bedenken ansprechen <small>sachlich, früh, deutlich</small></summary>
+      <div class="body">
+        <p>Wenn dir etwas komisch vorkommt, sag es. Auch als neuere oder unterstützende Person. Die führende Person sieht nicht alles, und ein offenes Wort ist keine Kritik, sondern Teamarbeit.</p>
+        <h3>In Stufen, je nachdem, wie dringend</h3>
+        <ol class="flow">
+          <li><div><strong>Beobachtung teilen</strong>
+            <span class="say">Mir fällt auf, dass er immer langsamer antwortet.</span></div></li>
+          <li><div><strong>Sorge benennen und vorschlagen</strong>
+            <span class="say">Ich mache mir Sorgen, dass sich das verschlechtert. Sollen wir den NEF nachfordern?</span></div></li>
+          <li><div><strong>Klar stoppen</strong> – wenn es um Sicherheit geht
+            <span class="say">Stopp. Da ist noch Strom auf der Leitung.</span></div></li>
+        </ol>
+        <h3>Als führende Person</h3>
+        <ul>
+          <li>Bedenken ernst nehmen, kurz bedanken, dann entscheiden: „Gut, dass du's sagst. Wir fordern nach.“</li>
+          <li>Selbst einladen: „Habe ich etwas übersehen?“ – das ist genau die Rückfrage am Ende der Teambesprechung.</li>
+          <li><strong>Im Zweifel die sicherere Option:</strong> Seid ihr euch beim Notarzt uneinig, lieber nachfordern. Abbestellen geht immer.</li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ============================================================ Wenn's hakt -->
+    <details class="sheet" id="hakt">
+      <summary>Wenn's hakt <small>typische Situationen</small></summary>
+      <div class="body">
+        <div class="case">
+          <h4>Beide reden gleichzeitig mit dem Patienten</h4>
+          <p>Eine Stimme zum Patienten, das ist A. B stellt Fragen über A oder übernimmt bewusst, z. B. die Angehörigen.</p>
+        </div>
+        <div class="case">
+          <h4>Beide greifen zum selben – oder keiner</h4>
+          <p>Aufgaben laut verteilen. Wer etwas anfängt, sagt es: „Ich mach die Blutdruckmanschette.“</p>
+        </div>
+        <div class="case">
+          <h4>Du weißt als B nicht, was du tun sollst</h4>
+          <p>Fragen ist völlig in Ordnung: „Was soll ich als Nächstes machen?“ Oder anbieten, was ansteht: Werte messen, Decke holen, Notizen machen.</p>
+        </div>
+        <div class="case">
+          <h4>Die andere Person übersieht etwas</h4>
+          <p>Sachlich ansprechen, nicht vorwurfsvoll: „Mir ist noch aufgefallen, dass …“ – siehe <a href="#bedenken">Bedenken ansprechen</a>. Nicht still selbst übernehmen, sonst arbeitet ihr aneinander vorbei.</p>
+        </div>
+        <div class="case">
+          <h4>A ist überfordert oder hängt fest</h4>
+          <p>Ein <a href="spicker.html#team">10 für 10</a> einfordern: „Lass uns kurz sortieren.“ Das darf jede:r im Team. Oder Unterstützung anbieten: „Soll ich die Führung übernehmen?“</p>
+        </div>
+        <div class="case">
+          <h4>Ihr seid unterschiedlicher Meinung</h4>
+          <p>Kurz austauschen, dann entscheidet A. Am Patienten nicht diskutieren – der hört mit. Grundsätzliches klärt ihr danach in Ruhe.</p>
+        </div>
+        <div class="case">
+          <h4>Ihr kennt euch nicht</h4>
+          <p>Zwei Minuten <a href="#briefing">vorher absprechen</a> sparen im Einsatz viel Hakeln.</p>
+        </div>
+        <div class="case">
+          <h4>Der Rettungsdienst kommt</h4>
+          <p>A übergibt, B ergänzt am Ende. Danach führt der Rettungsdienst. Ihr helft auf Auftrag weiter und meldet auch dort zurück, was ihr erledigt habt.</p>
+        </div>
+      </div>
+    </details>
+
+    <!-- ============================================================ Briefing -->
+    <details class="sheet" id="briefing">
+      <summary>Vorher absprechen <small>2 Minuten vor Dienst oder Prüfung</small></summary>
+      <div class="body">
+        <ul>
+          <li><strong>Namen</strong> – und wie ihr euch ansprecht.</li>
+          <li><strong>Erfahrung:</strong> Wer hat was schon oft gemacht, wo ist jemand unsicher?</li>
+          <li><strong>Wer führt</strong> beim ersten Einsatz? Wechselt ihr ab?</li>
+          <li><strong>Wer funkt?</strong> Rufnamen klar, Funkgerät geprüft.</li>
+          <li><strong>Material:</strong> Wer trägt was, wo liegt was im Rucksack?</li>
+          <li><strong>Zeichen für „Stopp, kurz sortieren“</strong> vereinbaren.</li>
+        </ul>
+        <span class="say">Ich bin Sam. Ich führe beim ersten Fall, du nimmst Material, Messen und Funk? Wenn dir was auffällt, sag's einfach laut.</span>
+      </div>
+    </details>
+
+    <!-- ============================================================ Prüfung -->
+    <details class="sheet" id="pruefung">
+      <summary>In der Prüfung <small>Teamarbeit sichtbar machen</small></summary>
+      <div class="body">
+        <ul>
+          <li><strong>Mit dem Prüfungspartner kurz absprechen,</strong> wer führt und wer was macht – siehe <a href="#briefing">vorher absprechen</a>.</li>
+          <li><strong>Laut denken und laut beauftragen.</strong> Prüfende können nur bewerten, was sie hören und sehen. Ein stiller Blick zum Kollegen zählt nicht.</li>
+          <li><strong>Teambesprechung mit Rückfrage abschließen:</strong> „Siehst du das auch so?“</li>
+          <li><strong>Fehler des Partners freundlich ansprechen,</strong> nicht wortlos übernehmen oder überspielen. Gute Zusammenarbeit wird gesehen.</li>
+          <li><strong>Hängt der Partner,</strong> hilf mit einem Vorschlag statt einer Lösung: „Wollen wir noch den Blutzucker messen?“</li>
+        </ul>
+        <p class="note"><strong>Üben in der App:</strong> Sag deine Aufträge an den Kollegen so, wie du sie im Einsatz sagen würdest – konkret und an ihn gerichtet. So wird das zur Gewohnheit.</p>
+      </div>
+    </details>
+
+    <!-- ============================================================ Danach -->
+    <details class="sheet" id="danach">
+      <summary>Nach dem Einsatz <small>kurz nachbesprechen</small></summary>
+      <div class="body">
+        <p>Fünf Minuten, ehrlich und ohne Schuldfrage. Am besten direkt danach, solange alles frisch ist.</p>
+        <ol class="flow">
+          <li><div><strong>Was lief gut?</strong> Das wollt ihr beibehalten.</div></li>
+          <li><div><strong>Wo hat es gehakt?</strong> Sachlich, an der Situation, nicht an der Person.</div></li>
+          <li><div><strong>Was machen wir beim nächsten Mal anders?</strong> Eine konkrete Sache reicht.</div></li>
+          <li><div><strong>Wie geht's dir?</strong> Belastende Einsätze gehören besprochen, im Team, mit der Gruppenführung oder mit der PSNV-E.</div></li>
+        </ol>
+        <span class="avoid"><s>„Du hast schon wieder vergessen …“</s> – besser: „Beim Blutdruck waren wir uns nicht einig, wer misst. Wie machen wir das beim nächsten Mal?“</span>
+      </div>
+    </details>
+
+    <footer>
+      <p>Allgemeine Tipps nach gängigen Prinzipien des Crew Resource Management (u. a. geschlossene Kommunikationsschleife, 10 für 10 nach Rall, Glavin &amp; Flin 2008). Die Aufteilung ist ein Vorschlag. Wie Rollen und Funk in deinem Verband verteilt sind, sagt deine Ausbildung.</p>
+    </footer>
+  </main>
+
+  <script>
+    // Sprungmarken öffnen den zugehörigen Abschnitt
+    function openFromHash() {
+      const el = location.hash && document.querySelector(location.hash);
+      if (el && el.tagName === "DETAILS") { el.open = true; requestAnimationFrame(() => el.scrollIntoView()); }
+    }
+    window.addEventListener("hashchange", openFromHash);
+    openFromHash();
+  </script>
+</body>
+</html>
