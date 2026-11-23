@@ -141,6 +141,14 @@ alone:
       - Patient: (keuchend) Nicht … weg… gehen …
       - Umstehende: Hallo? Sie können sie doch nicht allein lassen!
 
+smalltalk:
+  befinden:
+    - when: {sauerstoff: false}
+      say:
+        - Patient: (keuchend, schüttelt den Kopf)
+    - say:
+        - Patient: (nickt) Etwas … besser.
+
 patient_smalltalk:
   - say:
       - Patient: (keuchend, nickt nur)

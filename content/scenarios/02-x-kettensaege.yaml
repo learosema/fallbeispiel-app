@@ -225,6 +225,20 @@ alone:  # Jens drückt weiter auf die Wunde, Markus ruft
       - Patient: Hallo? Wo seid ihr?
       - Umstehende: (Jens, ruft) Hallo! Kommt ihr wieder?
 
+smalltalk:  # Antworten auf Smalltalk-Regeln (content/smalltalk.yaml), vor patient_smalltalk
+  befinden:
+    - when: {blutung_steht: false, durchgeblutet: true}
+      say:
+        - Patient: Nein! Das blutet ja schon wieder durch!
+    - when: {blutung_steht: false, druckverband_an: true}
+      say:
+        - Patient: (presst die Zähne zusammen) Ein bisschen … aber mir ist so schwindlig.
+    - when: {blutung_steht: false}
+      say:
+        - Patient: Nein! Das blutet immer noch – macht doch was!
+    - say:
+        - Patient: Ein bisschen … aber mir ist immer noch so schwindlig.
+
 patient_smalltalk:
   - when: {blutung_steht: false}
     say:

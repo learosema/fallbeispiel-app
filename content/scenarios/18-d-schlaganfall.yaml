@@ -137,6 +137,12 @@ alone:
   - say:
       - Umstehende: (Ehefrau) Sie können uns doch nicht allein lassen! Hilfe!
 
+smalltalk:
+  befinden:  # Lagerung hilft gegen die Angst, nicht gegen den Schlaganfall
+    - say:
+        - Patient: (verwaschen) Der Arm … immer noch so schwer.
+        - Patient: (schüttelt langsam den Kopf, verwaschen) Nicht … besser.
+
 patient_smalltalk:
   - say:
       - Patient: (nickt und sagt etwas Unverständliches)

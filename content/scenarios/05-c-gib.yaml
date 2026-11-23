@@ -127,6 +127,12 @@ events:
     set: {bewusstlos: true}
     expect: {any: [laut_ansprechen, atemkontrolle, schocklage], within: 20, label: Bewusstlosigkeit erkannt}
 
+smalltalk:
+  befinden:
+    - when: {schocklage: true}
+      say:
+        - Patient: Im Liegen … etwas besser. Aber mir ist noch schwindlig.
+
 key_actions:
   - label: Schock erkannt (Puls, Rekap, Haut)
     all: [puls, rekap, hautfarbe]

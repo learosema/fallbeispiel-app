@@ -139,6 +139,14 @@ alone:
       - Patient: (keuchend) Nicht … weggehen …
       - Umstehende: Hey! Ihr könnt sie doch nicht hier im Rauch lassen!
 
+smalltalk:
+  befinden:
+    - when: {aus_gefahr_bringen: false}
+      say:
+        - Patient: (hustet) Nein … der Rauch …
+    - say:
+        - Patient: (hustet, nickt) Etwas … besser.
+
 patient_smalltalk:
   - say:
       - Patient: (hustet, nickt nur)

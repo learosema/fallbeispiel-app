@@ -146,6 +146,12 @@ alone:
   - say:
       - Umstehende: (ein Mitarbeiter des Fahrgeschäfts) Hallo? Wo gehen Sie hin? Der rührt sich kaum!
 
+smalltalk:
+  befinden:  # Spannungspneu: Die Atemnot nimmt trotz Maßnahmen zu
+    - when: {gestaut: true}
+      say:
+        - Patient: (angestrengt) Nein … die Luft … wird immer weniger.
+
 key_actions:
   - label: Sicherheit (Not-Aus bestätigt) vor dem Betreten
     any: [lage_pruefen]
