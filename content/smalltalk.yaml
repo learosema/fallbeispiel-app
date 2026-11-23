@@ -11,6 +11,12 @@
 #   repeat    true: wiederholt stattdessen die Antworten der vorigen Äußerung („Wie bitte?“)
 #   unconscious  Antwort statt `say`, wenn die Person bewusstlos ist (für Sätze an den Patienten)
 #   tip       true: Bitte um Hilfe – Tipp zum nächsten offenen Punkt der Checkliste (abschaltbar)
+#   measures  Intents (Maßnahmen): Ist eine davon erfolgt, antwortet der Patient mit `better` statt `say`
+#   repeats   Intents, die – schon einmal erledigt – erneut gestellt als diese Regel gelten
+#             („Wie fühlen Sie sich?“ nach der Frage nach Beschwerden ist Betreuung, keine neue Anamnese)
+#
+# Fälle können einzelne Regeln überschreiben: `smalltalk: {befinden: [{when: …, say: …}]}` in der Fall-Datei
+# (erste passende Variante gilt, vor `patient_smalltalk`) – z. B. wenn es trotz Maßnahme nicht besser wird.
 #
 # Leitlinien: Fachliche Tipps nur über `tip` (auf Nachfrage); nichts über verborgene Befunde des Falls.
 # Nichts, was sich auch an Patient:innen richten könnte (Kinderfälle duzen!), z. B. „Wie geht's dir?“ –
@@ -106,6 +112,25 @@ rules:
       - Patient: (seufzt) Ja, das kann man wohl sagen.
       - Patient: Ja … ausgerechnet heute.
       - Patient: (nickt) Hm.
+    unconscious:
+      - Befund: (keine Reaktion)
+
+  befinden:  # an den Patienten: Nachfrage zum Befinden – Betreuung, damit er sich nicht allein gelassen fühlt (zählt nicht)
+    patterns:
+      - ^(und |na |so |also )?((geht es|gehts) (ihnen|dir)|fühlen sie sich|fühlst du dich|ist es|ist das|wird es|wirds)( jetzt| schon| denn| ein bisschen| ein wenig| etwas| wieder| mittlerweile| inzwischen| nun| so)* (besser|angenehmer|leichter|bequemer)( so| jetzt| damit| mit der decke| im liegen| im sitzen)?$
+      - ^(und |na |so |also )?(wie (geht es|gehts) (ihnen|dir)|wie fühlen sie sich|wie fühlst du dich)( denn)?( jetzt| inzwischen| mittlerweile| nun| so| damit| gerade)*$
+      - ^(und |na |so )?(hilft (das|es|ihnen das|dir das)( schon)?( ein bisschen| etwas)?|tut (ihnen |dir )?das gut|geht es (so|noch)|gehts (so|noch)|alles (okay|ok|gut|in ordnung) bei ihnen|sind sie (okay|ok)|halten sie (noch )?durch|ist das (so )?(okay|ok|in ordnung|angenehm|bequem) (für sie|für dich))( so)?$
+    repeats: [beschwerden_fragen]
+    measures: [blutung_stillen, abdruecken, druckverband, tourniquet, absaugen, rueckenschlaege, heimlich, sauerstoff,
+               oberkoerper_hoch, atemanweisung, schocklage, glukose_geben, decke, nasse_kleidung, kuehlen, auge,
+               wunde_versorgen, immobilisieren, hws_manuell, seitenlage, aus_gefahr_bringen]
+    better:  # nach einer Maßnahme: in irgendeiner Form ja
+      - Patient: Etwas besser, danke.
+      - Patient: (nickt) Ja, schon ein bisschen besser.
+      - Patient: Geht schon besser. Danke, dass Sie da sind.
+    say:  # noch keine Maßnahme
+      - Patient: Nicht wirklich besser …
+      - Patient: Geht so … noch nicht besser.
     unconscious:
       - Befund: (keine Reaktion)
 

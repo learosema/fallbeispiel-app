@@ -78,6 +78,8 @@ class Scenario:
     alone: list[Variant] | None = None    # Hilferufe, wenn der Patient allein gelassen wird (None = Standard, [] = nichts)
     # Wie der Patient auf Smalltalk („Oh, das ist ja doof“) reagiert, wenn er nicht normal sprechen kann (Bolus, Atemnot …)
     patient_smalltalk: list[Variant] = field(default_factory=list)
+    # Fallspezifische Antworten auf einzelne Smalltalk-Regeln (z. B. befinden: „Nein, es blutet immer noch!“), vor allem anderen
+    smalltalk: dict[str, list[Variant]] = field(default_factory=dict)
 
 
 def _lines(raw: Any, where: str) -> list[Line]:
@@ -143,6 +145,9 @@ class SmalltalkRule:
     max_words: int | None = None   # für nicht verankerte Muster
     tip: bool = False              # Bitte um Hilfe: Tipp zum nächsten offenen Punkt der Checkliste
     unconscious: list[Line] = field(default_factory=list)  # statt `say`, wenn die Person bewusstlos ist
+    measures: list[str] = field(default_factory=list)  # ist eine dieser Maßnahmen erfolgt, gilt `better` statt `say`
+    better: list[Line] = field(default_factory=list)
+    repeats: list[str] = field(default_factory=list)   # schon erledigte Intents, die erneut gestellt als diese Regel gelten
 
 
 @dataclass
@@ -169,7 +174,15 @@ def smalltalk() -> Smalltalk:
         if not pats:
             raise ValueError(f"smalltalk.{rid}: keine patterns")
         unconscious = _lines(d.get("unconscious"), f"smalltalk.{rid}.unconscious")
-        rules.append(SmalltalkRule(rid, pats, say, repeat, d.get("max_words"), bool(d.get("tip", False)), unconscious))
+        measures, repeats = list(d.get("measures") or []), list(d.get("repeats") or [])
+        for ref in measures + repeats:
+            if ref not in intents():
+                raise ValueError(f"smalltalk.{rid}: unbekannter Intent {ref!r}")
+        better = _lines(d.get("better"), f"smalltalk.{rid}.better")
+        if bool(measures) != bool(better):
+            raise ValueError(f"smalltalk.{rid}: measures und better gehören zusammen")
+        rules.append(SmalltalkRule(rid, pats, say, repeat, d.get("max_words"), bool(d.get("tip", False)), unconscious,
+                                   measures, better, repeats))
     fallback = _lines(data.get("fallback"), "smalltalk.fallback")
     if not fallback:
         raise ValueError("smalltalk.fallback: mindestens eine Rückfrage nötig")
@@ -259,6 +272,12 @@ def _load_scenario(path: Path) -> Scenario:
         for ref in _item_refs(ka) + list(ka.get("before", [])):
             if ref not in known:
                 raise ValueError(f"{path.name}: key_actions {ka.get('label')!r}: unbekannter Intent {ref!r}")
+    st_rules = {r.id for r in smalltalk().rules}
+    st_over = {}
+    for rid, raw in (d.get("smalltalk") or {}).items():
+        if rid not in st_rules:
+            raise ValueError(f"{path.name}: smalltalk: unbekannte Regel {rid!r} (siehe content/smalltalk.yaml)")
+        st_over[rid] = _variants(raw, f"{path.name}.smalltalk.{rid}")
     funk_early = list(d.get("funk_early") or [])
     for ref in funk_early:
         if ref not in known:
@@ -284,6 +303,7 @@ def _load_scenario(path: Path) -> Scenario:
         silence=_optional_lines(d, "silence", path.name),
         alone=_optional_lines(d, "alone", path.name),
         patient_smalltalk=_optional_lines(d, "patient_smalltalk", path.name) or [],
+        smalltalk=st_over,
     )
 
 

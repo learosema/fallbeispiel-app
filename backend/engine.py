@@ -449,6 +449,9 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
             state["team_offen"] = False
         else:
             hits, info = clf.classify(text), None
+            if hits and (rule := smalltalk_rule(text)) and rule.repeats and all(
+                    h.intent in rule.repeats and h.intent in first for h in hits):
+                hits = []  # „Wie fühlen Sie sich jetzt?“ nach der Frage nach Beschwerden: Befinden, keine neue Anamnese
             if "hlw" not in first and any(h.intent == "helferwechsel" for h in hits):
                 # „Kollege, du drückst!“ bevor jemand drückt: das ist der HLW-Beginn, kein Wechsel
                 hits = [h for h in hits if h.intent != "helferwechsel"]
@@ -587,8 +590,11 @@ def replay(scenario: Scenario, mode: str, settings: Settings, log: list[dict[str
                 lines = list(prev or [Line("Kollege", "Es hat noch niemand etwas gesagt.")]) + lines
             elif rule.unconscious and not awake():
                 lines = [rotate(rule.id, rule.unconscious)] + lines
+            elif v := pick(scenario.smalltalk.get(rule.id, []), state):
+                lines = [rotate(rule.id, v.say)] + lines  # Antwort des Falls („Nein, es blutet immer noch!“)
             else:
-                line = rotate(rule.id, rule.say)
+                better = rule.better and any(state.get(m) for m in rule.measures)
+                line = rotate(rule.id, rule.better if better else rule.say)
                 if line.who == "Patient" and (v := pick(scenario.patient_smalltalk, state)):
                     line = v.say[said.get(rule.id, 1) % len(v.say)]  # kann gerade nicht normal sprechen
                 lines = [line] + lines

@@ -929,6 +929,37 @@ def test_smalltalk_after_losing_consciousness_gets_no_reaction(clf):
     assert all(l.who != "Patient" for l in last.lines), last.lines
 
 
+# ---------- Befinden („Geht es Ihnen besser?“): Betreuung, zählt nicht ----------
+
+BETTER = {l.text for r in content.smalltalk().rules if r.id == "befinden" for l in r.better}
+
+
+def test_feeling_better_only_after_a_measure(clf):
+    run = play(clf, "basis-sturz", ["geht es ihnen besser", "ich lege ihnen eine decke um", "geht es ihnen jetzt besser"])
+    assert not run.turns[0].hits and not run.turns[2].hits
+    assert run.turns[0].lines[0].text not in BETTER
+    assert run.turns[2].lines[0].text in BETTER
+
+
+def test_asking_how_they_feel_again_is_care_not_anamnesis(clf):
+    # erst Frage nach Beschwerden (zählt), danach dieselbe Frage = Befinden: keine Wiederholung der Beschwerden
+    run = play(clf, "basis-sturz", ["wie fühlen sie sich", "ich lege ihnen eine decke um", "wie fühlen sie sich jetzt"])
+    assert [h.intent for h in run.turns[0].hits] == ["beschwerden_fragen"]
+    assert not run.turns[2].hits and run.turns[2].lines[0].text in BETTER
+
+
+def test_feeling_better_follows_the_case(clf):
+    run = play(clf, "x-kettensaege", ["geht es ihnen besser"])
+    assert "blutet immer noch" in said(run)[-1]
+    run = play(clf, "b-asthma", ["geht es ihnen besser", "ich gebe ihnen sauerstoff", "geht es ihnen besser"])
+    assert "schüttelt den Kopf" in said(run)[0] and "besser" in said(run)[-1]
+
+
+def test_feeling_better_unconscious_gets_no_reaction(clf):
+    run = play(clf, "bw-seitenlage", ["geht es ihnen besser"])
+    assert said(run) == ["(keine Reaktion)"]
+
+
 @pytest.mark.parametrize("sid", list(content.scenarios()))
 def test_no_patient_behaviour_after_losing_consciousness(clf, sid):
     # niemand lässt den Fall laufen und lässt den Patienten danach allein – nach dem Zusammensacken kommt nichts mehr vom Patienten

@@ -18,7 +18,12 @@ Jeder Intent ist ein Schritt („Puls“, „Decke“, „Rückenschläge“ …
 Greift nur, wenn kein Intent erkannt wurde, und zählt nicht in die Auswertung. Jede Regel hat `patterns` (auf den ganzen
 Satz, mit `^…$` verankert, damit lange unklare Sätze weiter eine Rückfrage bekommen) und `say` (Varianten reihum) oder
 `repeat: true` (wiederholt die letzte Antwort). `fallback` sind die Rückfragen, wenn gar nichts passt. Keine
-fachlichen Tipps, nichts, was sich an Patient:innen richten könnte.
+fachlichen Tipps, nichts, was sich an Patient:innen richten könnte – außer Regeln mit `unconscious` (Antwort bei
+Bewusstlosigkeit), z. B. `mitgefuehl` und `befinden`.
+
+`befinden` („Geht es Ihnen besser?“, „Wie fühlen Sie sich jetzt?“) antwortet mit `better`, sobald eine der `measures`
+erfolgt ist, sonst mit `say`. Mit `repeats: [beschwerden_fragen]` zählt das erste „Wie fühlen Sie sich?“ weiter als Frage
+nach Beschwerden, jedes weitere ist Befinden. Fälle überschreiben einzelne Regeln mit `smalltalk:` (siehe unten).
 
 Sonderfall HLW: `hlw`, Zählen und `schock_ausloesen` haben in `intents.yaml` eine `not_indicated`-Antwort. Sie gilt
 immer, wenn keine Indikation besteht (wach oder normale Atmung) – vor allen Antworten der Fälle; die Maßnahme zählt dann
@@ -101,6 +106,10 @@ alone: [...]                 # optional: Hilferufe, wenn das Team weggeht (Flag 
 patient_smalltalk:           # optional: Antwort des Patienten auf Smalltalk („Oh, das ist ja doof“), wenn er nicht
   - when: {geloest: false}   # normal sprechen kann (Bolus, Atemnot, Schlaganfall …), gleiches Format
     say: [Befund: (Herr Weber würgt und kann nicht antworten)]
+smalltalk:                   # optional: fallspezifische Antworten auf Regeln aus smalltalk.yaml, vor patient_smalltalk
+  befinden:                  # z. B. wenn es trotz Maßnahme nicht besser wird; gleiches Format
+    - when: {blutung_steht: false}
+      say: [Patient: Nein! Das blutet immer noch!]
 
 key_actions:                 # fallspezifische Schlüsselmaßnahmen für die Auswertung
   - label: Blutstillung vor allem anderen

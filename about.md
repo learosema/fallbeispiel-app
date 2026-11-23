@@ -42,7 +42,8 @@ Leitlinie: **Lieber nachfragen als raten.** Wird nichts erkannt, fragt der Kolle
 Varianten reihum). Davor greift `content/smalltalk.yaml`: kurze, mit `^…$` verankerte Sätze ohne Handlung („Danke“,
 „Moment“, „Mist“, „Was soll ich machen?“, „Wie bitte?“ → wiederholt die letzte Antwort) bekommen eine passende Antwort
 – ohne Intent, also ohne Einfluss auf die Auswertung. Mitgefühl an den Patienten („Oh, das ist ja unglücklich“,
-„Das tut mir leid“) beantwortet der Patient selbst (bewusstlos: „keine Reaktion“), der Kollege bleibt still. Als
+„Das tut mir leid“) und Fragen zum Befinden („Geht es Ihnen besser?“ – nach einer Maßnahme in irgendeiner Form ja,
+fallspezifisch überschreibbar) beantwortet der Patient selbst (bewusstlos: „keine Reaktion“), der Kollege bleibt still. Als
 Beruhigen zählt es erst mit Ausblick („… wir kümmern uns jetzt um Sie“).
 
 **Tipps auf Nachfrage** („Hast du einen Tipp?“, „Was fehlt noch?“, „Was soll ich machen?“): Der Kollege nennt den
