@@ -102,7 +102,10 @@ def main() -> None:
     device = args.device or ("cuda:0" if torch.cuda.is_available() else "cpu")
     gpu = device.startswith("cuda")
     batch = args.batch or (8 if gpu else 1)
-    model = Qwen3TTSModel.from_pretrained(BASE_MODEL, device_map=device, dtype=torch.bfloat16 if gpu else torch.float32)
+    # bfloat16 erst ab Ampere (A100, L4); die T4 in Colab kann nur float16
+    dtype = (torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16) if gpu else torch.float32
+    model = Qwen3TTSModel.from_pretrained(BASE_MODEL, device_map=device, dtype=dtype)
+    print(f"Modell auf {device} ({dtype}), {batch} Sätze pro Durchlauf", flush=True)
 
     done, total, t0 = 0, sum(map(len, todo.values())), time.time()
     if args.limit:

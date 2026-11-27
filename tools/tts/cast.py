@@ -48,7 +48,8 @@ def main() -> None:
     from qwen_tts import Qwen3TTSModel
 
     device = args.device or ("cuda:0" if torch.cuda.is_available() else "cpu")
-    dtype = torch.bfloat16 if device.startswith("cuda") else torch.float32
+    gpu = device.startswith("cuda")
+    dtype = (torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16) if gpu else torch.float32  # T4: float16
     model = Qwen3TTSModel.from_pretrained(DESIGN_MODEL, device_map=device, dtype=dtype)
     for n, v in enumerate(todo, 1):
         text = speech.reference_text(v)
