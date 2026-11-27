@@ -9,6 +9,10 @@ debrief_notes: >
   Atemwege frei, Atemkontrolle, stabile Seitenlage, Nachforderung, Absaugbereitschaft, BZ/SpO2/Puls/Temperatur,
   Wärmeerhalt trotz 29 °C (feuchter Sand, Wind, Alkohol), SAMPLER vom Freund, Atemkontrolle wiederholen.
 
+# Stimmen fürs Vorab-Vertonen (Beschreibung für Qwen3-TTS, siehe content/voices.yaml)
+voices:
+  Umstehende: A German man around thirty, native German speaker, drunk friend at the beach, loud, slurred and panicky, colloquial. Declarative sentences end with a clearly falling intonation.
+
 conscious: false
 breathing: normal
 request: {required: [RTW], optional: [NEF]}

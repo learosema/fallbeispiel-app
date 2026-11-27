@@ -7,6 +7,14 @@ debrief_notes: >
   Lena (19), Asthma, Kontakt mit Katze, Spray 4x ohne Effekt. B-Problem: sitzende Position, beruhigen, Atemanweisung,
   O2 nach Sättigung, Auskultation, Anaphylaxie ausschließen (E: Haut, Schwellung), Notarzt nachfordern, Reevaluation.
 
+# Stimmen fürs Vorab-Vertonen (Beschreibung für Qwen3-TTS, siehe content/voices.yaml)
+voices:
+  Patient: A 19-year-old German woman from Hamburg, native German speaker with standard German pronunciation and no English accent, during an asthma attack, short of breath, speaks in short gasping phrases, anxious. Declarative sentences end with a clearly falling intonation.
+  # Referenz fürs Casting selbst vorgegeben: ihre Zeilen sind alle sehr kurz und voller Pausen bzw. Fremdwörter
+  reference:
+    Patient: "Ich krieg so schlecht Luft. Das war bei meinen Freunden, die haben eine Katze. Mein Inhalator hilft nicht, ich hab ihn viermal genommen."
+  Umstehende: A German woman around twenty, native German speaker, the patient's friend, worried and nervous.
+
 conscious: true
 trauma: false
 request: {required: [RTW, NEF]}

@@ -4,7 +4,7 @@
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
   // ---------- Einstellungen ----------
-  const DEFAULTS = { rate: 1, speak: true, handsfree: false, mode: "minute", callsign: "EVT1", dispatcher: "RotkreuzHamburg", tips: true, keepAwake: true };
+  const DEFAULTS = { rate: 1, speak: true, voices: true, handsfree: false, mode: "minute", callsign: "EVT1", dispatcher: "RotkreuzHamburg", tips: true, keepAwake: true };
   let settings = { ...DEFAULTS };
   try {
     settings = { ...DEFAULTS, ...JSON.parse(localStorage.getItem("settings") || "{}") };
@@ -204,9 +204,10 @@
     addMsg(intro, "sys");
     // nacheinander vorlesen (speak() bricht laufende Ausgaben ab, deshalb abwarten)
     (async () => {
-      for (const text of [dispatch, intro]) {
+      const introClip = findClip("Befund", intro);
+      for (const [text, clip] of [[dispatch, s.dispatch_audio], [intro, await introClip]]) {
         if (scenario !== s) return;
-        await speak(text, PITCH.Befund);
+        await speak(text, PITCH.Befund, clip);
       }
     })();
   }
@@ -251,7 +252,80 @@
   // und der Zug bliebe „beschäftigt“. Deshalb: resume() vor jedem Sprechen und ein Wachhund, der aufgibt.
   let lastSpokeAt = 0;    // Ende der letzten Ausgabe – iOS braucht danach eine kurze Pause fürs Mikrofon
   let speechEpoch = 0;    // zählt hoch, wenn die App in den Hintergrund geht: Rest der Antwort nicht mehr vorlesen
-  function speak(text, pitch = 1) {
+
+  // ---------- Natürliche Stimmen: vorab vertonte Clips ----------
+  // Der Server liefert pro Zeile eine Clip-URL (Qwen3-TTS bzw. Leitstelle per Piper). Fehlt der Clip oder klappt die
+  // Wiedergabe nicht, liest wie bisher die Browserstimme. Ein einziges <audio> für alles: iOS erlaubt Wiedergabe ohne
+  // Fingertipp nur auf einem Element, das schon einmal durch einen Fingertipp gestartet wurde (unlockAudio).
+  const player = new Audio();
+  player.preload = "auto";
+  let clipDone = null;    // beendet die laufende Wiedergabe
+  const voicesOn = () => settings.voices !== false;
+  function silentWav() {
+    const n = 240, buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf);
+    const str = (o, s) => [...s].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
+    str(0, "RIFF"); v.setUint32(4, 36 + n * 2, true); str(8, "WAVEfmt "); v.setUint32(16, 16, true);
+    v.setUint16(20, 1, true); v.setUint16(22, 1, true); v.setUint32(24, 24000, true); v.setUint32(28, 48000, true);
+    v.setUint16(32, 2, true); v.setUint16(34, 16, true); str(36, "data"); v.setUint32(40, n * 2, true);
+    return URL.createObjectURL(new Blob([buf], { type: "audio/wav" }));
+  }
+  let audioUnlocked = false;
+  function unlockAudio() {
+    if (audioUnlocked || clipDone) return;
+    audioUnlocked = true;
+    try { player.src = silentWav(); player.play().catch(() => { audioUnlocked = false; }); } catch { audioUnlocked = false; }
+  }
+  ["pointerdown", "keydown"].forEach((ev) => document.addEventListener(ev, unlockAudio, { capture: true }));
+  function stopClip() { if (clipDone) clipDone(true); }
+  // true: gespielt (oder absichtlich abgebrochen) – false: ging nicht, dann Browserstimme
+  function playClip(url) {
+    stopClip();
+    return new Promise((resolve) => {
+      let started = false, maxTime = null;
+      const finish = (ok) => {
+        if (clipDone !== finish) return;
+        clipDone = null;
+        clearTimeout(noStart); clearTimeout(maxTime);
+        player.onplaying = player.onended = player.onerror = player.onloadedmetadata = null;
+        try { player.pause(); } catch {}
+        if (started) lastSpokeAt = Date.now();
+        resolve(ok || started);
+      };
+      clipDone = finish;
+      // lädt nicht / startet nicht (Netz weg, Server ohne Clip) → nach 5 s Browserstimme
+      const noStart = setTimeout(() => { if (!started) finish(false); }, 5000);
+      player.onloadedmetadata = () => {
+        if (Number.isFinite(player.duration)) maxTime = setTimeout(() => finish(true), (player.duration / player.playbackRate) * 1000 + 3000);
+      };
+      player.onplaying = () => { started = true; };
+      player.onended = () => finish(true);
+      player.onerror = () => finish(false);
+      player.src = url;
+      player.preservesPitch = true;
+      player.defaultPlaybackRate = player.playbackRate = Number(settings.rate) || 1;
+      player.play().catch(() => finish(false));
+    });
+  }
+  // Clip für Texte, die das Frontend selbst vorliest (Intro, Ergebnis der Auswertung) – nur Nachschlagen
+  async function findClip(who, text) {
+    if (!voicesOn() || !settings.speak) return null;
+    try {
+      const res = await fetch("/api/clip", { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ scenario: scenario ? scenario.id : null, who, text }) });
+      return res.ok ? (await res.json()).audio || null : null;
+    } catch { return null; }
+  }
+
+  async function speak(text, pitch = 1, clip = null) {
+    if (!settings.speak || document.hidden) return;
+    if (clip && voicesOn()) {
+      const epoch = speechEpoch;
+      if (await playClip(clip)) return;
+      if (epoch !== speechEpoch || document.hidden) return;
+    }
+    return speakNative(text, pitch);
+  }
+  function speakNative(text, pitch = 1) {
     return new Promise((resolve) => {
       if (!settings.speak || !("speechSynthesis" in window) || document.hidden) return resolve();
       speechSynthesis.cancel();
@@ -293,7 +367,7 @@
     for (const seg of segs) {
       if (!scenario || epoch !== speechEpoch) return;
       const { text, narration } = spokenText(seg);
-      if (text) await speak(text, narration ? PITCH.Befund : PITCH[seg.who] || 1);
+      if (text) await speak(text, narration ? PITCH.Befund : PITCH[seg.who] || 1, seg.audio);
     }
   }
 
@@ -328,6 +402,7 @@
     clearTimeout(restartTimer); restartTimer = null;
     if (byUser) quickEnds = 0;
     if ("speechSynthesis" in window && (speechSynthesis.speaking || speechSynthesis.pending)) { speechSynthesis.cancel(); lastSpokeAt = Date.now(); }
+    if (clipDone) { stopClip(); lastSpokeAt = Date.now(); }
     // iOS: direkt nach dem Vorlesen ist die Audio-Sitzung noch auf Wiedergabe – dann hört die Erkennung nichts
     const wait = IOS ? lastSpokeAt + 600 - Date.now() : 0;
     if (wait > 0) { scheduleListening(wait); return; }
@@ -392,6 +467,7 @@
   }
   function stopAll() {
     abortListening();
+    stopClip();
     if ("speechSynthesis" in window) speechSynthesis.cancel();
     setStatus("");
   }
@@ -399,6 +475,7 @@
   function pauseSpeech() {
     speechEpoch++;
     abortListening();
+    stopClip();
     if ("speechSynthesis" in window) speechSynthesis.cancel();
   }
   // … und bei Rückkehr neu aufsetzen (sonst musste man auf Android erst Schalter aus- und einschalten)
@@ -479,7 +556,8 @@
     li.appendChild(a);
     $("log").appendChild(li);
     scrollLog();
-    speak("Algorithmus " + result.verdict + ".");
+    const verdict = "Algorithmus " + result.verdict + ".";
+    speak(verdict, 1, await findClip("Befund", verdict));
   }
 
   // ---------- Einstellungen-Dialog ----------
@@ -487,6 +565,7 @@
     $("rate").value = settings.rate;
     $("rateOut").textContent = Number(settings.rate).toFixed(2);
     $("speak").checked = settings.speak;
+    $("voices").checked = voicesOn();
     $("tips").checked = settings.tips !== false;
     $("keepAwake").checked = settings.keepAwake !== false;
     $("callsign").value = settings.callsign;
@@ -501,6 +580,7 @@
     if (e.submitter && e.submitter.value === "save") {
       settings.rate = $("rate").value;
       settings.speak = $("speak").checked;
+      settings.voices = $("voices").checked;
       settings.tips = $("tips").checked;
       settings.keepAwake = $("keepAwake").checked;
       settings.callsign = $("callsign").value.trim() || DEFAULTS.callsign;

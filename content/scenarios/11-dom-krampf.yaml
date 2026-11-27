@@ -11,6 +11,11 @@ debrief_notes: >
   Wunde versorgen, SAMPLER, Rettungsdienst nachfordern.
 
 reaction: abnormal      # Reaktion beim Ansprechen auffällig → in Teambesprechung und Funkspruch nennen
+# Stimmen fürs Vorab-Vertonen (Beschreibung für Qwen3-TTS, siehe content/voices.yaml)
+voices:
+  Patient: A 24-year-old German man, native German speaker, drowsy and confused after a seizure, slow, mumbling, groggy.
+  Umstehende: A German woman in her early twenties, native German speaker, the patient's friend, scared and agitated at a fairground. Declarative sentences end with a clearly falling intonation.
+
 conscious: true
 trauma: true
 request: {required: [RTW], optional: [NEF]}

@@ -12,6 +12,14 @@ debrief_notes: >
   Oberkörper etwa 30° hoch, nichts essen und trinken (Schluckstörung). Ohne Nachforderung verschlechtert er sich.
 
 reaction: abnormal      # Reaktion beim Ansprechen auffällig → in Teambesprechung und Funkspruch nennen
+# Stimmen fürs Vorab-Vertonen (Beschreibung für Qwen3-TTS, siehe content/voices.yaml)
+voices:
+  Patient: A 72-year-old German man, native German speaker, with slurred, indistinct speech after a stroke, slow and effortful. Declarative sentences end with a clearly falling intonation.
+  Umstehende: A German woman around seventy, native German speaker, the patient's wife, worried but precise, speaks clearly. Declarative sentences end with a clearly falling intonation.
+  # Referenz fürs Casting vorgegeben (Anfang wurde verschluckt bzw. Fremdwörter in allen Zeilen)
+  reference:
+    Patient: "Mein Arm ist so schwer. Und das Reden geht nicht richtig. Meine Frau ist bei mir."
+
 conscious: true
 trauma: false
 request: {required: [RTW], optional: [NEF]}

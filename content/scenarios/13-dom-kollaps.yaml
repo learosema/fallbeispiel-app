@@ -9,6 +9,11 @@ debrief_notes: >
   Puls/Rekap/RR, BZ, Trinken/Zucker anbieten, Hitze reduzieren, SAMPLER inkl. Familienanamnese und Herzsymptomen, Reevaluation,
   begründete Entscheidung zur Abklärung, nicht allein lassen.
 
+# Stimmen fürs Vorab-Vertonen (Beschreibung für Qwen3-TTS, siehe content/voices.yaml)
+voices:
+  Patient: A 17-year-old German girl, native German speaker, faint and weak after collapsing, quiet, later a little better.
+  Umstehende: A 17-year-old German girl, native German speaker, the patient's best friend, panicked and crying, speaks fast. Declarative sentences end with a clearly falling intonation.
+
 conscious: true
 trauma: false
 request: {required: [RTW]}

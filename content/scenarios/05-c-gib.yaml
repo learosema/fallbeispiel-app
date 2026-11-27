@@ -9,6 +9,11 @@ debrief_notes: >
   Medikamente erfragen, Notarzt/zügiger Transport, Reevaluation.
 
 reaction: abnormal      # Reaktion beim Ansprechen auffällig → in Teambesprechung und Funkspruch nennen
+# Stimmen fürs Vorab-Vertonen (Beschreibung für Qwen3-TTS, siehe content/voices.yaml)
+voices:
+  Patient: A 71-year-old German man, native German speaker, very weak, pale and tired, speaks slowly and quietly.
+  Umstehende: A German woman around seventy, native German speaker, the patient's wife, worried, speaks clearly but anxiously.
+
 conscious: true
 trauma: false
 request: {required: [RTW, NEF]}

@@ -9,6 +9,13 @@ debrief_notes: >
   Atemkontrolle max. 10 s, stabile Seitenlage (Schritte benennen), Nachforderung, Atemkontrolle wiederholen, Absaugbereitschaft,
   Wärmeerhalt (6 °C, nass), BZ/SpO2/Puls, nicht allein lassen. Bleibt er auf dem Rücken, erbricht er und aspiriert.
 
+# Stimmen fürs Vorab-Vertonen (Beschreibung für Qwen3-TTS, siehe content/voices.yaml)
+voices:
+  Umstehende: A German man in his thirties, native German speaker, passer-by, uneasy and a bit helpless, casual everyday speech. Declarative sentences end with a clearly falling intonation.
+  # Referenz fürs Casting vorgegeben (Anfang wurde verschluckt bzw. Fremdwörter in allen Zeilen)
+  reference:
+    Umstehende: "Ich hab ihn so gefunden, er lag einfach da. Daneben steht 'ne Flasche, und er riecht stark nach Alkohol. Der reagiert gar nicht."
+
 conscious: false
 breathing: normal
 request: {required: [RTW], optional: [NEF]}

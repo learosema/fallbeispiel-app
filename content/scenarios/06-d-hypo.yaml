@@ -9,6 +9,11 @@ debrief_notes: >
   Wird kein BZ gemessen, bleibt die Ursache unklar.
 
 reaction: abnormal      # Reaktion beim Ansprechen auffällig → in Teambesprechung und Funkspruch nennen
+# Stimmen fürs Vorab-Vertonen (Beschreibung für Qwen3-TTS, siehe content/voices.yaml)
+voices:
+  Patient: A 54-year-old German woman, native German speaker, confused and disoriented from low blood sugar, slurred, irritable, sweating.
+  Umstehende: A German man in his thirties, native German speaker, passer-by, unsettled but matter-of-fact.
+
 conscious: true
 trauma: false
 request: {required: [RTW], optional: [NEF]}

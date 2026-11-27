@@ -1,0 +1,72 @@
+# Stimmen und Sprechfassung für die vorab vertonten Clips (siehe tools/tts/README.md).
+#
+# Stimmen: Qwen3-TTS „VoiceDesign“ entwirft aus der Beschreibung einmal einen Referenzclip (Casting), danach werden alle
+# Sätze einer Rolle von diesem Clip geklont – so klingt eine Rolle in jedem Satz gleich. Beschreibungen auf Englisch,
+# das versteht das Modell am zuverlässigsten. Wer eine Beschreibung ändert, bekommt automatisch eine neue Stimme
+# (der Schlüssel enthält einen Hash der Beschreibung) und muss diese Rolle neu casten und vertonen.
+#
+# Patient und Umstehende stehen pro Fall in scenarios/*.yaml unter `voices:`.
+
+roles:
+  Kollege:
+    design: A German man in his late twenties, native speaker, friendly and focused first-aid volunteer, calm but quick, natural everyday speech.
+  Befund:
+    design: A calm, neutral German male narrator in his fifties, native speaker, clear standard pronunciation like an audiobook reader, matter-of-fact, unhurried. Declarative statements with a clearly falling intonation at the end of every sentence, never rising like a question.
+  # Gerätestimme: Piper klingt synthetisch und gleichmäßig – genau richtig für einen Defi (auf dem Server erzeugt)
+  AED:
+    engine: piper
+    model: de_DE-thorsten-high
+  Rettungsdienst:
+    design: A German paramedic in his forties, native speaker, calm, confident and slightly hurried, professional.
+  # Die Leitstelle spricht über Digitalfunk und braucht Rufname und Leitstelle aus den Einstellungen: Piper auf dem
+  # Server, auf Zuruf erzeugt, mit Funkfilter. Piper buchstabiert Abkürzungen korrekt deutsch.
+  Leitstelle:
+    engine: piper
+    model: de_DE-kerstin-medium
+    filter: funk-leicht
+
+# Referenzsatz fürs Casting, wenn eine Rolle keine eigenen Zeilen hat (sonst werden echte Zeilen der Rolle genommen)
+reference:
+  Kollege: "Ich übernehme den Kopf und halte ihn ruhig. Die Rettungsdecke liegt neben dir. Sag Bescheid, wenn du was brauchst."
+  Befund: "Atmung ruhig und regelmäßig, etwa sechzehn pro Minute, keine Atemnot. Die Haut ist blass und kühl."
+  Rettungsdienst: "Rettungsdienst und Notarzt sind da. Was habt ihr bisher gemacht? Gut, wir übernehmen."
+
+# Wörter, die eine Referenz englisch klingen lassen – Zeilen damit nimmt das Casting nur notfalls (Wortanfang genügt)
+reference_avoid: [Hey, Steak, Spray, Salbutamol, Energydrink, chill, Pyro, okay, Team, Handy, Party, Fan, Block, Cola]
+
+# Sprechfassung: was Menschen in dem Moment wirklich sagen. Qwen liest Buchstaben-Abkürzungen englisch, deshalb wird
+# für die Qwen-Stimmen ausgeschrieben. Die Anzeige im Chat bleibt unverändert. Reihenfolge zählt (oben zuerst).
+# Format: [Regex, Ersatz] – Python-Regex, \1 für Gruppen.
+sprechfassung:
+  - ['\bRR\s*(\d+)\s*/\s*(\d+)', 'Blutdruck \1 zu \2']
+  - ['\bRR\b', 'Blutdruck']
+  - ['\bBZ\b', 'Blutzucker']
+  - ['\s*mg/dl\b', '']
+  - ['\bSpO2\b', 'Sättigung']
+  - ['\bGCS\b', 'Glasgow']
+  - ['\bAF\b', 'Atemfrequenz']
+  - ['\bHWS-', 'Halswirbelsäulen-']
+  - ['\bHWS\b', 'Halswirbelsäule']
+  - ['\bAED\b', 'Defi']
+  - ['\bHLW\b', 'Wiederbelebung']
+  - ['\bRTW\b', 'Rettungswagen']
+  - ['\bKTW\b', 'Krankentransportwagen']
+  - ['\bNEF\b', 'Notarzt']
+  - ['\bSHT\b', 'Schädel-Hirn-Trauma']
+  - ['\bDRK\b', 'Rotes Kreuz']
+  - ['\bOG\b', 'Stock']
+  - ['\bSAN-?memo\b', 'San-Memo']
+  - ['(\d+)\s*/\s*min\b', '\1 pro Minute']
+  - ['(\d+),(\d+)\s*°C', '\1 Komma \2 Grad']
+  - ['(\d+)\s*°C', '\1 Grad']
+  - ['(\d+)\s*%', '\1 Prozent']
+  - ['\b(\d{1,2}):(\d\d)\s*Uhr\b', '\1 Uhr \2']
+  - ['\b(\d{1,2}):(\d\d)\b', '\1 Uhr \2']
+  - ['(\d+)\s*m\b', '\1 Meter']
+  - ['\bca\.\s*', 'circa ']
+  - ['\bz\.\s*B\.', 'zum Beispiel']
+  - ['\s\+\s', ' und ']
+  - ['\b(der|einer)\s+1\.\s*Minute', '\1 ersten Minute']
+  - ['\b1\.\s*Minute', 'erste Minute']
+  # Pausen: „...“ spricht Qwen als natürliche kleine Pause (im Klon-Test etwas besser als „…“, Kommas pausieren zu kurz)
+  - ['\s*…', '...']
