@@ -63,7 +63,9 @@
     } catch { wakeLock = null; /* z. B. Energiesparmodus: dann eben ohne */ }
   }
   function releaseAwake() { if (wakeLock) { wakeLock.release().catch(() => {}); wakeLock = null; } }
-  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") keepAwake(); });
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") { keepAwake(); resumeSpeech(); } else pauseSpeech();
+  });
 
   // ---------- UI ----------
   const APP_TITLE = "Fallbeispiel xABCDE";
@@ -245,16 +247,35 @@
     return out.replace(new RegExp("\\b(" + SPELLED.join("|") + ")\\b", "g"), (m) => spell(m));
   }
 
+  // Android-Chrome hält die Sprachausgabe an, wenn die App im Hintergrund war; dann kommt onend nie
+  // und der Zug bliebe „beschäftigt“. Deshalb: resume() vor jedem Sprechen und ein Wachhund, der aufgibt.
+  let lastSpokeAt = 0;    // Ende der letzten Ausgabe – iOS braucht danach eine kurze Pause fürs Mikrofon
+  let speechEpoch = 0;    // zählt hoch, wenn die App in den Hintergrund geht: Rest der Antwort nicht mehr vorlesen
   function speak(text, pitch = 1) {
     return new Promise((resolve) => {
-      if (!settings.speak || !("speechSynthesis" in window)) return resolve();
+      if (!settings.speak || !("speechSynthesis" in window) || document.hidden) return resolve();
       speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(forSpeech(text.replace(/[*_#`]/g, "")));
+      const spoken = forSpeech(text.replace(/[*_#`]/g, ""));
+      const u = new SpeechSynthesisUtterance(spoken);
       u.lang = "de-DE";
       if (germanVoice) u.voice = germanVoice;
       u.rate = Number(settings.rate) || 1;
       u.pitch = pitch;
-      u.onend = u.onerror = () => resolve();
+      let done = false, started = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        clearTimeout(noStart); clearTimeout(maxTime);
+        lastSpokeAt = Date.now();
+        resolve();
+      };
+      const giveUp = () => { if (!done) { try { speechSynthesis.cancel(); } catch {} finish(); } };
+      // fängt gar nicht an → hängt; großzügige Obergrenze (≈ 100 Wörter/Minute) für den Fall, dass onend fehlt
+      const noStart = setTimeout(() => { if (!started) giveUp(); }, 4000);
+      const maxTime = setTimeout(giveUp, 4000 + (spoken.split(/\s+/).length * 600) / u.rate);
+      u.onstart = () => { started = true; };
+      u.onend = u.onerror = finish;
+      try { speechSynthesis.resume(); } catch {}
       speechSynthesis.speak(u);
     });
   }
@@ -268,56 +289,123 @@
     return { text: text.replace(/\([^)]*\)/g, "").replace(/\s+/g, " ").trim(), narration: false };
   }
   async function speakReply(segs) {
+    const epoch = speechEpoch;
     for (const seg of segs) {
-      if (!scenario) return;
+      if (!scenario || epoch !== speechEpoch) return;
       const { text, narration } = spokenText(seg);
       if (text) await speak(text, narration ? PITCH.Befund : PITCH[seg.who] || 1);
     }
   }
 
   // ---------- Spracheingabe ----------
-  function startListening() {
+  const IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const STANDALONE = navigator.standalone === true || window.matchMedia?.("(display-mode: standalone)").matches;
+  const FATAL = ["not-allowed", "service-not-allowed", "audio-capture", "language-not-supported"];
+  let restartTimer = null;
+  let quickEnds = 0;      // Erkennungen hintereinander, die sofort wieder endeten (iOS) – sonst startet Freisprechen im Kreis
+
+  function setMicUi(on) {
+    $("micBtn").classList.toggle("listening", on);
+    $("micBtn").setAttribute("aria-pressed", on ? "true" : "false");
+  }
+  function scheduleListening(ms) {
+    clearTimeout(restartTimer);
+    restartTimer = setTimeout(() => { restartTimer = null; startListening(); }, ms);
+  }
+  function errorText(code) {
+    if (code === "service-not-allowed" && IOS)
+      return STANDALONE
+        ? "Spracherkennung geht in der Home-Bildschirm-App auf dem iPhone oft nicht. Bitte die Seite in Safari öffnen – oder tippen."
+        : "Spracherkennung nicht verfügbar. Auf dem iPhone: Einstellungen → Allgemein → Tastatur → „Diktierfunktion“ einschalten.";
+    if (code === "not-allowed" || code === "service-not-allowed") return "Mikrofon nicht erlaubt. Bitte in den Browser-Einstellungen freigeben – oder einmal aufs Mikrofon tippen.";
+    if (code === "audio-capture") return "Kein Mikrofon gefunden oder gerade von einer anderen App belegt.";
+    return "Spracherkennung: " + code;
+  }
+
+  function startListening({ byUser = false } = {}) {
     if (!SR) { setStatus("Spracherkennung wird von diesem Browser nicht unterstützt. Bitte tippen.", true); return; }
-    if (listening || busy) return;
-    if ("speechSynthesis" in window) speechSynthesis.cancel();
+    if (listening || busy || document.hidden) return;
+    clearTimeout(restartTimer); restartTimer = null;
+    if (byUser) quickEnds = 0;
+    if ("speechSynthesis" in window && (speechSynthesis.speaking || speechSynthesis.pending)) { speechSynthesis.cancel(); lastSpokeAt = Date.now(); }
+    // iOS: direkt nach dem Vorlesen ist die Audio-Sitzung noch auf Wiedergabe – dann hört die Erkennung nichts
+    const wait = IOS ? lastSpokeAt + 600 - Date.now() : 0;
+    if (wait > 0) { scheduleListening(wait); return; }
     startClock();
-    recognition = new SR();
-    recognition.lang = "de-DE";
-    recognition.interimResults = true;
-    recognition.continuous = false;
-    let finalText = "";
-    recognition.onstart = () => { listening = true; $("micBtn").classList.add("listening"); $("micBtn").setAttribute("aria-pressed", "true"); setStatus("Ich höre zu …"); };
-    recognition.onresult = (e) => {
+
+    const rec = new SR();
+    recognition = rec;
+    rec.lang = "de-DE";
+    rec.interimResults = true;
+    rec.continuous = false;
+    let finalText = "", lastError = "", recStartedAt = 0, silence = null;
+    listening = true; // schon jetzt, damit kein zweiter Start dazwischenkommt
+    const noStart = setTimeout(() => { if (!recStartedAt && recognition === rec) { try { rec.abort(); } catch {} } }, 5000);
+
+    rec.onstart = () => { recStartedAt = Date.now(); setMicUi(true); setStatus("Ich höre zu …"); };
+    rec.onresult = (e) => {
       let interim = "";
       for (let i = e.resultIndex; i < e.results.length; i++) {
         const t = e.results[i][0].transcript;
         if (e.results[i].isFinal) finalText += t; else interim += t;
       }
       $("textInput").value = (finalText + interim).trim();
+      // iOS meldet oft kein isFinal und hört nicht von selbst auf: nach kurzer Pause selbst beenden
+      if (IOS) { clearTimeout(silence); silence = setTimeout(() => { try { rec.stop(); } catch {} }, 1500); }
     };
-    recognition.onerror = (e) => {
-      if (e.error === "not-allowed" || e.error === "service-not-allowed") setStatus("Mikrofon nicht erlaubt. Bitte in den Browser-Einstellungen freigeben.", true);
-      else if (e.error !== "no-speech" && e.error !== "aborted") setStatus("Spracherkennung: " + e.error, true);
-    };
-    recognition.onend = () => {
+    rec.onerror = (e) => { lastError = e.error || ""; };
+    rec.onend = () => {
+      clearTimeout(noStart); clearTimeout(silence);
+      if (recognition !== rec) return; // veraltet
+      recognition = null;
       listening = false;
-      $("micBtn").classList.remove("listening");
-      $("micBtn").setAttribute("aria-pressed", "false");
+      setMicUi(false);
       const text = (finalText || $("textInput").value).trim();
-      if (text) { $("textInput").value = ""; send(text); }
-      else if (tickDue() && !busy) turn({ tick: true });
-      else { setStatus(""); if (settings.handsfree && scenario && !busy) setTimeout(startListening, 300); }
+      if (text) { quickEnds = 0; $("textInput").value = ""; send(text); return; }
+      if (FATAL.includes(lastError)) { setStatus(errorText(lastError), true); return; }
+      if (lastError && !["no-speech", "aborted"].includes(lastError)) setStatus(errorText(lastError), true);
+      else setStatus("");
+      if (tickDue() && !busy) { turn({ tick: true }); return; }
+      if (!settings.handsfree || !scenario || busy || debriefDone || document.hidden) return;
+      // Normales „nichts gesagt“ dauert einige Sekunden. Endet es sofort, ist die Erkennung gestört:
+      // mit wachsender Pause neu versuchen und nach ein paar Fehlversuchen Freisprechen anhalten.
+      const quick = !recStartedAt || Date.now() - recStartedAt < 2000;
+      quickEnds = quick ? quickEnds + 1 : 0;
+      if (quickEnds >= 3) {
+        quickEnds = 0;
+        setStatus(IOS && STANDALONE
+          ? "Spracherkennung hört nichts. In der Home-Bildschirm-App auf dem iPhone klappt sie oft nicht – bitte in Safari öffnen oder aufs Mikrofon tippen."
+          : "Spracherkennung hört nichts – Freisprechen pausiert. Tippe aufs Mikrofon, um weiterzumachen.", true);
+        return;
+      }
+      scheduleListening(300 + quickEnds * 1200);
     };
-    try { recognition.start(); } catch { /* läuft schon */ }
+    try { rec.start(); }
+    catch { clearTimeout(noStart); recognition = null; listening = false; setMicUi(false); }
   }
   function stopListening() { if (recognition) { try { recognition.stop(); } catch {} } }
-  function stopAll() {
-    if (recognition) { recognition.onend = null; try { recognition.abort(); } catch {} }
+  function abortListening() {
+    clearTimeout(restartTimer); restartTimer = null;
+    if (recognition) { const r = recognition; recognition = null; r.onend = null; try { r.abort(); } catch {} }
     listening = false;
-    $("micBtn").classList.remove("listening");
-    $("micBtn").setAttribute("aria-pressed", "false");
+    setMicUi(false);
+  }
+  function stopAll() {
+    abortListening();
     if ("speechSynthesis" in window) speechSynthesis.cancel();
     setStatus("");
+  }
+  // App geht in den Hintergrund: Mikrofon und Vorlesen sauber beenden, statt sie halb hängen zu lassen …
+  function pauseSpeech() {
+    speechEpoch++;
+    abortListening();
+    if ("speechSynthesis" in window) speechSynthesis.cancel();
+  }
+  // … und bei Rückkehr neu aufsetzen (sonst musste man auf Android erst Schalter aus- und einschalten)
+  function resumeSpeech() {
+    if ("speechSynthesis" in window) { try { speechSynthesis.cancel(); speechSynthesis.resume(); } catch {} pickVoice(); }
+    quickEnds = 0;
+    if (settings.handsfree && scenario && !busy && !debriefDone) scheduleListening(400);
   }
 
   // ---------- Backend ----------
@@ -426,10 +514,11 @@
     r.addEventListener("change", () => { settings.mode = r.value; saveSettings(); });
   });
   $("backBtn").addEventListener("click", showHome);
-  $("micBtn").addEventListener("click", () => (listening ? stopListening() : startListening()));
+  $("micBtn").addEventListener("click", () => (listening ? stopListening() : startListening({ byUser: true })));
   $("handsfree").addEventListener("change", (e) => {
     settings.handsfree = e.target.checked; saveSettings();
-    if (settings.handsfree && !busy) startListening();
+    if (settings.handsfree && !busy) startListening({ byUser: true });
+    else if (!settings.handsfree) clearTimeout(restartTimer);
   });
   $("inputBar").addEventListener("submit", (e) => {
     e.preventDefault();
