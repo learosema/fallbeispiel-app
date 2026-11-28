@@ -35,18 +35,30 @@ def plausible(text: str, seconds: float) -> bool:
     return CPS_MIN <= len(text) / max(seconds, 0.01) <= CPS_MAX
 
 
-def to_mp3(audio, sr: int) -> bytes:
-    import lameenc
+def trim(audio, sr: int):
+    """Stille am Anfang/Ende kürzen (bis auf 80 ms)."""
     import numpy as np
 
     x = np.asarray(audio, dtype=np.float32)
     if x.ndim > 1:
         x = x.mean(axis=1)
-    # Stille am Anfang/Ende kürzen (bis auf 80 ms), dann Lautheit angleichen
     loud = np.flatnonzero(np.abs(x) > 0.01)
     if loud.size:
         pad = int(0.08 * sr)
         x = x[max(0, loud[0] - pad): loud[-1] + pad]
+    return x
+
+
+def spoken_seconds(audio, sr: int) -> float:
+    """Länge so, wie sie später im Clip steht (ohne Stille) – darauf bezieht sich die Plausibilitätsprüfung."""
+    return len(trim(audio, sr)) / sr
+
+
+def to_mp3(audio, sr: int) -> bytes:
+    import lameenc
+    import numpy as np
+
+    x = trim(audio, sr)  # dann Lautheit angleichen
     rms = float(np.sqrt(np.mean(x ** 2))) or 1e-6
     x = x * min(10 ** (TARGET_RMS_DB / 20) / rms, PEAK / (float(np.abs(x).max()) or 1e-6))
     pcm = (np.clip(x, -1, 1) * 32767).astype("<i2")
@@ -123,14 +135,14 @@ def main() -> None:
             wavs = list(wavs)
             for n, c in enumerate(part):
                 tries = 0
-                while not plausible(c.text, len(wavs[n]) / sr) and tries < RETRIES:
+                while not plausible(c.text, spoken_seconds(wavs[n], sr)) and tries < RETRIES:
                     tries += 1
                     again, _ = model.generate_voice_clone(text=[c.text], language=["German"], voice_clone_prompt=prompt)
                     wavs[n] = again[0]
-                if not plausible(c.text, len(wavs[n]) / sr):
+                if not plausible(c.text, spoken_seconds(wavs[n], sr)):
                     with open(speech.CLIPS_DIR / SUSPECT, "a", encoding="utf-8") as f:
-                        f.write(f"{c.id}\t{key}\t{len(wavs[n]) / sr:.1f}s\t{c.text}\n")
-                    print(f"  auffällig: {c.id} ({len(wavs[n]) / sr:.1f} s) {c.text[:60]}", flush=True)
+                        f.write(f"{c.id}\t{key}\t{spoken_seconds(wavs[n], sr):.1f}s\t{c.text}\n")
+                    print(f"  auffällig: {c.id} ({spoken_seconds(wavs[n], sr):.1f} s) {c.text[:60]}", flush=True)
             for c, w in zip(part, wavs):
                 tmp = speech.CLIPS_DIR / f".{c.id}.tmp"
                 tmp.write_bytes(to_mp3(w, sr))

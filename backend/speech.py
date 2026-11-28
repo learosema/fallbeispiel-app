@@ -253,6 +253,6 @@ def reference_text(v: Voice, max_chars: int = 220) -> str:
 
 
 @cache
-def available() -> frozenset[str]:
-    """Ids der vorab vertonten Clips, die da sind."""
-    return frozenset(p.stem for p in CLIPS_DIR.glob("*.mp3")) if CLIPS_DIR.is_dir() else frozenset()
+def available() -> dict[str, Path]:
+    """Vorab vertonte Clips, die da sind: id → Datei. Der Server nimmt Pfade nur von hier, nie aus der Anfrage."""
+    return {p.stem: p for p in CLIPS_DIR.glob("*.mp3")} if CLIPS_DIR.is_dir() else {}

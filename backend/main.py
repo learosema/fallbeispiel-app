@@ -207,21 +207,29 @@ async def find_clip(req: ClipRequest):
 AUDIO_HEADERS = {"Cache-Control": "public, max-age=31536000, immutable"}  # Name = Hash des Inhalts
 
 
+def _in_dir(base: Path, filename: str) -> Path | None:
+    """Pfad zu filename in base – nur, wenn er nach dem Auflösen wirklich in base liegt."""
+    root = os.path.realpath(base)
+    full = os.path.realpath(os.path.join(root, filename))
+    return Path(full) if full.startswith(root + os.sep) else None
+
+
 @app.get("/audio/{name}", include_in_schema=False)
 async def audio(name: str):
     m = re.fullmatch(r"([0-9a-f]{20})\.mp3", name)
     if not m:
         raise HTTPException(404, "Kein Clip.")
     cid = m[1]
-    if cid in speech.available():
-        return FileResponse(speech.CLIPS_DIR / name, media_type="audio/mpeg", headers=AUDIO_HEADERS)
+    if (pre := speech.available().get(cid)) is not None:  # Pfad aus dem Verzeichnislisting, nicht aus der URL
+        return FileResponse(pre, media_type="audio/mpeg", headers=AUDIO_HEADERS)
     with _pending_lock:
         c = _pending.get(cid)
-    cached = tts_piper.CACHE_DIR / name
-    if c is None and not cached.exists():
+    cached = _in_dir(tts_piper.CACHE_DIR, f"{cid}.mp3")
+    have_cached = cached is not None and cached.is_file()
+    if c is None and not have_cached:
         raise HTTPException(404, "Kein Clip.")
     try:
-        path = cached if cached.exists() else await run_in_threadpool(tts_piper.render, c)
+        path = cached if have_cached else await run_in_threadpool(tts_piper.render, c)
     except Exception:
         log.exception("Piper-Clip %s fehlgeschlagen", cid)
         raise HTTPException(503, "Clip gerade nicht verfügbar.")
