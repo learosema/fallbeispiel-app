@@ -6,7 +6,8 @@ HOST ?= 127.0.0.1
 UV   := $(shell command -v uv 2>/dev/null)
 
 .DEFAULT_GOAL := help
-.PHONY: help install serve test test-fast docker check-uv
+.PHONY: help install serve test test-fast docker check-uv voices-cast audio-status
+TTS_PY := .venv-tts/bin/python
 
 help: ## diese Übersicht
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-10s %s\n", $$1, $$2}'
@@ -33,3 +34,9 @@ test-fast: check-uv ## schnelle Tests, nur Regex
 
 docker: ## wie auf dem Server: im Docker-Container bauen und starten
 	docker compose up --build
+
+voices-cast: ## Stimmen casten: Referenzclips nach audio/voices (siehe tools/tts/README.md)
+	$(TTS_PY) tools/tts/cast.py
+
+audio-status: ## wie viele vertonte Clips fehlen
+	uv run python tools/tts/render.py --status

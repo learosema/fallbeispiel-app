@@ -6,3 +6,10 @@ node_modules/
 # DRK-SANmemo (© DRK) nicht ins Repo
 Onlineversion_SAN-Memo_2024.pdf
 
+
+# Leitstellen-Clips, die der Server auf Zuruf mit Piper erzeugt
+audio/cache/
+# Umgebung fürs Vorab-Vertonen (tools/tts)
+.venv-tts/
+# zweite Takes aus dem Casting (cast.py --takes), bis eine Wahl getroffen ist
+audio/voices/*~*

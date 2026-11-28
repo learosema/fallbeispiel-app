@@ -10,6 +10,14 @@ debrief_notes: >
   steriler Verband, Auge nicht reiben, vorsichtig spülen/abdecken, Sehen erfragen, Heiserkeit beobachten, Wärmeerhalt, SAMPLER inkl. Tetanus,
   Rettungsdienst/Augenabklärung.
 
+# Stimmen fürs Vorab-Vertonen (Beschreibung für Qwen3-TTS, siehe content/voices.yaml)
+voices:
+  Patient: A 22-year-old German man, native German speaker, in pain from a burn, slightly hoarse, shocked, tries to play it down. Declarative sentences end with a clearly falling intonation.
+  Umstehende: A German man in his early twenties, native German speaker, football fan and friend, shocked and nervous. Declarative sentences end with a clearly falling intonation.
+  # Referenz fürs Casting vorgegeben (Anfang wurde verschluckt bzw. Fremdwörter in allen Zeilen)
+  reference:
+    Umstehende: "Oh Mann, das ging so schnell. Die Fackel ist ihm aus der Hand gerutscht, die Funken sind voll auf Arm und Gesicht."
+
 conscious: true
 trauma: true
 request: {required: [RTW]}

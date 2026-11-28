@@ -1,0 +1,7 @@
+# Nur für das Vorab-Vertonen (cast.py, render.py) – die App selbst braucht das nicht.
+# Eigene Umgebung mit Python 3.12, z. B.: uv venv -p 3.12 .venv-tts && uv pip install -p .venv-tts -r tools/tts/requirements.txt
+# In Colab ist torch schon installiert.
+qwen-tts
+soundfile
+lameenc
+pyyaml

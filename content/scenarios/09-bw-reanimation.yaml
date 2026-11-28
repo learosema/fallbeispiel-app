@@ -14,6 +14,10 @@ debrief_notes: >
   Zu zweit ist während der HLW niemand frei für Anamnese oder weitere Untersuchungen: einer drückt, einer beatmet,
   beim Helferwechsel tauschen die Rollen.
 
+# Stimmen fürs Vorab-Vertonen (Beschreibung für Qwen3-TTS, siehe content/voices.yaml)
+voices:
+  Umstehende: A German woman in her forties, native German speaker, distraught bystander who saw a runner collapse, shaky voice, near tears. Declarative sentences end with a clearly falling intonation. Speaks standard German with a native German accent, no English or American accent.
+
 conscious: false
 breathing: abnormal
 request: {required: [RTW, NEF]}

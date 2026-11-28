@@ -9,6 +9,14 @@ debrief_notes: >
   Vitalzeichen länger prüfen, Notarzt, Transport. Keine heißen Getränke, kein Alkohol, keine aktive Bewegung.
 
 reaction: abnormal      # Reaktion beim Ansprechen auffällig → in Teambesprechung und Funkspruch nennen
+# Stimmen fürs Vorab-Vertonen (Beschreibung für Qwen3-TTS, siehe content/voices.yaml)
+voices:
+  Patient: A 68-year-old German man, native German speaker, hypothermic hiker, tired and shivering, speaks only slightly slower than normal with short pauses, mumbles a little. Declarative sentences end with a clearly falling intonation.
+  Umstehende: A German man in his fifties, native German speaker, hiker who found the patient, calm and slightly worried.
+  # Referenz vorgegeben: seine Zeilen bestehen fast nur aus „…“, dabei hat das Casting mitten im Text aufgehört
+  reference:
+    Patient: "Hartmann heiße ich. Ich bin im Wald gestolpert und kam nicht mehr hoch. Das Handgelenk tut weh, und die Hüfte. Mir ist so kalt, und ich bin so müde."
+
 conscious: true
 trauma: true
 request: {required: [RTW, NEF]}

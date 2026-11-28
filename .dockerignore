@@ -3,3 +3,6 @@
 .env
 __pycache__
 *.pdf
+audio/cache
+.venv-tts
+audio/voices

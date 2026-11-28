@@ -11,6 +11,11 @@ debrief_notes: >
   Wärmeerhalt, schonende Rettung, Reevaluation, strukturierte Übergabe.
 
 reaction: abnormal      # Reaktion beim Ansprechen auffällig → in Teambesprechung und Funkspruch nennen
+# Stimmen fürs Vorab-Vertonen (Beschreibung für Qwen3-TTS, siehe content/voices.yaml)
+voices:
+  Patient: A 31-year-old German man, native German speaker, in pain after a fall from a ride, short of breath, strained. Declarative sentences end with a clearly falling intonation. Speaks standard German with a native German accent, no English or American accent.
+  Umstehende: A German man in his forties, native German speaker, fairground ride operator, shaken but trying to stay professional. Declarative sentences end with a clearly falling intonation.
+
 conscious: true
 trauma: true
 request: {required: [RTW, NEF]}

@@ -7,6 +7,11 @@ debrief_notes: >
   Markus (45) hat eine spritzende Blutung am linken Oberschenkel innen. x zuerst: abdrücken und Druckverband;
   blutet der durch, Tourniquet – bevor irgendetwas anderes passiert. Ohne Blutstillung entwickelt sich rasch ein Schock. Danach Schocklage, Wärmeerhalt, RTW + NEF.
 
+# Stimmen fürs Vorab-Vertonen (Beschreibung für Qwen3-TTS, siehe content/voices.yaml)
+voices:
+  Patient: A 45-year-old German man, native German speaker, forestry worker, in severe pain and frightened, breathing hard, later weak.
+  Umstehende: A German man in his forties, native German speaker, the patient's coworker, panicked and shouting, out of breath.
+
 conscious: true
 trauma: true
 bleeding: true

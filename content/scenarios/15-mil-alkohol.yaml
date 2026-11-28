@@ -10,6 +10,11 @@ debrief_notes: >
   BZ messen (Alkohol nicht als alleinige Erklärung), HWS bei Kopfanprall bedenken, Wärmeerhalt, SAMPLER, Rettungsdienst, nicht allein lassen.
 
 reaction: abnormal      # Reaktion beim Ansprechen auffällig → in Teambesprechung und Funkspruch nennen
+# Stimmen fürs Vorab-Vertonen (Beschreibung für Qwen3-TTS, siehe content/voices.yaml)
+voices:
+  Patient: A 34-year-old German man, native German speaker, heavily drunk, mumbling and slurring, barely coherent. Declarative sentences end with a clearly falling intonation.
+  Umstehende: A German man in his thirties, native German speaker, football fan and friend of the patient, tipsy, loud and colloquial. Declarative sentences end with a clearly falling intonation.
+
 conscious: true
 trauma: true
 request: {required: [RTW], optional: [NEF]}

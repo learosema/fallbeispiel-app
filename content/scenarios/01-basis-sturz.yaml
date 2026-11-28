@@ -11,6 +11,11 @@ debrief_notes: >
   Kopfanprall unter Blutverdünner und Nackenschmerz → manuelle HWS-Stabilisierung und Rettungsdienst (RTW, NEF vertretbar).
   Er friert (5 °C, nass) – Wärmeerhalt ist entscheidend. Er will zuerst nach Hause und braucht eine gute Aufklärung.
 
+# Stimmen fürs Vorab-Vertonen (Beschreibung für Qwen3-TTS, siehe content/voices.yaml)
+voices:
+  Patient: A 68-year-old German man, native German speaker, slightly hoarse, shaken and embarrassed after a fall, cold and a little shivery.
+  Umstehende: A German woman in her forties, native German speaker, helpful passer-by, concerned but composed.
+
 conscious: true
 trauma: true
 bleeding: false

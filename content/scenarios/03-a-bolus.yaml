@@ -8,6 +8,11 @@ debrief_notes: >
   5 Rückenschläge, dann 5 Oberbauchkompressionen im Wechsel. Ohne Hilfe wird er zyanotisch, dann bewusstlos (dann HLW).
   Auch bei Erfolg: Nachkontrolle und Transport (Verletzungen durch Heimlich möglich).
 
+# Stimmen fürs Vorab-Vertonen (Beschreibung für Qwen3-TTS, siehe content/voices.yaml)
+voices:
+  Patient: A 62-year-old German man from Hamburg, native German speaker with standard German pronunciation, strained and hoarse after choking, speaks in short calm statements with falling intonation at the end of each sentence.
+  Umstehende: A German woman in her late fifties from Hamburg, native German speaker with standard German pronunciation and no English accent, the patient's dinner companion, frightened and agitated, speaks fast. Declarative sentences end with a clearly falling intonation.
+
 conscious: true
 trauma: false
 request: {required: [RTW], optional: [NEF]}

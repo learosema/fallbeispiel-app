@@ -9,6 +9,14 @@ debrief_notes: >
   aufrecht lagern, Atemanweisung, O2, Pulsoxi (bei Rauch mit Vorsicht deuten), Auskultation, Heiserkeit/Rußspuren als Warnzeichen
   (Inhalationstrauma?), SAMPLER inkl. Spray, Rettungsdienst nachfordern, Reevaluation.
 
+# Stimmen fürs Vorab-Vertonen (Beschreibung für Qwen3-TTS, siehe content/voices.yaml)
+voices:
+  Patient: A 29-year-old German woman, native German speaker, short of breath and hoarse from smoke, coughing, anxious. Declarative sentences end with a clearly falling intonation.
+  Umstehende: A German woman around thirty, native German speaker, football fan and the patient's friend, agitated and loud. Declarative sentences end with a clearly falling intonation. Speaks standard German with a native German accent, no English or American accent.
+  # Referenz fürs Casting vorgegeben (Anfang wurde verschluckt bzw. Fremdwörter in allen Zeilen)
+  reference:
+    Umstehende: "Da hinten hat jemand was gezündet, und der ganze Rauch kam zu uns. Sie hat Asthma. Ihr Medikament liegt im Auto!"
+
 conscious: true
 trauma: false
 request: {required: [RTW], optional: [NEF]}

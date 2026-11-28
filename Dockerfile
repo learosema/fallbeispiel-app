@@ -4,6 +4,10 @@ WORKDIR /app
 ENV UV_LINK_MODE=copy UV_COMPILE_BYTECODE=1 HF_HOME=/models
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev
+# Vorab vertonte Clips (tools/tts; Referenzstimmen bleiben draußen, .dockerignore). Vor dem Code, weil sie sich seltener
+# ändern – so bleibt die Schicht bei Code-Änderungen im Build-Cache. Die Piper-Stimmen (Leitstelle, AED) lädt der Server
+# beim Start nach /models.
+COPY audio ./audio
 COPY backend ./backend
 COPY public ./public
 COPY content ./content
